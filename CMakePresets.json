@@ -1,0 +1,58 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 8,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "defaults",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "generator": "Ninja"
+        },
+        {
+            "name" : "defaults-linux",
+            "hidden": true,
+            "inherits" : [
+                "defaults"
+            ],
+            "condition" : {
+                "type" : "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name" : "defaults-release",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name" : "defaults-debug",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name" : "linux-debug",
+            "displayName": "debug",
+            "inherits" : [
+                "defaults-linux",
+                "defaults-debug"
+            ]
+        },
+        {
+            "name" : "linux-release",
+            "displayName": "release",
+            "inherits" : [
+                "defaults-linux",
+                "defaults-release"
+            ]
+        }
+    ]
+}

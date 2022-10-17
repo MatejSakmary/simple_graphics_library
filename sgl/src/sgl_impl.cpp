@@ -57,6 +57,8 @@ const char *sglGetErrorString(sglEErrorCode error)
 //---------------------------------------------------------------------------
 
 std::unique_ptr<SglCore> core;
+float color4[4] = {0, 0, 0, 0};
+float color3[3] = {0, 0, 0};
 
 void sglInit(void) 
 {
@@ -73,11 +75,14 @@ int sglCreateContext(int width, int height)
 	return core->create_context(width, height);
 }
 
-void sglDestroyContext(int id) {}
+void sglDestroyContext(int id) 
+{
+	delete &core;
+}
 
-void sglSetContext(int id) {}
+void sglSetContext(int id) { core->set_context(id); }
 
-int sglGetContext(void) { return 0; } 
+int sglGetContext(void) { return core->get_context(); } 
 
 float *sglGetColorBufferPointer(void)
 {
@@ -97,9 +102,18 @@ float *sglGetColorBufferPointer(void)
 // Drawing functions
 //---------------------------------------------------------------------------
 
-void sglClearColor(float r, float g, float b, float alpha) {}
+void sglClearColor(float r, float g, float b, float alpha) {
+	color4[0] = r;
+	color4[1] = g;
+	color4[2] = b;
+	color4[3] = alpha;
+} 
 
-void sglClear(unsigned what) {}
+void sglClear(unsigned what) {
+	if(what /*& mask*/ ) {
+
+	}
+}
 
 void sglBegin(sglEElementType mode) {}
 
@@ -157,9 +171,9 @@ void sglAreaMode(sglEAreaMode mode) {}
 
 void sglPointSize(float size) {}
 
-void sglEnable(sglEEnableFlags cap) {}
+void sglEnable(sglEEnableFlags cap) { cap=SGL_DEPTH_TEST; }
 
-void sglDisable(sglEEnableFlags cap) {}
+void sglDisable(sglEEnableFlags cap) { cap=SGL_NO_DEPTH_TEST; }
 
 //---------------------------------------------------------------------------
 // RayTracing oriented functions

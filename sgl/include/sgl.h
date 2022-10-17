@@ -119,6 +119,7 @@ extern "C"
 	typedef enum
 	{
 		/// enable/disable depth test
+		SGL_NO_DEPTH_TEST = 0,
 		SGL_DEPTH_TEST = 1
 	} sglEEnableFlags;
 

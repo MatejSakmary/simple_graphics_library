@@ -8,6 +8,7 @@
 //---------------------------------------------------------------------------
 
 #include "sgl.h"
+#include "sgl_core.hpp"
 
 /// Current error code.
 static sglEErrorCode _libStatus = SGL_NO_ERROR;
@@ -55,11 +56,22 @@ const char *sglGetErrorString(sglEErrorCode error)
 // Initialization functions
 //---------------------------------------------------------------------------
 
-void sglInit(void) {}
+std::unique_ptr<SglCore> core;
 
-void sglFinish(void) {}
+void sglInit(void) 
+{
+	core = std::make_unique<SglCore>();
+}
 
-int sglCreateContext(int width, int height) { return 0; }
+void sglFinish(void)
+{
+	core.reset();
+}
+
+int sglCreateContext(int width, int height) 
+{ 
+	return core->create_context(width, height);
+}
 
 void sglDestroyContext(int id) {}
 

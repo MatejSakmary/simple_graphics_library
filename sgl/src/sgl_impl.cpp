@@ -55,17 +55,22 @@ const char *sglGetErrorString(sglEErrorCode error)
 // Initialization functions
 //---------------------------------------------------------------------------
 
-void sglInit(void) {}
+void sglInit(void) {
+	// Init empty buffers probably
+}
 
 void sglFinish(void) {}
 
-int sglCreateContext(int width, int height) { return 0; }
+int sglCreateContext(int width, int height) { 
+	// Create new buffer, return it's id?
+	return 0;
+}
 
 void sglDestroyContext(int id) {}
 
 void sglSetContext(int id) {}
 
-int sglGetContext(void) { return 0; }
+int sglGetContext(void) { return 0; } 
 
 float *sglGetColorBufferPointer(void)
 {

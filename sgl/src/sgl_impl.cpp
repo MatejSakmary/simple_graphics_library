@@ -10,22 +10,21 @@
 #include "sgl.h"
 #include "sgl_core.hpp"
 
-/// Current error code.
-static sglEErrorCode _libStatus = SGL_NO_ERROR;
-
-static inline void setErrCode(sglEErrorCode c)
-{
-	if (_libStatus == SGL_NO_ERROR)
-		_libStatus = c;
-}
+// sglCore instance
+std::unique_ptr<SglCore> core = nullptr;
 
 //---------------------------------------------------------------------------
 // sglGetError()
 //---------------------------------------------------------------------------
+
 sglEErrorCode sglGetError(void)
 {
-	sglEErrorCode ret = _libStatus;
-	_libStatus = SGL_NO_ERROR;
+    sglEErrorCode ret;
+    if(core) {
+        ret = core->get_error();
+    } else {
+	    ret = SGL_NO_ERROR;
+    }
 	return ret;
 }
 
@@ -56,7 +55,6 @@ const char *sglGetErrorString(sglEErrorCode error)
 // Initialization functions
 //---------------------------------------------------------------------------
 
-std::unique_ptr<SglCore> core;
 
 void sglInit(void) 
 {
@@ -73,9 +71,15 @@ int sglCreateContext(int width, int height)
 	return core->create_context(width, height);
 }
 
-void sglDestroyContext(int id) {}
+void sglDestroyContext(int id) 
+{
+    core->destroy_context(id);
+}
 
-void sglSetContext(int id) {}
+void sglSetContext(int id) 
+{
+    core->set_context(id);
+}
 
 int sglGetContext(void) { return 0; }
 

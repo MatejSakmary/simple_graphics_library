@@ -4,9 +4,10 @@ project(sgl)
 
 add_library(${PROJECT_NAME} STATIC 
 	"src/sgl_impl.cpp"
-  "src/sgl_context.cpp"
-  "src/sgl_core.cpp"
-  "src/sgl_framebuffer.cpp"
+    "src/sgl_context.cpp"
+    "src/sgl_core.cpp"
+    "src/sgl_framebuffer.cpp"
+    "src/sgl_matrix.cpp"
 )
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)

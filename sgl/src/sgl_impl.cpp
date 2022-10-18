@@ -10,22 +10,21 @@
 #include "sgl.h"
 #include "sgl_core.hpp"
 
-/// Current error code.
-static sglEErrorCode _libStatus = SGL_NO_ERROR;
-
-static inline void setErrCode(sglEErrorCode c)
-{
-	if (_libStatus == SGL_NO_ERROR)
-		_libStatus = c;
-}
+// sglCore instance
+std::unique_ptr<SglCore> core = nullptr;
 
 //---------------------------------------------------------------------------
 // sglGetError()
 //---------------------------------------------------------------------------
+
 sglEErrorCode sglGetError(void)
 {
-	sglEErrorCode ret = _libStatus;
-	_libStatus = SGL_NO_ERROR;
+    sglEErrorCode ret;
+    if(core) {
+        ret = core->get_error();
+    } else {
+	    ret = SGL_NO_ERROR;
+    }
 	return ret;
 }
 
@@ -56,9 +55,8 @@ const char *sglGetErrorString(sglEErrorCode error)
 // Initialization functions
 //---------------------------------------------------------------------------
 
+
 std::unique_ptr<SglCore> core;
-float color4[4] = {0, 0, 0, 0};
-float color3[3] = {0, 0, 0};
 
 void sglInit(void) 
 {
@@ -77,10 +75,13 @@ int sglCreateContext(int width, int height)
 
 void sglDestroyContext(int id) 
 {
-	delete &core;
+    core->destroy_context(id);
 }
 
-void sglSetContext(int id) { core->set_context(id); }
+void sglSetContext(int id) 
+{
+    core->set_context(id);
+}
 
 int sglGetContext(void) { return core->get_context(); } 
 
@@ -102,12 +103,7 @@ float *sglGetColorBufferPointer(void)
 // Drawing functions
 //---------------------------------------------------------------------------
 
-void sglClearColor(float r, float g, float b, float alpha) {
-	color4[0] = r;
-	color4[1] = g;
-	color4[2] = b;
-	color4[3] = alpha;
-} 
+void sglClearColor(float r, float g, float b, float alpha) {} 
 
 void sglClear(unsigned what) {
 	if(what /*& mask*/ ) {

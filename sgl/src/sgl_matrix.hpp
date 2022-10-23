@@ -14,7 +14,7 @@ struct SglMatrix
     SglMatrix operator * (const SglMatrix & other );
     SglMatrix operator + (const SglMatrix & other );
 
-    auto to_string() -> std::string;
+    auto to_string() const -> std::string;
 
     private:
         SglMatrix(bool emtpy);

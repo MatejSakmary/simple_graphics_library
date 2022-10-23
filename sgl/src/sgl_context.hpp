@@ -26,6 +26,11 @@ struct SglContext
     void push_matrix();
     void load_identity();
     void load_matrix(const SglMatrix matrix);
+    void mult_matrix(const SglMatrix matrix);
+    void translate(float x, float y, float z);
+    void rotate_2d(float angle, float center_x, float center_y);
+    void rotate_y(float angle);
+    void scale();
 
     private:
         friend struct SglCore;

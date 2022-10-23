@@ -11,7 +11,7 @@ SglMatrix::SglMatrix() : mat{ {1.0f, 0.0f, 0.0f, 0.0f,
 SglMatrix::SglMatrix(bool emtpy) : mat{} {};
 SglMatrix::~SglMatrix(){};
 
-auto SglMatrix::to_string() -> std::string
+auto SglMatrix::to_string() const -> std::string
 {
     std::stringstream s;
     for(int i = 0; i < 16; i++)

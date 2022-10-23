@@ -33,7 +33,7 @@ int32_t SglCore::create_context(int32_t width, int32_t height)
 
 void SglCore::set_context(int32_t context_idx)
 {
-    if(context_idx < contexts.size() || 
+    if(context_idx > contexts.size() || 
        contexts.at(context_idx).released ) 
     {
         SGL_DEBUG_OUT("[SglCore::set_context()] Context at index " +
@@ -42,6 +42,8 @@ void SglCore::set_context(int32_t context_idx)
         return;
     }
 
+    SGL_DEBUG_OUT("[SglCore::set_context()] Setting context with index " +
+        std::to_string(context_idx) + " as active context"); 
     current_context = context_idx;
 }
 

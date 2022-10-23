@@ -1164,6 +1164,9 @@ int main(int argc, char **argv)
 		sglSetContext(_contexts[0]);
 		sglClearColor(0, 0, 0, 1);
 		sglClear(SGL_COLOR_BUFFER_BIT);
+
+		// NOTE(msakmary) Testing matrices here
+
 		DrawTestScene0A();
 
 		double time = timer.RealTime();

@@ -1,11 +1,9 @@
 #include "sgl_core.hpp"
 
 
-SglCore::SglCore()
-{};
+SglCore::SglCore() {}
 
-SglCore::~SglCore()
-{};
+SglCore::~SglCore() {}
 
 int32_t SglCore::create_context(int32_t width, int32_t height)
 {
@@ -16,7 +14,8 @@ int32_t SglCore::create_context(int32_t width, int32_t height)
         {
             contexts.at(i) = {{
                 .width = static_cast<uint32_t>(width),
-                .height = static_cast<uint32_t>(height)
+                .height = static_cast<uint32_t>(height),
+                .error_cbf = std::bind(&SglCore::set_error, this, std::placeholders::_1)
             }};
             return i;
         }
@@ -74,7 +73,7 @@ void SglCore::destroy_context(int32_t context_idx)
 
 void SglCore::set_error(sglEErrorCode error_code)
 {
-    if(error == SGL_NO_ERROR) { error = error_code; }
+    if(error == sglEErrorCode::SGL_NO_ERROR) { error = error_code; }
 }
 
 sglEErrorCode SglCore::get_error()

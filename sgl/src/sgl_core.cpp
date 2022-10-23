@@ -1,6 +1,5 @@
 #include "sgl_core.hpp"
 
-
 SglCore::SglCore() {}
 
 SglCore::~SglCore() {}
@@ -12,6 +11,7 @@ int32_t SglCore::create_context(int32_t width, int32_t height)
     {
         if(contexts.at(i).released) 
         {
+            SGL_DEBUG_OUT("[SglCore::create_context()] Found released context at index " + std::to_string(i));
             contexts.at(i) = {{
                 .width = static_cast<uint32_t>(width),
                 .height = static_cast<uint32_t>(height),
@@ -26,6 +26,8 @@ int32_t SglCore::create_context(int32_t width, int32_t height)
         .width = static_cast<uint32_t>(width),
         .height = static_cast<uint32_t>(height)
     });
+    SGL_DEBUG_OUT("[SglCore::create_context()] Creating new context at index " +
+        std::to_string(contexts.size() -1));
     return contexts.size() - 1;
 }
 
@@ -34,13 +36,12 @@ void SglCore::set_context(int32_t context_idx)
     if(context_idx < contexts.size() || 
        contexts.at(context_idx).released ) 
     {
+        SGL_DEBUG_OUT("[SglCore::set_context()] Context at index " +
+            std::to_string(context_idx) + " is invalid"); 
         set_error(sglEErrorCode::SGL_INVALID_VALUE);
         return;
-    } else if (context_idx == current_context)
-    {
-        set_error(sglEErrorCode::SGL_INVALID_OPERATION);
-        return;
     }
+
     current_context = context_idx;
 }
 
@@ -48,6 +49,7 @@ int32_t SglCore::get_context()
 {
     if(current_context == -1)
     {
+        SGL_DEBUG_OUT("[SglCore::get_context()] No context has yet been created");
         set_error(sglEErrorCode::SGL_INVALID_OPERATION);
     }
     return current_context;
@@ -56,18 +58,24 @@ int32_t SglCore::get_context()
 void SglCore::destroy_context(int32_t context_idx)
 {
     // check if context_idx is valid
-    if(context_idx < contexts.size() || 
+    if(context_idx > contexts.size() || 
        contexts.at(context_idx).released ) 
     {
+        SGL_DEBUG_OUT("[SglCore::destroy_context()] Context at index " +
+            std::to_string(context_idx) + " is out of bounds or was previously destroyed");
         set_error(sglEErrorCode::SGL_INVALID_VALUE);
         return;
     } 
     // check if current context is in use
     else if (context_idx == current_context)
     {
+        SGL_DEBUG_OUT("[SglCore::destroy_context()] Context at index " +
+            std::to_string(context_idx) + " is currently in use"); 
         set_error(sglEErrorCode::SGL_INVALID_OPERATION);
         return;
     }
+    SGL_DEBUG_OUT("[SglCore::destroy_contex()] Destroy context at index " + 
+        std::to_string(context_idx));
     contexts.at(context_idx).released = true;
 }
 

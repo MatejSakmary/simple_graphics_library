@@ -81,7 +81,10 @@ void sglSetContext(int id)
     core->set_context(id);
 }
 
-int sglGetContext(void) { return 0; }
+int sglGetContext(void) 
+{ 
+	return core->get_context();
+}
 
 float *sglGetColorBufferPointer(void)
 {

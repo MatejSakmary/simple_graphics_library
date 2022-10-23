@@ -10,6 +10,13 @@ add_library(${PROJECT_NAME} STATIC
     "src/sgl_matrix.cpp"
 )
 
+if(SGL_LOG_DEBUG_OUTPUT)
+	target_compile_definitions(${PROJECT_NAME}
+		PUBLIC
+	 	SGL_LOG_OUTPUT=true
+	)
+endif()
+
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 target_include_directories(${PROJECT_NAME}

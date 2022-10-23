@@ -3,12 +3,54 @@
 #include <sstream>
 
 SglMatrix::SglMatrix(const std::array<float, 16> & mat) : mat{mat} {};
-SglMatrix::SglMatrix() : mat{ {1.0f, 0.0f, 0.0f, 0.0f,
-                               0.0f, 1.0f, 0.0f, 0.0f,
-                               0.0f, 0.0f, 1.0f, 0.0f,
-                               0.0f, 0.0f, 0.0f, 1.0f}} {};
+SglMatrix::SglMatrix(const MatrixCreateInfo & info) :
+    mat{ }
+{
+    switch(info.type)
+    {
+        case MatrixType::IDENTITY:
+        {
+            mat = {1.0f, 0.0f, 0.0f, 0.0f,
+                   0.0f, 1.0f, 0.0f, 0.0f,
+                   0.0f, 0.0f, 1.0f, 0.0f,
+                   0.0f, 0.0f, 0.0f, 1.0f };
+            return;
+        }
+        case MatrixType::TRANSLATE:
+        {
+            mat = {1.0f, 0.0f, 0.0f, info.x,
+                   0.0f, 1.0f, 0.0f, info.y,
+                   0.0f, 0.0f, 1.0f, info.z,
+                   0.0f, 0.0f, 0.0f, 1.0f };
+            return;
+        }
+        case MatrixType::SCALE:
+        {
+            mat = {info.x,  0.0f,   0.0f,  0.0f,
+                    0.0f,  info.y,  0.0f,  0.0f,
+                    0.0f,   0.0f,  info.z, 0.0f,
+                    0.0f,   0.0f,   0.0f,  1.0f };
+            return;
+        }
+        case MatrixType::ROTATE:
+        {
+            using std::cos;
+            using std::sin;
+            // General rotation matrix in the order x-y-z euler angles
+            float x = info.x; float y = info.y; float z = info.z;
+            mat = {cos(y) * cos(z)  ,  sin(x) * sin(y) * cos(z) - cos(x) * sin(z)  , cos(x) * sin(y) * cos(z) + sin(x) * sin(z)  , 0.0f,
+                   cos(y) * sin(z)  ,  sin(x) * sin(y) * sin(z) + cos(x) * cos(z)  , cos(x) * sin(y) * sin(z) - sin(x) * cos(z)  , 0.0f,
+                        -sin(y)     ,                sin(x) * cos(y)               ,                cos(x) * cos(y)              , 0.0f,
+                         0.0f       ,                      0.0f                    ,                      0.0f                   , 1.0f };
+            return;
+        }
+        default:
+            SGL_DEBUG_OUT("[SglMatrix::SglMatrix()] Unknown input matrix type");
+            return;
+    }
+}
 
-SglMatrix::SglMatrix(bool emtpy) : mat{} {};
+SglMatrix::SglMatrix() : mat{} {};
 SglMatrix::~SglMatrix(){};
 
 auto SglMatrix::to_string() const -> std::string
@@ -23,7 +65,7 @@ auto SglMatrix::to_string() const -> std::string
     return s.str();
 }
 
-float SglMatrix::operator () (int x, int y)
+auto SglMatrix::at (int x, int y) -> float&
 {
     return mat[y * 4 + x];
 };
@@ -31,6 +73,17 @@ float SglMatrix::operator () (int x, int y)
 SglMatrix SglMatrix::operator * (const SglMatrix & other )
 {
     SglMatrix ret_mat = SglMatrix();
+    // RET = THIS * OTHER
+    //                            
+    // # # # #      row > # # # #       # # # #
+    // # # # #   =        # # # #   *   # # # #
+    // # # # #            # # # #       # # # #
+    // # # # #            # # # #       # # # #
+    //                                  ^
+    //                              other col
+    // row is the selected row in the first matrix
+    // other_col is the selected column in the second matrix
+    // idx is just the position in respective selected row / column
     for(int row = 0; row < 4; row++)
     {
         for(int other_col = 0; other_col < 4; other_col++)

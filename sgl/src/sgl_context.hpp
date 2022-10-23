@@ -22,6 +22,8 @@ struct SglContext
     SglContext(const SglContextInitInfo & info);
     ~SglContext();
 
+    void set_matrix_mode(sglEMatrixMode mode);
+
     void pop_matrix();
     void push_matrix();
     void load_identity();
@@ -30,7 +32,7 @@ struct SglContext
     void translate(float x, float y, float z);
     void rotate_2d(float angle, float center_x, float center_y);
     void rotate_y(float angle);
-    void scale();
+    void scale(float scale_x, float scale_y, float scale_z);
 
     private:
         friend struct SglCore;

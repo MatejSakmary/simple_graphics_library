@@ -1,10 +1,13 @@
 #include "sgl_core.hpp"
 
-SglCore::SglCore() {}
+SglCore::SglCore() : 
+    current_context{-1},
+    error{sglEErrorCode::SGL_NO_ERROR},
+    recording{false} {}
 
 SglCore::~SglCore() {}
 
-int32_t SglCore::create_context(int32_t width, int32_t height)
+auto SglCore::create_context(int32_t width, int32_t height) -> int32_t
 {
     // try to find any free context slots
     for(int32_t i = 0; i < contexts.size(); i++)
@@ -47,7 +50,7 @@ void SglCore::set_context(int32_t context_idx)
     current_context = context_idx;
 }
 
-int32_t SglCore::get_context()
+auto SglCore::get_context() -> int32_t
 {
     if(current_context == -1)
     {

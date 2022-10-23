@@ -127,26 +127,105 @@ void sglArc(float x, float y, float z, float radius, float from, float to) {}
 //---------------------------------------------------------------------------
 // Transform functions
 //---------------------------------------------------------------------------
+bool check_recording_status(std::string prefix)
+{
+	// check for calls inside begin/end block or when no context was allocated
+	if(core->recording || core->contexts.size() == 0 || core->get_context() == -1) 
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+		SGL_DEBUG_OUT(prefix + " Cannot be called inside sglBegin()/sglEnd() block or if no context was created");
+		return false;
+	}
+	return true;
+}
 
-void sglMatrixMode(sglEMatrixMode mode) {}
+void sglMatrixMode(sglEMatrixMode mode) 
+{
+	if(!check_recording_status("[sglMatrixMode()]")) { return; }
+	// check if mode is known sglEMatrixMode value
+	if(mode != sglEMatrixMode::SGL_MODELVIEW &&
+	   mode != sglEMatrixMode::SGL_PROJECTION)
+	{
+		SGL_DEBUG_OUT("[sglMatrixMode()] invalid mode enum provided");
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
 
-void sglPushMatrix(void) {}
+	core->contexts.at(core->get_context()).set_matrix_mode(mode);
+}
 
-void sglPopMatrix(void) {}
+void sglPushMatrix(void) 
+{
+	if(!check_recording_status("[sglPushMatrix()]")) { return; }
+	core->contexts.at(core->get_context()).push_matrix();
+}
 
-void sglLoadIdentity(void) {}
+void sglPopMatrix(void) 
+{
+	if(!check_recording_status("[sglPopMatrix()]")) { return; }
+	core->contexts.at(core->get_context()).pop_matrix();
+}
 
-void sglLoadMatrix(const float *matrix) {}
+void sglLoadIdentity(void) 
+{
+	if(!check_recording_status("[sglLoadIdentityMatrix()]")) { return; }
+	core->contexts.at(core->get_context()).load_identity();
+}
 
-void sglMultMatrix(const float *matrix) {}
+void sglLoadMatrix(const float *matrix)
+{
+	if(!check_recording_status("[sglLoadMatrix()]")) { return; }
 
-void sglTranslate(float x, float y, float z) {}
+	std::array<float, 16> transp_mat;
+	for(int col = 0; col < 4; col++)
+	{
+		for(int row = 0; row < 4; row++)
+		{
+			transp_mat[row * 4 + col] = matrix[col * 4 + row];
+		}
+	}
+	core->contexts.at(core->get_context()).load_matrix({transp_mat});
+}
 
-void sglScale(float scalex, float scaley, float scalez) {}
+void sglMultMatrix(const float *matrix)
+{
+	if(!check_recording_status("[sglMultMatrix()]")) { return; }
 
-void sglRotate2D(float angle, float centerx, float centery) {}
+	std::array<float, 16> transp_mat;
+	for(int col = 0; col < 4; col++)
+	{
+		for(int row = 0; row < 4; row++)
+		{
+			transp_mat[row * 4 + col] = matrix[col * 4 + row];
+		}
+	}
+	core->contexts.at(core->get_context()).mult_matrix({transp_mat});
 
-void sglRotateY(float angle) {}
+}
+
+void sglTranslate(float x, float y, float z) 
+{
+	if(!check_recording_status("[sglTranslateMatrix()]")) { return; }
+	core->contexts.at(core->get_context()).translate(x, y, z);
+}
+
+void sglScale(float scalex, float scaley, float scalez) 
+{
+	if(!check_recording_status("[sglScale()]")) { return; }
+	core->contexts.at(core->get_context()).scale(scalex, scaley, scalez);
+}
+
+void sglRotate2D(float angle, float centerx, float centery) 
+{
+	if(!check_recording_status("[sglRotate2D()]")) { return; }
+	core->contexts.at(core->get_context()).rotate_2d(angle, centerx, centery);
+}
+
+void sglRotateY(float angle) 
+{
+	if(!check_recording_status("[sglRotateY()]")) { return; }
+	core->contexts.at(core->get_context()).rotate_y(angle);
+}
 
 void sglOrtho(float left, float right, float bottom, float top, float near, float far) {}
 

@@ -44,6 +44,25 @@ SglMatrix::SglMatrix(const MatrixCreateInfo & info) :
                          0.0f       ,                      0.0f                    ,                      0.0f                   , 1.0f };
             return;
         }
+        case MatrixType::ORTHOGRAPHIC:
+        {
+            float right = info.right; float left = info.left;
+            float top = info.top; float bottom = info.bottom;
+            float near = info.near; float far = info.far;
+            mat = {2.0f / (right - left)  ,            0.0f          ,            0.0f       ,  -(right + left) / (right - left),
+                           0.0f           ,  2.0f / (top - bottom )  ,            0.0f       ,  -(top + bottom) / (top - bottom),
+                           0.0f           ,            0.0f          ,  2.0f / (far - near)  ,  -(far + near)   / (far - near)  ,
+                           0.0f           ,            0.0f          ,            0.0f       ,                 1.0f              };
+            return;
+        }
+        case MatrixType::VIEWPORT:
+        {
+            mat = { info.left / 2.0f ,        0.0f        ,  0.0f  ,  info.x + (info.left  / 2.0f),
+                       0.0f          , info.right / 2.0f  ,  0.0f  ,  info.y + (info.right / 2.0f),
+                       0.0f          ,        0.0f        ,  0.5f  ,               0.5f           ,
+                       0.0f          ,        0.0f        ,  0.0f  ,               1.0f            };
+            return;
+        }
         default:
             SGL_DEBUG_OUT("[SglMatrix::SglMatrix()] Unknown input matrix type");
             return;
@@ -56,11 +75,14 @@ SglMatrix::~SglMatrix(){};
 auto SglMatrix::to_string() const -> std::string
 {
     std::stringstream s;
-    for(int i = 0; i < 16; i++)
+    for(int row = 0; row < 4; row++)
     {
-        s << std::to_string(mat[i]);
-        if(!(i % 4)) { s << "\n"; }
-        else 		 { s << " ";  } 
+        for(int col = 0; col < 4; col++)
+        {
+            s << std::to_string(mat[row * 4 + col]) << " ";
+
+        }
+        s << "\n";
     }
     return s.str();
 }

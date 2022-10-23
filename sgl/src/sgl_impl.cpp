@@ -200,7 +200,6 @@ void sglMultMatrix(const float *matrix)
 		}
 	}
 	core->contexts.at(core->get_context()).mult_matrix({transp_mat});
-
 }
 
 void sglTranslate(float x, float y, float z) 
@@ -227,11 +226,29 @@ void sglRotateY(float angle)
 	core->contexts.at(core->get_context()).rotate_y(angle);
 }
 
-void sglOrtho(float left, float right, float bottom, float top, float near, float far) {}
+void sglOrtho(float left, float right, float bottom, float top, float near, float far) 
+{
+	if(!check_recording_status("[sglOrtho()]")) { return; }
+	if(left == right || bottom == top || near == far)
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE);
+		return;
+	}
+	core->contexts.at(core->get_context()).ortho(left, right, bottom, top, near, far);
+}
 
 void sglFrustum(float left, float right, float bottom, float top, float near, float far) {}
 
-void sglViewport(int x, int y, int width, int height) {}
+void sglViewport(int x, int y, int width, int height)
+{
+	if(!check_recording_status("[sglViewport()]")) { return; }
+	if(width < 0.0f || height < 0.0f)
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE);
+		return;
+	}
+	core->contexts.at(core->get_context()).viewport(x, y, width, height);
+}
 
 //---------------------------------------------------------------------------
 // Attribute functions

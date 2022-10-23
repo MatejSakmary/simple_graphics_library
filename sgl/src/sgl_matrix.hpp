@@ -11,7 +11,9 @@ enum MatrixType
     IDENTITY,
     SCALE,
     TRANSLATE,
-    ROTATE
+    ROTATE,
+    ORTHOGRAPHIC,
+    VIEWPORT
 };
 
 struct MatrixCreateInfo
@@ -20,6 +22,15 @@ struct MatrixCreateInfo
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
+
+    // TODO(msakmary) Figure out a better way to pass them
+    // Params for orthographic and viewport matrix
+    float left = 0.0;   // width in the case of viewport matrix
+    float right = 0.0;  // height in the case of viewport matrix
+    float bottom = 0.0;
+    float top = 0.0;
+    float near = 0.0;
+    float far = 0.0;
 };
 
 struct SglMatrix

@@ -27,7 +27,8 @@ auto SglCore::create_context(int32_t width, int32_t height) -> int32_t
     // if we find no free context slots create new one at the end
     contexts.emplace_back(SglContextInitInfo{
         .width = static_cast<uint32_t>(width),
-        .height = static_cast<uint32_t>(height)
+        .height = static_cast<uint32_t>(height),
+        .error_cbf = std::bind(&SglCore::set_error, this, std::placeholders::_1)
     });
     SGL_DEBUG_OUT("[SglCore::create_context()] Creating new context at index " +
         std::to_string(contexts.size() -1));

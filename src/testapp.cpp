@@ -1191,11 +1191,13 @@ void sgl_tests()
     std::cout << "TEST 8 - test push matrix" << std::endl; 
     sglPushMatrix();
     test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    sglPopMatrix();
     std::cout << "======================================================\n";
     // =====================================================================
 
     // =========== TEST 9 - test load matrix ===============================
     std::cout << "TEST 9 - test load matrix" << std::endl; 
+    sglPushMatrix();
     float m[] = {
         1.0f, 1.0f, 1.0f, 1.0f,					   // col 1
         2.0f, 2.0f, 2.0f, 2.0f,					   // col 2
@@ -1203,6 +1205,7 @@ void sgl_tests()
         4.0f, 4.0f, 4.0f, 4.0f};				   // col 4
     sglLoadMatrix(m);
     test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    sglPopMatrix();
     std::cout << "======================================================\n";
     // =====================================================================
 
@@ -1299,6 +1302,27 @@ void sgl_tests()
     sglLoadIdentity();
     sglRotateY(1.57079633f);
     sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 18 - test vertex transform =========================
+    std::cout << "TEST 18 - test vertex transform" << std::endl; 
+    sglMatrixMode(sglEMatrixMode::SGL_MODELVIEW);
+    sglPushMatrix();
+    sglLoadIdentity();
+    sglTranslate(-2.0f, 3.0f, 0.5f);
+    sglScale(3.0f, 3.0f, 3.0f);
+    sglMatrixMode(sglEMatrixMode::SGL_PROJECTION);
+    sglLoadIdentity();
+    sglAreaMode(sglEAreaMode::SGL_POINT);
+    sglBegin(sglEElementType::SGL_POINTS);
+    sglVertex4f(1.0f, 1.0f, 1.0f, 1.0f);
+    sglEnd();
+    sglPopMatrix();
+    sglMatrixMode(sglEMatrixMode::SGL_MODELVIEW);
+    sglPopMatrix();
+
     test_err_code(sglEErrorCode::SGL_NO_ERROR);
     std::cout << "======================================================\n";
     // =====================================================================

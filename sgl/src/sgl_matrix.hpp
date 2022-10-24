@@ -6,8 +6,7 @@
 
 #include "sgl.h"
 
-// Forward decl vertex so we can friend it and it can access private
-// fiels of mat
+// Forward decl vertex so we can friend it 
 struct SglVertex;
 
 enum MatrixType

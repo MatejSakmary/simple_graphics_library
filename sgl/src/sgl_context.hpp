@@ -19,7 +19,6 @@ struct SglContext
     SglContextInitInfo info;
     SglFramebuffer framebuffer;
     Pixel clear_color;
-    Pixel draw_color;
 
     SglContext(const SglContextInitInfo & info);
     ~SglContext();
@@ -45,4 +44,5 @@ struct SglContext
         sglEMatrixMode mode;
         std::function<void(sglEErrorCode)> error_cbf;
         std::array<std::stack<SglMatrix>, 2> matrix_stacks;
+        SglMatrix viewport_mat;
 };

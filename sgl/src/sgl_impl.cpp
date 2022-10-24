@@ -9,6 +9,7 @@
 
 #include "sgl.h"
 #include "sgl_core.hpp"
+#include "sgl_vertex.hpp"
 
 // sglCore instance
 std::unique_ptr<SglCore> core = nullptr;
@@ -107,7 +108,7 @@ float *sglGetColorBufferPointer(void)
 bool check_recording_status(std::string prefix)
 {
 	// check for calls inside begin/end block or when no context was allocated
-	if(core->state.recording || core->contexts.size() == 0 || core->get_context() == -1) 
+	if(core->get_recording() || core->contexts.size() == 0 || core->get_context() == -1) 
 	{
 		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
 		SGL_DEBUG_OUT(prefix + " Cannot be called inside sglBegin()/sglEnd() block or if no context was created");
@@ -136,7 +137,7 @@ void sglClear(unsigned what)
 
 void sglBegin(sglEElementType mode) 
 {
-	if(core->state.recording)
+	if(core->get_recording())
 	{
 		SGL_DEBUG_OUT("[sglBegin()] Another call to sglBegin() previously without corresponding sglEnd()");
 		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
@@ -148,34 +149,37 @@ void sglBegin(sglEElementType mode)
 		return;
 	}
 
-	core->state.element_type_mode = mode;
-	core->state.recording = true;
+	core->renderer.state.element_type_mode = mode;
+	core->set_recording(true);
 }
 
 void sglEnd(void)
 {
-	if(!core->state.recording)
+	if(!core->get_recording())
 	{
 		SGL_DEBUG_OUT("[sglEnd()] No previous unended sglBegin call registered");
 		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
 		return;
 	}
-	core->state.recording = false;
+	core->set_recording(false);
 }
 
 void sglVertex4f(float x, float y, float z, float w) 
 {
-
+	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglVertex4f()] Ignoring vertex - no active sglBegin() call"); return; }
+	core->push_vertex(SglVertex(x, y, z, w));
 }
 
 void sglVertex3f(float x, float y, float z)
 {
-
+	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglVertex3f()] Ignoring vertex - no active sglBegin() call"); return; }
+	core->push_vertex(SglVertex(x, y, z, 1.0f));
 }
 
 void sglVertex2f(float x, float y)
 {
-
+	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglVertex2f()] Ignoring vertex - no active sglBegin() call"); return; }
+	core->push_vertex(SglVertex(x, y, 0.0f, 1.0f));
 }
 
 void sglCircle(float x, float y, float z, float radius)
@@ -315,7 +319,7 @@ void sglViewport(int x, int y, int width, int height)
 void sglColor3f(float r, float g, float b) 
 {
 	if(!check_recording_status("[sglColor3f()]")) { return; }
-	core->state.draw_color = Pixel{.r = r, .g = g, .b = b};
+	core->renderer.state.draw_color = Pixel{.r = r, .g = g, .b = b};
 }
 
 void sglAreaMode(sglEAreaMode mode) 
@@ -327,7 +331,7 @@ void sglAreaMode(sglEAreaMode mode)
 		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
 		return;
 	}
-	core->state.area_mode = mode;
+	core->renderer.state.area_mode = mode;
 }
 
 void sglPointSize(float size)
@@ -339,7 +343,7 @@ void sglPointSize(float size)
 		core->set_error(sglEErrorCode::SGL_INVALID_VALUE);
 		return;
 	}
-	core->state.point_size = size;
+	core->renderer.state.point_size = size;
 }
 
 void sglEnable(sglEEnableFlags cap) {}

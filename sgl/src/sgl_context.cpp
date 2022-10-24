@@ -3,13 +3,14 @@
 SglContext::SglContext(const SglContextInitInfo & info) :
     info{info},
     framebuffer(info.width, info.height),
+    clear_color{Pixel{.r = 0.0f, .g = 0.0f, .b = 0.0f}},
     released{false},
     mode{sglEMatrixMode::SGL_MODELVIEW},
     error_cbf{info.error_cbf},
     matrix_stacks{
         std::stack<SglMatrix>({SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})}),
         std::stack<SglMatrix>({SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})})},
-    clear_color{Pixel{.r = 0.0f, .g = 0.0f, .b = 0.0f}}
+    viewport_mat{SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})}
     {}
 
 SglContext::~SglContext() {}
@@ -134,13 +135,11 @@ void SglContext::ortho(float left, float right, float bottom, float top, float n
 
 void SglContext::viewport(int x, int y, int width, int height)
 {
-    SGL_DEBUG_OUT("[SglContext::viewport()] multiplying top of the selected matrix stack: \n" 
-        + matrix_stacks[mode].top().to_string() + "with viewport projection matrix");
-    matrix_stacks[mode].top() = matrix_stacks[mode].top() * SglMatrix({
+    viewport_mat = SglMatrix({
         .type = MatrixType::VIEWPORT, .x = static_cast<float>(x), .y = static_cast<float>(y), .z = 0.0f,
         .left = static_cast<float>(width), .right = static_cast<float>(height), .bottom = 0.0f, .top = 0.0f, .near = 0.0f, .far = 0.0f
     });
-    SGL_DEBUG_OUT("[SglContext::ortho()] result is: \n" + matrix_stacks[mode].top().to_string());
+    SGL_DEBUG_OUT("[SglContext::viewport()] setting viewport mat \n" + viewport_mat.to_string());
 }
 
 void SglContext::clear(unsigned mask)

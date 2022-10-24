@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 
 #include "sgl.h"
 #include "sgl_matrix.hpp"
@@ -11,6 +12,8 @@ struct SglVertex
     ~SglVertex();
 
     SglVertex operator * (const SglMatrix & other );
+
+    auto to_string() -> std::string;
 
     private:
         SglVertex();

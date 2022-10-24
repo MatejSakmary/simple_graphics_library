@@ -3,13 +3,7 @@
 SglCore::SglCore() : 
     current_context{-1},
     error{sglEErrorCode::SGL_NO_ERROR},
-    state{
-        .draw_color = Pixel{.r = 0.0f, .g = 0.0f, .b = 0.0f} ,
-        .recording = false,
-        .area_mode = sglEAreaMode::SGL_FILL,
-        .element_type_mode = sglEElementType::SGL_POINTS,
-        .point_size = 1.0f
-    }
+    recording{false}
     {}
 
 SglCore::~SglCore() {}
@@ -102,4 +96,26 @@ sglEErrorCode SglCore::get_error()
     sglEErrorCode error_ret = error;
     error = sglEErrorCode::SGL_NO_ERROR;
     return error_ret;
+}
+
+void SglCore::set_recording(bool new_recording)
+{
+    recording = new_recording;
+    if(recording == true) { renderer.recording_start(); }
+    else                  { renderer.recording_end(); }
+}
+
+auto SglCore::get_recording() -> bool
+{
+    return recording;
+}
+
+void SglCore::push_vertex(SglVertex vertex)
+{
+    SGL_DEBUG_OUT("[SglCore::push_vertex()] Transforming vertex: \n" + vertex.to_string());
+    vertex = vertex * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
+    SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview: \n" + vertex.to_string());
+    vertex = vertex * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top();
+    SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
+    renderer.push_vertex(vertex);
 }

@@ -14,7 +14,7 @@ struct SglVertex
     ~SglVertex();
 
     auto to_string() -> std::string;
-    auto at(int idx) -> float;
+    auto at(int idx) const -> float;
 
     private:
         friend struct SglMatrix;

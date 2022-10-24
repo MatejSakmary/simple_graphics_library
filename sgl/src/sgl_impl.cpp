@@ -313,6 +313,7 @@ void sglColor3f(float r, float g, float b)
 {
 	if(!check_recording_status("[sglColor3f()]")) { return; }
 	core->renderer.state.draw_color = Pixel{.r = r, .g = g, .b = b};
+	SGL_DEBUG_OUT("[sglColor3f()] changed color to: " + std::to_string(r)+ " " + std::to_string(g) + " " + std::to_string(b));
 }
 
 void sglAreaMode(sglEAreaMode mode) 

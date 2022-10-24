@@ -98,18 +98,23 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
 {
     vertices.push_back(vertex);
 
-    state.currentFramebuffer->set_pixel(static_cast<int>(vertex.at(0)), static_cast<int>(vertex.at(1)), state.draw_color);
+    // state.currentFramebuffer->set_pixel(static_cast<uint32_t>(vertex.at(0)), static_cast<uint32_t>(vertex.at(1)), state.draw_color);
+    // return;
 
-    if ((state.element_type_mode == SGL_LINES) & (vertices.size() == 2)) {
+    if((state.element_type_mode == SGL_POINTS) && (vertices.size() == 1)) {
+        state.currentFramebuffer->set_pixel(static_cast<uint32_t>(vertices[0].at(0)), static_cast<uint32_t>(vertices[0].at(1)), state.draw_color);
+        vertices.clear();
+    }
+    else if ((state.element_type_mode == SGL_LINES) && (vertices.size() == 2)) {
         draw_line(vertices[0], vertices[1]);
         vertices.clear();
     }
-    else if ((state.element_type_mode == SGL_LINE_STRIP) & vertices.size() == 2) {
+    else if ((state.element_type_mode == SGL_LINE_STRIP) && (vertices.size() == 2)) {
         draw_line(vertices[0], vertices[1]);
         vertices.clear();
         vertices.push_back(vertex);
     }
-    else if ((state.element_type_mode == SGL_LINE_LOOP) & vertices.size() >= 2) {
+    else if ((state.element_type_mode == SGL_LINE_LOOP) && (vertices.size() >= 2)) {
         if(vertices.size() == 2) {
             draw_line(vertices[0], vertices[1]);
         }

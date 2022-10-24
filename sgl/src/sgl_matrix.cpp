@@ -92,31 +92,49 @@ auto SglMatrix::at (int x, int y) -> float&
     return mat[y * 4 + x];
 };
 
+
+SglVertex SglMatrix::operator * (const SglVertex & other )
+{
+    SglVertex res_vert = SglVertex();
+    // RET = OTHER_MAT * THIS_VERT
+    //                            
+    // #      row > # # # #       # 
+    // #   =        # # # #   *   # 
+    // #            # # # #       # 
+    // #            # # # #       # 
+    // row is the selected row in the first matrix
+    // idx is just the position in respective selected row / col of the vector
+    for(int row = 0; row < 4; row++)
+    {
+        for(int idx = 0; idx < 4; idx++)
+        {
+            res_vert.vert[row] += mat[row * 4 + idx] * other.vert[idx]; 
+        }
+    }
+    return res_vert;
+}
+
 SglMatrix SglMatrix::operator * (const SglMatrix & other )
 {
     SglMatrix ret_mat = SglMatrix();
-    // NOTE(msakmary) This is possibly wrong recheck - but since in sgl.h they use column major matrix
-    // and we use row major matrix the matrix multiplication has to be reversed
-    // TODO(msakmary) if this is corect I probably should reverse the order of multiplication on the
-    // caller side (SglContext) and leave the order unchanged here (RET = THIS * OTHER)
-    // RET = OTHER * THIS
+    // RET = THIS * OTHER
     //                            
-    // # # # #   other row > # # # #       # # # #
-    // # # # #   =           # # # #   *   # # # #
-    // # # # #               # # # #       # # # #
-    // # # # #               # # # #       # # # #
-    //                                     ^
-    //                                    col
-    // other_row is the selected row in the first matrix
-    // col is the selected column in the second matrix
+    // # # # #      row > # # # #       # # # #
+    // # # # #   =        # # # #   *   # # # #
+    // # # # #            # # # #       # # # #
+    // # # # #            # # # #       # # # #
+    //                                  ^
+    //                              other col
+    // row is the selected row in the first matrix
+    // other_col is the selected column in the second matrix
     // idx is just the position in respective selected row / column
-    for(int other_row = 0; other_row < 4; other_row++)
+    for(int row = 0; row < 4; row++)
     {
-        for(int col = 0; col < 4; col++)
+        for(int other_col = 0; other_col < 4; other_col++)
         {
             for(int idx = 0; idx < 4; idx++)
             {
-                ret_mat.mat[other_row * 4 + col] += other.mat[other_row * 4 + idx] * mat[idx * 4 + col];
+                ret_mat.mat[row * 4 + other_col] += mat[row * 4 + idx] * other.mat[idx * 4 + other_col];
             }
         } 
     }

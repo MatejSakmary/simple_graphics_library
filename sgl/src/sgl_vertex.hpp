@@ -4,18 +4,19 @@
 #include <string>
 
 #include "sgl.h"
-#include "sgl_matrix.hpp"
+
+// forward declare matrix so we can friend it
+struct SglMatrix;
 
 struct SglVertex
 {
     SglVertex(float x, float y, float z, float w);
     ~SglVertex();
 
-    SglVertex operator * (const SglMatrix & other );
-
     auto to_string() -> std::string;
 
     private:
+        friend struct SglMatrix;
         SglVertex();
         std::array<float, 4> vert;
 };

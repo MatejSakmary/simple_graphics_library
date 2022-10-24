@@ -115,7 +115,7 @@ void sglClearColor(float r, float g, float b, float alpha)
 
 void sglClear(unsigned what)
 {
-	if(what & 0xFFFC != 0x0000)
+	if((what & ~(sglEClearBit::SGL_COLOR_BUFFER_BIT | sglEClearBit::SGL_DEPTH_BUFFER_BIT)) != 0x0000)
 	{
 		SGL_DEBUG_OUT("[sglClear()] Invalid clear bit");
 		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);

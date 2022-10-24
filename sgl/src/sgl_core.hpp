@@ -22,7 +22,12 @@ struct SglCore
     auto get_context() -> int32_t;
     void set_context(int32_t context_idx);
     void destroy_context(int32_t context_idx);
+    
     void push_vertex(SglVertex vertex);
+    void draw_circle(SglVertex center, float radius);
+    void draw_ellipse(SglVertex center, float a, float b);
+    void draw_arc(SglVertex center, float radius, float from, float to);
+    
     void set_recording(bool new_recording);
     auto get_recording() -> bool;
 

@@ -121,3 +121,20 @@ void SglCore::push_vertex(SglVertex vertex)
     SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview, projection and viewport: \n" + vertex.to_string());
     renderer.push_vertex(vertex);
 }
+
+void SglCore::draw_circle(SglVertex center, float radius) {
+    //add transforms
+    renderer.draw_circle(center, radius);
+}
+
+
+void SglCore::draw_ellipse(SglVertex center, float a, float b) {
+    //add transforms
+    renderer.draw_ellipse(center, a, b);
+}
+
+
+void SglCore::draw_arc(SglVertex center, float radius, float from, float to) {
+    //add transforms
+    renderer.draw_arc(center, radius, from, to);
+}

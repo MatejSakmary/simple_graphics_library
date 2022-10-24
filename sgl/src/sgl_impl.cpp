@@ -186,17 +186,20 @@ void sglVertex2f(float x, float y)
 
 void sglCircle(float x, float y, float z, float radius)
 {
-
+	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglCircle()] Ignoring vertex - no active sglBegin() call"); return; }
+	core->draw_circle(SglVertex(x, y, z, 1.0f), radius);
 }
 
 void sglEllipse(float x, float y, float z, float a, float b)
 {
-
+	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglEllipse()] Ignoring vertex - no active sglBegin() call"); return; }
+	core->draw_ellipse(SglVertex(x, y, z, 1.0f), a, b);
 }
 
 void sglArc(float x, float y, float z, float radius, float from, float to)
 {
-
+	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglArc()] Ignoring vertex - no active sglBegin() call"); return; }
+	core->draw_arc(SglVertex(x, y, z, 1.0f), radius, from, to);
 }
 
 //---------------------------------------------------------------------------

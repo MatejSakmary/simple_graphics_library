@@ -33,9 +33,9 @@ struct SglRenderer
         friend struct SglCore;
         std::vector<SglVertex> vertices;
 
-        void draw_line_low(float x0, float y0, float x1, float y1);
-        void draw_line_high(float x0, float y0, float x1, float y1);
-        void draw_line(SglVertex & start_v, SglVertex & end_v);
+        void draw_line_low(int x0, int y0, int x1, int y1);
+        void draw_line_high(int x0, int y0, int x1, int y1);
+        void draw_line(const SglVertex & start_v, const SglVertex & end_v);
 
         void recording_start();
         void recording_end();

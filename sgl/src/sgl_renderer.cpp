@@ -13,24 +13,20 @@ SglRenderer::SglRenderer() :
 SglRenderer::~SglRenderer() {}
 
 
-void init(int c0, int c1, int p, int d_x, int d_y) {
-    c0 = 2 * d_y;
-    c1 = c0 - 2 * d_x;
-    p = c0 - d_x;
-}
-
-void SglRenderer::draw_line_low(float x0, float y0, float x1, float y1) {
+void SglRenderer::draw_line_low(int x0, int y0, int x1, int y1) {
     int c0, c1, p;
-    float d_x = x1 - x0;
-    float d_y = y1 - y0;
-    float y_step = 1;
+    int d_x = x1 - x0;
+    int d_y = y1 - y0;
+    int y_step = 1;
     
     if(d_y < 0) {
         y_step = -1;
         d_y = -d_y;
     }
-
-    init(c0, c1, p, d_x, d_y);
+    
+    c0 = 2 * d_y;
+    c1 = c0 - 2 * d_x;
+    p = c0 - d_x;
 
     state.currentFramebuffer->set_pixel(x0, y0, state.draw_color);
     
@@ -46,18 +42,20 @@ void SglRenderer::draw_line_low(float x0, float y0, float x1, float y1) {
     }
 }
 
-void SglRenderer::draw_line_high(float x0, float y0, float x1, float y1) {
+void SglRenderer::draw_line_high(int x0, int y0, int x1, int y1) {
     int c0, c1, p;
-    float d_x = x1 - x0;
-    float d_y = y1 - y0;
-    float x_step = 1;
+    int d_x = x1 - x0;
+    int d_y = y1 - y0;
+    int x_step = 1;
     
     if(d_x < 0) {
         x_step = -1;
         d_x = -d_x;
     }
 
-    init(c0, c1, p, d_y, d_x);
+    c0 = 2 * d_y;
+    c1 = c0 - 2 * d_x;
+    p = c0 - d_x;
 
     state.currentFramebuffer->set_pixel(x0, y0, state.draw_color);
     
@@ -74,13 +72,13 @@ void SglRenderer::draw_line_high(float x0, float y0, float x1, float y1) {
 }
 
 
-void SglRenderer::draw_line(SglVertex & start_v, SglVertex & end_v) {
-    float x0 = start_v.at(0);
-    float y0 = start_v.at(1);
-    float x1 = end_v.at(0);
-    float y1 = end_v.at(1);
-    float d_x = abs(x1 - x0);
-    float d_y = abs(y1 - y0);
+void SglRenderer::draw_line(const SglVertex & start_v, const SglVertex & end_v) {
+    int x0 = static_cast<int>(start_v.at(0));
+    int y0 = static_cast<int>(start_v.at(1));
+    int x1 = static_cast<int>(end_v.at(0));
+    int y1 = static_cast<int>(end_v.at(1));
+    int d_x = abs(x1 - x0);
+    int d_y = abs(y1 - y0);
     // float k = d_y / d_x;
 
     if(d_y < d_x) {
@@ -101,11 +99,12 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
     // return;
 
     if (state.element_type_mode == SGL_POINTS) {
-        state.currentFramebuffer->set_pixel(static_cast<uint32_t>(vertex.at(0)), static_cast<uint32_t>(vertex.at(1)), state.draw_color);
+        state.currentFramebuffer->set_pixel(static_cast<int>(vertex.at(0)), static_cast<int>(vertex.at(1)), state.draw_color);
     }
     
     vertices.push_back(vertex);
 
+    SGL_DEBUG_OUT("[Vertices] are " + std::to_string(vertices.size()));
     if ((state.element_type_mode == SGL_LINES) && (vertices.size() == 2)) {
         draw_line(vertices[0], vertices[1]);
         vertices.clear();

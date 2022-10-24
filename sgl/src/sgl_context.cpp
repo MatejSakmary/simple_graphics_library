@@ -8,8 +8,9 @@ SglContext::SglContext(const SglContextInitInfo & info) :
     error_cbf{info.error_cbf},
     matrix_stacks{
         std::stack<SglMatrix>({SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})}),
-        std::stack<SglMatrix>({SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})}) 
-    }  {}
+        std::stack<SglMatrix>({SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})})},
+    clear_color{Pixel{.r = 0.0f, .g = 0.0f, .b = 0.0f}}
+    {}
 
 SglContext::~SglContext() {}
 
@@ -140,4 +141,9 @@ void SglContext::viewport(int x, int y, int width, int height)
         .left = static_cast<float>(width), .right = static_cast<float>(height), .bottom = 0.0f, .top = 0.0f, .near = 0.0f, .far = 0.0f
     });
     SGL_DEBUG_OUT("[SglContext::ortho()] result is: \n" + matrix_stacks[mode].top().to_string());
+}
+
+void SglContext::clear(unsigned mask)
+{
+    framebuffer.clear_framebuffer(clear_color);
 }

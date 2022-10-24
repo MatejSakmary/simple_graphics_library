@@ -5,12 +5,22 @@
 #include <cstdint>
 
 #include "sgl_context.hpp"
+#include "sgl_frambuffer.hpp"
 #include "sgl.h"
+
+struct DrawState
+{
+    Pixel draw_color;
+    bool recording;
+    sglEAreaMode area_mode;
+    sglEElementType element_type_mode;
+    float point_size;
+};
 
 struct SglCore
 {
     std::vector<SglContext> contexts;
-    bool recording;
+    DrawState state;
 
     SglCore();
     ~SglCore();

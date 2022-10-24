@@ -3,7 +3,14 @@
 SglCore::SglCore() : 
     current_context{-1},
     error{sglEErrorCode::SGL_NO_ERROR},
-    recording{false} {}
+    state{
+        .draw_color = Pixel{.r = 0.0f, .g = 0.0f, .b = 0.0f} ,
+        .recording = false,
+        .area_mode = sglEAreaMode::SGL_FILL,
+        .element_type_mode = sglEElementType::SGL_POINTS,
+        .point_size = 1.0f
+    }
+    {}
 
 SglCore::~SglCore() {}
 

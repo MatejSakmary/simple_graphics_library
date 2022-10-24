@@ -18,6 +18,8 @@ struct SglContext
 {
     SglContextInitInfo info;
     SglFramebuffer framebuffer;
+    Pixel clear_color;
+    Pixel draw_color;
 
     SglContext(const SglContextInitInfo & info);
     ~SglContext();
@@ -35,6 +37,7 @@ struct SglContext
     void scale(float scale_x, float scale_y, float scale_z);
 	void ortho(float left, float right, float bottom, float top, float near, float far);
 	void viewport(int x, int y, int width, int height);
+    void clear(unsigned mask);
 
     private:
         friend struct SglCore;

@@ -104,19 +104,79 @@ float *sglGetColorBufferPointer(void)
 // Drawing functions
 //---------------------------------------------------------------------------
 
-void sglClearColor(float r, float g, float b, float alpha) {}
+bool check_recording_status(std::string prefix)
+{
+	// check for calls inside begin/end block or when no context was allocated
+	if(core->state.recording || core->contexts.size() == 0 || core->get_context() == -1) 
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+		SGL_DEBUG_OUT(prefix + " Cannot be called inside sglBegin()/sglEnd() block or if no context was created");
+		return false;
+	}
+	return true;
+}
 
-void sglClear(unsigned what) {}
+void sglClearColor(float r, float g, float b, float alpha) 
+{
+	if(!check_recording_status("[sglClearColor()]")) { return; }
+	core->contexts.at(core->get_context()).clear_color = Pixel{.r = r, .g = g, .b = b};
+}
 
-void sglBegin(sglEElementType mode) {}
+void sglClear(unsigned what)
+{
+	if(what & 0xFFFC != 0x0000)
+	{
+		SGL_DEBUG_OUT("[sglClear()] Invalid clear bit");
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
+	if(!check_recording_status("[sglClearColor()]")) { return; }
+	core->contexts.at(core->get_context()).clear(what);
+}
 
-void sglEnd(void) {}
+void sglBegin(sglEElementType mode) 
+{
+	if(core->state.recording)
+	{
+		SGL_DEBUG_OUT("[sglBegin()] Another call to sglBegin() previously without corresponding sglEnd()");
+		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+		return;
+	}
+	if(mode >= SGL_LAST_ELEMENT_TYPE || mode < SGL_POINTS)
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
 
-void sglVertex4f(float x, float y, float z, float w) {}
+	core->state.element_type_mode = mode;
+	core->state.recording = true;
+}
 
-void sglVertex3f(float x, float y, float z) {}
+void sglEnd(void)
+{
+	if(!core->state.recording)
+	{
+		SGL_DEBUG_OUT("[sglEnd()] No previous unended sglBegin call registered");
+		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+		return;
+	}
+	core->state.recording = false;
+}
 
-void sglVertex2f(float x, float y) {}
+void sglVertex4f(float x, float y, float z, float w) 
+{
+
+}
+
+void sglVertex3f(float x, float y, float z)
+{
+
+}
+
+void sglVertex2f(float x, float y)
+{
+
+}
 
 void sglCircle(float x, float y, float z, float radius) {}
 
@@ -127,17 +187,6 @@ void sglArc(float x, float y, float z, float radius, float from, float to) {}
 //---------------------------------------------------------------------------
 // Transform functions
 //---------------------------------------------------------------------------
-bool check_recording_status(std::string prefix)
-{
-	// check for calls inside begin/end block or when no context was allocated
-	if(core->recording || core->contexts.size() == 0 || core->get_context() == -1) 
-	{
-		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
-		SGL_DEBUG_OUT(prefix + " Cannot be called inside sglBegin()/sglEnd() block or if no context was created");
-		return false;
-	}
-	return true;
-}
 
 void sglMatrixMode(sglEMatrixMode mode) 
 {
@@ -254,11 +303,35 @@ void sglViewport(int x, int y, int width, int height)
 // Attribute functions
 //---------------------------------------------------------------------------
 
-void sglColor3f(float r, float g, float b) {}
+void sglColor3f(float r, float g, float b) 
+{
+	if(!check_recording_status("[sglColor3f()]")) { return; }
+	core->state.draw_color = Pixel{.r = r, .g = g, .b = b};
+}
 
-void sglAreaMode(sglEAreaMode mode) {}
+void sglAreaMode(sglEAreaMode mode) 
+{
+	if(!check_recording_status("[sglAreaMode()]")) { return; }
+	if(mode < sglEAreaMode::SGL_POINT || mode > sglEAreaMode::SGL_FILL)
+	{
+		SGL_DEBUG_OUT("[sglAreaMode()] Invalid area mode");
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
+	core->state.area_mode = mode;
+}
 
-void sglPointSize(float size) {}
+void sglPointSize(float size)
+{
+	if(!check_recording_status("[sglPointSize()]")) { return; }
+	if(size < 0.0f)
+	{
+		SGL_DEBUG_OUT("[sglPointSize()] Point size is not allowed to be negative value");
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE);
+		return;
+	}
+	core->state.point_size = size;
+}
 
 void sglEnable(sglEEnableFlags cap) {}
 

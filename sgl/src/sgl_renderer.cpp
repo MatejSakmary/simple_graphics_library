@@ -121,7 +121,7 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
     }
 }
 
-void draw_circle(const SglVertex & center, float radius) {
+void SglRenderer::draw_circle(const SglVertex & center, float radius) {
     // TODO Sakaci Midpoint alg
     int x, y, p, twoX, twoY;
     x = 0;
@@ -143,11 +143,11 @@ void draw_circle(const SglVertex & center, float radius) {
     }
 }
 
-void draw_ellipse(const SglVertex & center, float a, float b) {
+void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b) {
     // TODO Sakaci
 }
 
-void draw_arc(const SglVertex & center, float radius, float from, float to) {
+void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to) {
     // TODO Sakaci
 }
 

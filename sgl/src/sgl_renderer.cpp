@@ -98,7 +98,7 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
 {
     vertices.push_back(vertex);
     
-    if ((state.element_type_mode == SGL_LINE) & (vertices.size() == 2)) {
+    if ((state.element_type_mode == SGL_LINES) & (vertices.size() == 2)) {
         draw_line(vertices[0], vertices[1]);
         vertices.clear();
     }

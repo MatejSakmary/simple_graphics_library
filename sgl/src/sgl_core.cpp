@@ -50,6 +50,7 @@ void SglCore::set_context(int32_t context_idx)
     SGL_DEBUG_OUT("[SglCore::set_context()] Setting context with index " +
         std::to_string(context_idx) + " as active context"); 
     current_context = context_idx;
+    renderer.state.currentFramebuffer = &contexts.at(current_context).framebuffer;
 }
 
 auto SglCore::get_context() -> int32_t

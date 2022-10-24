@@ -102,15 +102,35 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
         draw_line(vertices[0], vertices[1]);
         vertices.clear();
     }
-    // else if ((state.element_type_mode ==SGL_LINE_STRIP ))
+    else if ((state.element_type_mode ==SGL_LINE_STRIP) & vertices.size() == 2) {
+        draw_line(vertices[0], vertices[1]);
+        vertices.clear();
+        vertices.push_back(vertex);
+    }
+    else if ((state.element_type_mode == SGL_LINE_LOOP) & vertices.size() >= 2) {
+        if(vertices.size() == 2) {
+            draw_line(vertices[0], vertices[1]);
+        }
+        if(vertices.size() == 3) {
+            SglVertex first = vertices[0];
+            draw_line(vertices[1], vertices[2]);
+            vertices.clear();
+            vertices.push_back(first);
+            vertices.push_back(vertex);
+        }
+    }
 }
 
 void SglRenderer::recording_start()
 {
     // init vertices?
+    // init frame_buffer?
 }
 
 void SglRenderer::recording_end()
 {
+    if(state.element_type_mode == SGL_LINE_LOOP && vertices.size() == 2) {
+        draw_line(vertices[0], vertices[1]);
+    }
     vertices.clear();
 }

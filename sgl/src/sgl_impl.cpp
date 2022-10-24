@@ -56,9 +56,6 @@ const char *sglGetErrorString(sglEErrorCode error)
 // Initialization functions
 //---------------------------------------------------------------------------
 
-
-std::unique_ptr<SglCore> core;
-
 void sglInit(void) 
 {
 	core = std::make_unique<SglCore>();

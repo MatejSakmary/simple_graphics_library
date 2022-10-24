@@ -96,16 +96,17 @@ void SglRenderer::draw_line(SglVertex & start_v, SglVertex & end_v) {
 
 void SglRenderer::push_vertex(const SglVertex & vertex)
 {
-    vertices.push_back(vertex);
 
     // state.currentFramebuffer->set_pixel(static_cast<uint32_t>(vertex.at(0)), static_cast<uint32_t>(vertex.at(1)), state.draw_color);
     // return;
 
-    if((state.element_type_mode == SGL_POINTS) && (vertices.size() == 1)) {
-        state.currentFramebuffer->set_pixel(static_cast<uint32_t>(vertices[0].at(0)), static_cast<uint32_t>(vertices[0].at(1)), state.draw_color);
-        vertices.clear();
+    if (state.element_type_mode == SGL_POINTS) {
+        state.currentFramebuffer->set_pixel(static_cast<uint32_t>(vertex.at(0)), static_cast<uint32_t>(vertex.at(1)), state.draw_color);
     }
-    else if ((state.element_type_mode == SGL_LINES) && (vertices.size() == 2)) {
+    
+    vertices.push_back(vertex);
+
+    if ((state.element_type_mode == SGL_LINES) && (vertices.size() == 2)) {
         draw_line(vertices[0], vertices[1]);
         vertices.clear();
     }

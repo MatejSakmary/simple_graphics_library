@@ -1,10 +1,14 @@
 #include "sgl_core.hpp"
 
-SglCore::SglCore() {}
+SglCore::SglCore() : 
+    current_context{-1},
+    error{sglEErrorCode::SGL_NO_ERROR},
+    recording{false}
+    {}
 
 SglCore::~SglCore() {}
 
-int32_t SglCore::create_context(int32_t width, int32_t height)
+auto SglCore::create_context(int32_t width, int32_t height) -> int32_t
 {
     // try to find any free context slots
     for(int32_t i = 0; i < contexts.size(); i++)
@@ -24,7 +28,8 @@ int32_t SglCore::create_context(int32_t width, int32_t height)
     // if we find no free context slots create new one at the end
     contexts.emplace_back(SglContextInitInfo{
         .width = static_cast<uint32_t>(width),
-        .height = static_cast<uint32_t>(height)
+        .height = static_cast<uint32_t>(height),
+        .error_cbf = std::bind(&SglCore::set_error, this, std::placeholders::_1)
     });
     SGL_DEBUG_OUT("[SglCore::create_context()] Creating new context at index " +
         std::to_string(contexts.size() -1));
@@ -47,7 +52,7 @@ void SglCore::set_context(int32_t context_idx)
     current_context = context_idx;
 }
 
-int32_t SglCore::get_context()
+auto SglCore::get_context() -> int32_t
 {
     if(current_context == -1)
     {
@@ -91,4 +96,26 @@ sglEErrorCode SglCore::get_error()
     sglEErrorCode error_ret = error;
     error = sglEErrorCode::SGL_NO_ERROR;
     return error_ret;
+}
+
+void SglCore::set_recording(bool new_recording)
+{
+    recording = new_recording;
+    if(recording == true) { renderer.recording_start(); }
+    else                  { renderer.recording_end(); }
+}
+
+auto SglCore::get_recording() -> bool
+{
+    return recording;
+}
+
+void SglCore::push_vertex(SglVertex vertex)
+{
+    SGL_DEBUG_OUT("[SglCore::push_vertex()] Transforming vertex: \n" + vertex.to_string());
+    vertex = vertex * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
+    SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview: \n" + vertex.to_string());
+    vertex = vertex * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top();
+    SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
+    renderer.push_vertex(vertex);
 }

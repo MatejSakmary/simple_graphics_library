@@ -9,6 +9,7 @@
 
 #include "sgl.h"
 #include "sgl_core.hpp"
+#include "sgl_vertex.hpp"
 
 // sglCore instance
 std::unique_ptr<SglCore> core = nullptr;
@@ -106,69 +107,246 @@ float *sglGetColorBufferPointer(void)
 // Drawing functions
 //---------------------------------------------------------------------------
 
-void sglClearColor(float r, float g, float b, float alpha) {} 
-
-void sglClear(unsigned what) {
-	if(what /*& mask*/ ) {
-
+bool check_recording_status(std::string prefix)
+{
+	// check for calls inside begin/end block or when no context was allocated
+	if(core->get_recording() || core->contexts.size() == 0 || core->get_context() == -1) 
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+		SGL_DEBUG_OUT(prefix + " Cannot be called inside sglBegin()/sglEnd() block or if no context was created");
+		return false;
 	}
+	return true;
 }
 
-void sglBegin(sglEElementType mode) {}
+void sglClearColor(float r, float g, float b, float alpha) 
+{
+	if(!check_recording_status("[sglClearColor()]")) { return; }
+	core->contexts.at(core->get_context()).clear_color = Pixel{.r = r, .g = g, .b = b};
+}
 
-void sglEnd(void) {}
+void sglClear(unsigned what)
+{
+	if(what & 0xFFFC != 0x0000)
+	{
+		SGL_DEBUG_OUT("[sglClear()] Invalid clear bit");
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
+	if(!check_recording_status("[sglClearColor()]")) { return; }
+	core->contexts.at(core->get_context()).clear(what);
+}
 
-void sglVertex4f(float x, float y, float z, float w) {}
+void sglBegin(sglEElementType mode) 
+{
+	if(core->get_recording())
+	{
+		SGL_DEBUG_OUT("[sglBegin()] Another call to sglBegin() previously without corresponding sglEnd()");
+		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+		return;
+	}
+	if(mode >= SGL_LAST_ELEMENT_TYPE || mode < SGL_POINTS)
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
 
-void sglVertex3f(float x, float y, float z) {}
+	core->renderer.state.element_type_mode = mode;
+	core->set_recording(true);
+}
 
-void sglVertex2f(float x, float y) {}
+void sglEnd(void)
+{
+	if(!core->get_recording())
+	{
+		SGL_DEBUG_OUT("[sglEnd()] No previous unended sglBegin call registered");
+		core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+		return;
+	}
+	core->set_recording(false);
+}
 
-void sglCircle(float x, float y, float z, float radius) {}
+void sglVertex4f(float x, float y, float z, float w) 
+{
+	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglVertex4f()] Ignoring vertex - no active sglBegin() call"); return; }
+	core->push_vertex(SglVertex(x, y, z, w));
+}
 
-void sglEllipse(float x, float y, float z, float a, float b) {}
+void sglVertex3f(float x, float y, float z)
+{
+	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglVertex3f()] Ignoring vertex - no active sglBegin() call"); return; }
+	core->push_vertex(SglVertex(x, y, z, 1.0f));
+}
 
-void sglArc(float x, float y, float z, float radius, float from, float to) {}
+void sglVertex2f(float x, float y)
+{
+	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglVertex2f()] Ignoring vertex - no active sglBegin() call"); return; }
+	core->push_vertex(SglVertex(x, y, 0.0f, 1.0f));
+}
+
+void sglCircle(float x, float y, float z, float radius)
+{
+
+}
+
+void sglEllipse(float x, float y, float z, float a, float b)
+{
+
+}
+
+void sglArc(float x, float y, float z, float radius, float from, float to)
+{
+
+}
 
 //---------------------------------------------------------------------------
 // Transform functions
 //---------------------------------------------------------------------------
 
-void sglMatrixMode(sglEMatrixMode mode) {}
+void sglMatrixMode(sglEMatrixMode mode) 
+{
+	if(!check_recording_status("[sglMatrixMode()]")) { return; }
+	// check if mode is known sglEMatrixMode value
+	if(mode != sglEMatrixMode::SGL_MODELVIEW &&
+	   mode != sglEMatrixMode::SGL_PROJECTION)
+	{
+		SGL_DEBUG_OUT("[sglMatrixMode()] invalid mode enum provided");
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
 
-void sglPushMatrix(void) {}
+	core->contexts.at(core->get_context()).set_matrix_mode(mode);
+}
 
-void sglPopMatrix(void) {}
+void sglPushMatrix(void) 
+{
+	if(!check_recording_status("[sglPushMatrix()]")) { return; }
+	core->contexts.at(core->get_context()).push_matrix();
+}
 
-void sglLoadIdentity(void) {}
+void sglPopMatrix(void) 
+{
+	if(!check_recording_status("[sglPopMatrix()]")) { return; }
+	core->contexts.at(core->get_context()).pop_matrix();
+}
 
-void sglLoadMatrix(const float *matrix) {}
+void sglLoadIdentity(void) 
+{
+	if(!check_recording_status("[sglLoadIdentityMatrix()]")) { return; }
+	core->contexts.at(core->get_context()).load_identity();
+}
 
-void sglMultMatrix(const float *matrix) {}
+void sglLoadMatrix(const float *matrix)
+{
+	if(!check_recording_status("[sglLoadMatrix()]")) { return; }
 
-void sglTranslate(float x, float y, float z) {}
+	std::array<float, 16> transp_mat;
+	for(int col = 0; col < 4; col++)
+	{
+		for(int row = 0; row < 4; row++)
+		{
+			transp_mat[row * 4 + col] = matrix[col * 4 + row];
+		}
+	}
+	core->contexts.at(core->get_context()).load_matrix({transp_mat});
+}
 
-void sglScale(float scalex, float scaley, float scalez) {}
+void sglMultMatrix(const float *matrix)
+{
+	if(!check_recording_status("[sglMultMatrix()]")) { return; }
 
-void sglRotate2D(float angle, float centerx, float centery) {}
+	std::array<float, 16> transp_mat;
+	for(int col = 0; col < 4; col++)
+	{
+		for(int row = 0; row < 4; row++)
+		{
+			transp_mat[row * 4 + col] = matrix[col * 4 + row];
+		}
+	}
+	core->contexts.at(core->get_context()).mult_matrix({transp_mat});
+}
 
-void sglRotateY(float angle) {}
+void sglTranslate(float x, float y, float z) 
+{
+	if(!check_recording_status("[sglTranslateMatrix()]")) { return; }
+	core->contexts.at(core->get_context()).translate(x, y, z);
+}
 
-void sglOrtho(float left, float right, float bottom, float top, float near, float far) {}
+void sglScale(float scalex, float scaley, float scalez) 
+{
+	if(!check_recording_status("[sglScale()]")) { return; }
+	core->contexts.at(core->get_context()).scale(scalex, scaley, scalez);
+}
+
+void sglRotate2D(float angle, float centerx, float centery) 
+{
+	if(!check_recording_status("[sglRotate2D()]")) { return; }
+	core->contexts.at(core->get_context()).rotate_2d(angle, centerx, centery);
+}
+
+void sglRotateY(float angle) 
+{
+	if(!check_recording_status("[sglRotateY()]")) { return; }
+	core->contexts.at(core->get_context()).rotate_y(angle);
+}
+
+void sglOrtho(float left, float right, float bottom, float top, float near, float far) 
+{
+	if(!check_recording_status("[sglOrtho()]")) { return; }
+	if(left == right || bottom == top || near == far)
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE);
+		return;
+	}
+	core->contexts.at(core->get_context()).ortho(left, right, bottom, top, near, far);
+}
 
 void sglFrustum(float left, float right, float bottom, float top, float near, float far) {}
 
-void sglViewport(int x, int y, int width, int height) {}
+void sglViewport(int x, int y, int width, int height)
+{
+	if(!check_recording_status("[sglViewport()]")) { return; }
+	if(width < 0.0f || height < 0.0f)
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE);
+		return;
+	}
+	core->contexts.at(core->get_context()).viewport(x, y, width, height);
+}
 
 //---------------------------------------------------------------------------
 // Attribute functions
 //---------------------------------------------------------------------------
 
-void sglColor3f(float r, float g, float b) {}
+void sglColor3f(float r, float g, float b) 
+{
+	if(!check_recording_status("[sglColor3f()]")) { return; }
+	core->renderer.state.draw_color = Pixel{.r = r, .g = g, .b = b};
+}
 
-void sglAreaMode(sglEAreaMode mode) {}
+void sglAreaMode(sglEAreaMode mode) 
+{
+	if(!check_recording_status("[sglAreaMode()]")) { return; }
+	if(mode < sglEAreaMode::SGL_POINT || mode > sglEAreaMode::SGL_FILL)
+	{
+		SGL_DEBUG_OUT("[sglAreaMode()] Invalid area mode");
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
+	core->renderer.state.area_mode = mode;
+}
 
-void sglPointSize(float size) {}
+void sglPointSize(float size)
+{
+	if(!check_recording_status("[sglPointSize()]")) { return; }
+	if(size < 0.0f)
+	{
+		SGL_DEBUG_OUT("[sglPointSize()] Point size is not allowed to be negative value");
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE);
+		return;
+	}
+	core->renderer.state.point_size = size;
+}
 
 void sglEnable(sglEEnableFlags cap) { cap=SGL_DEPTH_TEST; }
 

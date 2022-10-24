@@ -1143,33 +1143,188 @@ void sgl_tests()
     test_ctx1 = sglCreateContext(1000, 1000);
     test_ctx2 = sglCreateContext(800, 800);
     test_ctx3 = sglCreateContext(400, 400);
+    std::cout << "======================================================\n";
     // =====================================================================
 
     // ============== TEST 2 - test destroy context ========================
     std::cout << "TEST 2 - test destroy context" << std::endl;
     sglDestroyContext(test_ctx2);
+    std::cout << "======================================================\n";
     // =====================================================================
 
     // ============= TEST 3 - test destroy destroyed context === 
     std::cout << "TEST 3 - test destroy destroyed context : " << std::endl;
     sglDestroyContext(test_ctx2);
     test_err_code(sglEErrorCode::SGL_INVALID_VALUE);
+    std::cout << "======================================================\n";
     // =====================================================================
 
     // ============= TEST 4 - test set destroyed context ===================
     std::cout << "TEST 4 - test set destroyed context" << std::endl;
     sglSetContext(test_ctx2); 
     test_err_code(sglEErrorCode::SGL_INVALID_VALUE);
+    std::cout << "======================================================\n";
     // =====================================================================
 
     // ============ TEST 5 - test create context reuse destroyed idx ======
     std::cout << "TEST 5 - test create context reuse destroyed idx" << std::endl; 
     test_ctx2 = sglCreateContext(800, 800);
+    std::cout << "======================================================\n";
     // =====================================================================
 
     // =========== TEST 6 - test set context ===============================
     std::cout << "TEST 6 - test set context" << std::endl; 
     sglSetContext(test_ctx1);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // TEST FOR MATRICES ===================================================
+    sglSetContext(test_ctx3);
+    // =========== TEST 7 - test pop matrix error ==========================
+    std::cout << "TEST 7 - test pop matrix error" << std::endl; 
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_STACK_UNDERFLOW);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 8 - test push matrix ===============================
+    std::cout << "TEST 8 - test push matrix" << std::endl; 
+    sglPushMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    sglPopMatrix();
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 9 - test load matrix ===============================
+    std::cout << "TEST 9 - test load matrix" << std::endl; 
+    sglPushMatrix();
+    float m[] = {
+        1.0f, 1.0f, 1.0f, 1.0f,					   // col 1
+        2.0f, 2.0f, 2.0f, 2.0f,					   // col 2
+        3.0f, 3.0f, 3.0f, 3.0f,					   // col 3
+        4.0f, 4.0f, 4.0f, 4.0f};				   // col 4
+    sglLoadMatrix(m);
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    sglPopMatrix();
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 10 - test scale matrix ===============================
+    std::cout << "TEST 10 - test scale matrix" << std::endl; 
+    sglPushMatrix();
+    sglScale(2.0f, 3.0f, 0.5f);
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 11 - test load identity matrix ===============================
+    std::cout << "TEST 11 - test load identity matrix" << std::endl; 
+    sglPushMatrix();
+    sglLoadIdentity();
+    sglScale(2.0f, 3.0f, 0.5f);
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 12 - test mult matrix ===============================
+    std::cout << "TEST 12 - test mult matrix" << std::endl; 
+    sglPushMatrix();
+    sglLoadIdentity();
+    float g[] = {
+        2.0f, 0.0f, 0.0f, 0.0f,					   // col 1
+        0.0f, 3.0f, 0.0f, 0.0f,					   // col 2
+        0.0f, 0.0f, 4.0f, 0.0f,					   // col 3
+        0.0f, 0.0f, 0.0f, 1.0f};				   // col 4
+    sglMultMatrix(g);
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 13 - test mult matrix 2 ===============================
+    std::cout << "TEST 13 - test mult matrix 2" << std::endl; 
+    sglPushMatrix();
+    sglLoadIdentity();
+    float f[] = {
+        1.0f, 0.0f, 0.0f, 0.0f,					   // col 1
+        1.0f, 1.0f, 0.0f, 0.0f,					   // col 2
+        0.0f, 1.0f, 3.0f, 0.0f,					   // col 3
+        0.0f, 0.0f, 0.0f, 1.0f};				   // col 4
+    sglMultMatrix(f);
+    sglMultMatrix(g);
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 14 - test switch mode ==============================
+    std::cout << "TEST 14 - test switch mode" << std::endl; 
+    sglMatrixMode(sglEMatrixMode::SGL_MODELVIEW);
+    sglPushMatrix();
+    sglLoadMatrix(f);
+    sglMatrixMode(sglEMatrixMode::SGL_PROJECTION);
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_STACK_UNDERFLOW);
+    sglLoadIdentity();
+    sglPushMatrix();
+    sglPopMatrix();
+    sglMatrixMode(sglEMatrixMode::SGL_MODELVIEW);
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 15 - test translate matrix =========================
+    std::cout << "TEST 15 - test translate matrix" << std::endl; 
+    sglPushMatrix();
+    sglLoadIdentity();
+    sglTranslate(-2, 3, 4);
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 16 - test scale matrix =========================
+    std::cout << "TEST 16 - test scale matrix" << std::endl; 
+    sglPushMatrix();
+    sglLoadIdentity();
+    sglScale(2, 0.5, 3.0);
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 17 - test rotateY matrix =========================
+    std::cout << "TEST 17 - test rotateY matrix" << std::endl; 
+    sglPushMatrix();
+    sglLoadIdentity();
+    sglRotateY(1.57079633f);
+    sglPopMatrix();
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
+    // =====================================================================
+
+    // =========== TEST 18 - test vertex transform =========================
+    std::cout << "TEST 18 - test vertex transform" << std::endl; 
+    sglMatrixMode(sglEMatrixMode::SGL_MODELVIEW);
+    sglPushMatrix();
+    sglLoadIdentity();
+    sglTranslate(-2.0f, 3.0f, 0.5f);
+    sglScale(3.0f, 3.0f, 3.0f);
+    sglMatrixMode(sglEMatrixMode::SGL_PROJECTION);
+    sglLoadIdentity();
+    sglAreaMode(sglEAreaMode::SGL_POINT);
+    sglBegin(sglEElementType::SGL_POINTS);
+    sglVertex4f(1.0f, 1.0f, 1.0f, 1.0f);
+    sglEnd();
+    sglPopMatrix();
+    sglMatrixMode(sglEMatrixMode::SGL_MODELVIEW);
+    sglPopMatrix();
+
+    test_err_code(sglEErrorCode::SGL_NO_ERROR);
+    std::cout << "======================================================\n";
     // =====================================================================
 
     sglFinish();

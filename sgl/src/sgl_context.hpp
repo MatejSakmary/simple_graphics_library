@@ -18,9 +18,12 @@ struct SglContext
 {
     SglContextInitInfo info;
     SglFramebuffer framebuffer;
+    Pixel clear_color;
 
     SglContext(const SglContextInitInfo & info);
     ~SglContext();
+
+    void set_matrix_mode(sglEMatrixMode mode);
 
     void pop_matrix();
     void push_matrix();
@@ -30,7 +33,10 @@ struct SglContext
     void translate(float x, float y, float z);
     void rotate_2d(float angle, float center_x, float center_y);
     void rotate_y(float angle);
-    void scale();
+    void scale(float scale_x, float scale_y, float scale_z);
+	void ortho(float left, float right, float bottom, float top, float near, float far);
+	void viewport(int x, int y, int width, int height);
+    void clear(unsigned mask);
 
     private:
         friend struct SglCore;
@@ -38,4 +44,5 @@ struct SglContext
         sglEMatrixMode mode;
         std::function<void(sglEErrorCode)> error_cbf;
         std::array<std::stack<SglMatrix>, 2> matrix_stacks;
+        SglMatrix viewport_mat;
 };

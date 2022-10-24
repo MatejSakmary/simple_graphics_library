@@ -5,9 +5,7 @@
 #include <cmath>
 
 #include "sgl.h"
-
-// Forward decl vertex so we can friend it 
-struct SglVertex;
+#include "sgl_vertex.hpp"
 
 enum MatrixType
 {
@@ -42,6 +40,7 @@ struct SglMatrix
     SglMatrix(const MatrixCreateInfo & info);
     ~SglMatrix();
     SglMatrix operator * (const SglMatrix & other );
+    SglVertex operator * (const SglVertex & other );
     SglMatrix operator + (const SglMatrix & other );
 
     auto at(int x, int y) -> float&;

@@ -1314,6 +1314,7 @@ void sgl_tests()
     sglTranslate(-2.0f, 3.0f, 0.5f);
     sglScale(3.0f, 3.0f, 3.0f);
     sglMatrixMode(sglEMatrixMode::SGL_PROJECTION);
+    sglPushMatrix();
     sglLoadIdentity();
     sglAreaMode(sglEAreaMode::SGL_POINT);
     sglBegin(sglEElementType::SGL_POINTS);

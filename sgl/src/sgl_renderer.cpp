@@ -13,16 +13,10 @@ SglRenderer::SglRenderer() :
 SglRenderer::~SglRenderer() {}
 
 
-void init_low(int c0, int c1, int p, int d_x, int d_y) {
+void init(int c0, int c1, int p, int d_x, int d_y) {
     c0 = 2 * d_y;
     c1 = c0 - 2 * d_x;
     p = c0 - d_x;
-}
-
-void init_high(int c0, int c1, int p, int d_x, int d_y) {
-    c0 = 2 * d_x;
-    c1 = c0 - 2 * d_y;
-    p = c0 - d_y;
 }
 
 void SglRenderer::draw_line_low(float x0, float y0, float x1, float y1) {
@@ -36,7 +30,7 @@ void SglRenderer::draw_line_low(float x0, float y0, float x1, float y1) {
         d_y = -d_y;
     }
 
-    init_low(c0, c1, p, d_x, d_y);
+    init(c0, c1, p, d_x, d_y);
 
     state.currentFramebuffer->set_pixel(x0, y0, state.draw_color);
     
@@ -63,7 +57,7 @@ void SglRenderer::draw_line_high(float x0, float y0, float x1, float y1) {
         d_x = -d_x;
     }
 
-    init_high(c0, c1, p, d_x, d_y);
+    init(c0, c1, p, d_y, d_x);
 
     state.currentFramebuffer->set_pixel(x0, y0, state.draw_color);
     

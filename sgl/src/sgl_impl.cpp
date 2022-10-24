@@ -88,16 +88,7 @@ int sglGetContext(void)
 
 float *sglGetColorBufferPointer(void)
 {
-	// NOTE(msakmary) This is just a test if everything works
-	// please change this to the current implementation whenever you wish
-	float* array = new float[800*600 * 3];
-	for(int i = 0; i < 800*600 * 3; i+=3)
-	{
-		array[i] = 0.5;
-		array[i + 1] = 0.5;
-		array[i + 2] = 0;
-	}
-	return array;
+	return core->contexts.at(core->get_context()).framebuffer.get_framebuffer_pointer();
 }
 
 //---------------------------------------------------------------------------

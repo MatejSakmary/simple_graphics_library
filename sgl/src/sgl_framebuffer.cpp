@@ -23,3 +23,7 @@ void SglFramebuffer::clear_framebuffer(const Pixel & clear_color)
 {
     for(auto & pixel : pixels) { pixel = clear_color; }
 }
+
+float* SglFramebuffer::get_framebuffer_pointer() {
+    return reinterpret_cast<float*>(pixels.data());
+}

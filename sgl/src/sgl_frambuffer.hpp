@@ -17,6 +17,7 @@ struct SglFramebuffer
     Pixel get_pixel(uint32_t x, uint32_t y);
     void set_pixel(uint32_t x, uint32_t y, const Pixel & pixel);
     void clear_framebuffer(const Pixel & clear_color);
+    float* get_framebuffer_pointer();
 
     private:
         friend struct Context;

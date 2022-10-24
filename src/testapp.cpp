@@ -1362,7 +1362,7 @@ int main(int argc, char **argv)
 
 
     // init SGL
-    sgl_tests();
+    // sgl_tests();
     Init();
 
 

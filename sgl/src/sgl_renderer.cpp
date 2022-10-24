@@ -97,7 +97,9 @@ void SglRenderer::draw_line(SglVertex & start_v, SglVertex & end_v) {
 void SglRenderer::push_vertex(const SglVertex & vertex)
 {
     vertices.push_back(vertex);
-    
+
+    state.currentFramebuffer->set_pixel(static_cast<int>(vertex.at(0)), static_cast<int>(vertex.at(1)), state.draw_color);
+
     if ((state.element_type_mode == SGL_LINES) & (vertices.size() == 2)) {
         draw_line(vertices[0], vertices[1]);
         vertices.clear();

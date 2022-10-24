@@ -6,6 +6,10 @@
 
 #include "sgl.h"
 
+// Forward decl vertex so we can friend it and it can access private
+// fiels of mat
+struct SglVertex;
+
 enum MatrixType
 {
     IDENTITY,
@@ -45,6 +49,7 @@ struct SglMatrix
     auto to_string() const -> std::string;
 
     private:
+        friend struct SglVertex;
         SglMatrix();
         std::array<float, 16> mat;
 };

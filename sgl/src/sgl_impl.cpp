@@ -178,11 +178,20 @@ void sglVertex2f(float x, float y)
 
 }
 
-void sglCircle(float x, float y, float z, float radius) {}
+void sglCircle(float x, float y, float z, float radius)
+{
 
-void sglEllipse(float x, float y, float z, float a, float b) {}
+}
 
-void sglArc(float x, float y, float z, float radius, float from, float to) {}
+void sglEllipse(float x, float y, float z, float a, float b)
+{
+
+}
+
+void sglArc(float x, float y, float z, float radius, float from, float to)
+{
+
+}
 
 //---------------------------------------------------------------------------
 // Transform functions

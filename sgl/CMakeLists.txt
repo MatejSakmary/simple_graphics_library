@@ -3,11 +3,12 @@ cmake_minimum_required(VERSION 3.8)
 project(sgl)
 
 add_library(${PROJECT_NAME} STATIC 
-	"src/sgl_impl.cpp"
+	  "src/sgl_impl.cpp"
     "src/sgl_context.cpp"
     "src/sgl_core.cpp"
     "src/sgl_framebuffer.cpp"
     "src/sgl_matrix.cpp"
+    "src/sgl_vertex.cpp"
 )
 
 if(SGL_LOG_DEBUG_OUTPUT)

@@ -4,9 +4,10 @@
 #include <memory>
 #include <cstdint>
 
+#include "sgl.h"
 #include "sgl_context.hpp"
 #include "sgl_frambuffer.hpp"
-#include "sgl.h"
+#include "sgl_vertex.hpp"
 
 struct DrawState
 {
@@ -15,6 +16,7 @@ struct DrawState
     sglEAreaMode area_mode;
     sglEElementType element_type_mode;
     float point_size;
+    std::vector<SglVertex> vertices;
 };
 
 struct SglCore

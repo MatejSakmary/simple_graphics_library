@@ -12,6 +12,37 @@ SglRenderer::SglRenderer() :
 
 SglRenderer::~SglRenderer() {}
 
+void SglRenderer::push_vertex(const SglVertex & vertex)
+{
+
+    if (state.element_type_mode == SGL_POINTS) {
+        state.currentFramebuffer->set_pixel(static_cast<int>(vertex.at(0)), static_cast<int>(vertex.at(1)), state.draw_color);
+    }
+    
+    vertices.push_back(vertex);
+
+    // SGL_DEBUG_OUT("[Vertices] are " + std::to_string(vertices.size()));
+    if ((state.element_type_mode == SGL_LINES) && (vertices.size() == 2)) {
+        draw_line(vertices[0], vertices[1]);
+        vertices.clear();
+    }
+
+    else if ((state.element_type_mode == SGL_LINE_STRIP) && (vertices.size() == 2)) {
+        draw_line(vertices[0], vertices[1]);
+        vertices.erase(vertices.begin());
+    }
+    
+    else if ((state.element_type_mode == SGL_LINE_LOOP) && (vertices.size() >= 2)) {
+        if(vertices.size() == 2) {
+            draw_line(vertices[0], vertices[1]);
+        }
+        else if(vertices.size() == 3) {
+            SglVertex first = vertices[0];
+            draw_line(vertices[1], vertices[2]);
+            vertices.erase(vertices.begin()+1);
+        }
+    }
+}
 
 void SglRenderer::draw_line_low(int x0, int y0, int x1, int y1) {
     int c0, c1, p;
@@ -71,7 +102,6 @@ void SglRenderer::draw_line_high(int x0, int y0, int x1, int y1) {
     }
 }
 
-
 void SglRenderer::draw_line(const SglVertex & start_v, const SglVertex & end_v) {
     int x0 = static_cast<int>(start_v.at(0));
     int y0 = static_cast<int>(start_v.at(1));
@@ -92,46 +122,13 @@ void SglRenderer::draw_line(const SglVertex & start_v, const SglVertex & end_v) 
 
 void SglRenderer::draw_sym_pixels(int x_c, int y_c, int x, int y) {
     state.currentFramebuffer->set_pixel(x_c + x, y_c + y, state.draw_color);
-    state.currentFramebuffer->set_pixel(x_c + x, y_c + y, state.draw_color);
+    state.currentFramebuffer->set_pixel(x_c + x, y_c - y, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c - x, y_c + y, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c - x, y_c - y, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c + y, y_c + x, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c + y, y_c - x, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c - y, y_c + x, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c - y, y_c - x, state.draw_color);
-}
-
-
-void SglRenderer::push_vertex(const SglVertex & vertex)
-{
-
-    if (state.element_type_mode == SGL_POINTS) {
-        state.currentFramebuffer->set_pixel(static_cast<int>(vertex.at(0)), static_cast<int>(vertex.at(1)), state.draw_color);
-    }
-    
-    vertices.push_back(vertex);
-
-    // SGL_DEBUG_OUT("[Vertices] are " + std::to_string(vertices.size()));
-    if ((state.element_type_mode == SGL_LINES) && (vertices.size() == 2)) {
-        draw_line(vertices[0], vertices[1]);
-        vertices.clear();
-    }
-
-    else if ((state.element_type_mode == SGL_LINE_STRIP) && (vertices.size() == 2)) {
-        draw_line(vertices[0], vertices[1]);
-        vertices.erase(vertices.begin());
-    }
-    
-    else if ((state.element_type_mode == SGL_LINE_LOOP) && (vertices.size() >= 2)) {
-        if(vertices.size() == 2) {
-            draw_line(vertices[0], vertices[1]);
-        }
-        else if(vertices.size() == 3) {
-            SglVertex first = vertices[0];
-            draw_line(vertices[1], vertices[2]);
-            vertices.erase(vertices.begin()+1);
-        }
-    }
 }
 
 void SglRenderer::draw_circle(const SglVertex & center, int radius) {

@@ -131,6 +131,12 @@ void SglCore::draw_circle(SglVertex center, float radius) {
     // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
     center = contexts.at(current_context).viewport_mat * center;
 
+    SglMatrix mat = SglMatrix(contexts.at(current_context).viewport_mat);
+    mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
+    mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
+    float det = mat.at(0,0) * mat.at(1,1) - mat.at(0, 1) * mat.at(1, 0);
+    radius = radius * std::sqrt(det);
+
     renderer.draw_circle(center, static_cast<int>(radius));
 }
 

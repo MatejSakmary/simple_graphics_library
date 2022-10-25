@@ -82,20 +82,20 @@ void SglContext::rotate_2d(float angle, float center_x, float center_y)
     SGL_DEBUG_OUT("[SglContext::rotate_2d()] 2d rotating current matrix: \n" + matrix_stacks[mode].top().to_string() +
          " by angle: " + std::to_string(angle) + " and with origin: " + std::to_string(center_x) + "," + std::to_string(center_y));
         
-    // Translate so that center_x, center_y is now in the coordinate origin
+    // Translate back so that origin is again 0,0
     matrix_stacks[mode].top() = matrix_stacks[mode].top() * SglMatrix({
         .type = MatrixType::TRANSLATE,
-        .x = -center_x, .y = -center_y, .z = 0.0f
+        .x = center_x, .y = center_y, .z = 0.0f
     });
    // Rotate by the z axis (xy plane)
     matrix_stacks[mode].top() = matrix_stacks[mode].top() * SglMatrix({
         .type = MatrixType::ROTATE,
         .x = 0.0f, .y = 0.0f, .z = angle
     });
-    // Translate back so that origin is again 0,0
+    // Translate so that center_x, center_y is now in the coordinate origin
     matrix_stacks[mode].top() = matrix_stacks[mode].top() * SglMatrix({
         .type = MatrixType::TRANSLATE,
-        .x = center_x, .y = center_y, .z = 0.0f
+        .x = -center_x, .y = -center_y, .z = 0.0f
     });
     SGL_DEBUG_OUT("[SglContext::traslate_matrix()] result is: \n" + matrix_stacks[mode].top().to_string());
 }

@@ -92,7 +92,7 @@ void SglRenderer::draw_line(const SglVertex & start_v, const SglVertex & end_v) 
 
 void SglRenderer::draw_sym_pixels(int x_c, int y_c, int x, int y) {
     state.currentFramebuffer->set_pixel(x_c + x, y_c + y, state.draw_color);
-    state.currentFramebuffer->set_pixel(x_c + x, y_c + y, state.draw_color);
+    state.currentFramebuffer->set_pixel(x_c + x, y_c - y, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c - x, y_c + y, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c - x, y_c - y, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c + y, y_c + x, state.draw_color);

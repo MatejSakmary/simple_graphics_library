@@ -157,7 +157,7 @@ void SglRenderer::draw_circle(const SglVertex & center, int radius) {
     }
 }
 
-void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b) {
+void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, const SglMatrix & mat) {
     int d_x, d_y, p, x, y, b2, a2;
     int x_c = static_cast<int>(center.at(0));
     int y_c = static_cast<int>(center.at(1));
@@ -172,7 +172,9 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b) {
     p = b2 - (a2 * b) + (0.25 * a2);
     
     while (d_x < d_y) {
-        draw_sym_pixels(x_c, y_c, x, y);
+        // const SglVertex vert = SglVertex(x, y, 0.0f, 1.0f);
+        // const SglVertex vert_t = mat * vert;
+        draw_sym_pixels(x_c, y_c, vert_t.at(0), vert_t.at(1));
         if (p >= 0) {
             --y;
             d_y -= 2 * a2;
@@ -201,12 +203,12 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b) {
 
 void SglRenderer::draw_arc(const SglVertex & center, int radius, int from, int to) {
     // TODO Sakaci
+
+
 }
 
 void SglRenderer::recording_start()
 {
-    // init vertices?
-    // init frame_buffer?
 }
 
 void SglRenderer::recording_end()

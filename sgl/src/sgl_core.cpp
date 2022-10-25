@@ -106,6 +106,13 @@ float SglCore::get_scaling_factor() {
     return  mat.at(0,0) * mat.at(1,1) - mat.at(0, 1) * mat.at(1, 0);
 }
 
+const SglMatrix SglCore::get_matrix() {
+    SglMatrix mat = SglMatrix(contexts.at(current_context).viewport_mat);
+    mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
+    mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
+    return mat;
+}
+
 void SglCore::set_recording(bool new_recording)
 {
     recording = new_recording;
@@ -156,7 +163,7 @@ void SglCore::draw_ellipse(SglVertex center, float a, float b) {
     a = a * std::sqrt(get_scaling_factor());
     b = b * std::sqrt(get_scaling_factor());
 
-    renderer.draw_ellipse(center, static_cast<int>(a), static_cast<int>(b));
+    renderer.draw_ellipse(center, static_cast<int>(a), static_cast<int>(b), get_matrix());
 }
 
 

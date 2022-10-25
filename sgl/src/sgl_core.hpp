@@ -39,5 +39,6 @@ struct SglCore
         bool recording;
         int32_t current_context;
         sglEErrorCode error;
+        const SglMatrix get_matrix();
         float get_scaling_factor();
 };

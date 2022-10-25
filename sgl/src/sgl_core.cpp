@@ -171,52 +171,6 @@ void SglCore::draw_ellipse(SglVertex center, float a, float b) {
     b = b * std::sqrt(get_scaling_factor());
 
     renderer.draw_ellipse(center, static_cast<int>(a), static_cast<int>(b), contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top());
-    // // SglMatrix mat = get_matrix();
-    // int d_x, d_y, p, x, y, b2, a2;
-    // int x_c_t = static_cast<int>(center.at(0));
-    // int y_c_t = static_cast<int>(center.at(1));
-
-    // x = 0;
-    // y = b;
-    // a2 = a * a;
-    // b2 = b * b;
-    // d_x = 2 * b2 * x;
-    // d_y = 2 * a2 * y;
-    
-    // p = b2 - (a2 * b) + (0.25 * a2);
-    
-    // while (d_x < d_y) {
-    //     SglVertex vert = SglVertex(x, y, z_c, 1.0f);
-    //     SGL_DEBUG_OUT("Vertex is " + std::to_string(vert.at(0)) + " " + std::to_string(vert.at(1)));
-    //     SglVertex vert_t = (contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * vert);
-    //     SGL_DEBUG_OUT("Transformed vertex is " + std::to_string(vert_t.at(0)) + " " + std::to_string(vert_t.at(1)));
-    //     push_sym_vertices(x_c_t, y_c_t, vert_t);
-    //     if (p >= 0) {
-    //         --y;
-    //         d_y -= 2 * a2;
-    //         p -= d_y;
-    //     }
-    //     ++x;
-    //     d_x += 2 * b2;
-    //     p += d_x + b2;
-    // }
-
-    // p = (b2 * ((x + 0.5) * (x + 0.5))) + (a2 * ((y - 1) * (y - 1))) - (a2 * b2);
-    
-    // while (y >= 0) {
-    //     SglVertex vert = SglVertex(x, y, z_c, 1.0f);
-    //     SglVertex vert_t = (contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * vert);
-    //     push_sym_vertices(x_c_t, y_c_t, vert_t);
-    //     if (p <= 0)
-    //     {
-    //         x++;
-    //         d_x += 2 * b2;
-    //         p += d_x;
-    //     }
-    //     --y;
-    //     d_y -= 2 * a2;
-    //     p += a2 - d_y;
-    // }
 }
 
 

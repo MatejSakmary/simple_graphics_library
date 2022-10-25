@@ -119,7 +119,7 @@ void SglCore::push_vertex(SglVertex vertex)
     vertex = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * vertex;
     // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
     vertex = contexts.at(current_context).viewport_mat * vertex;
-    SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview, projection and viewport: \n" + vertex.to_string());
+    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview, projection and viewport: \n" + vertex.to_string());
     renderer.push_vertex(vertex);
 }
 
@@ -130,7 +130,7 @@ void SglCore::draw_circle(SglVertex center, float radius) {
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
     // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
     center = contexts.at(current_context).viewport_mat * center;
-    
+
     renderer.draw_circle(center, radius);
 }
 

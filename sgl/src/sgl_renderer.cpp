@@ -146,6 +146,7 @@ void SglRenderer::draw_circle(const SglVertex & center, float radius) {
     twoY = 2 * radius;
 
     while (x <= y) {
+        // SGL_DEBUG_OUT("[draw_circle] offsets are " + std::to_string(x) + " " + std::to_string(y));
         draw_sym_pixels(x_c, y_c, x, y);
         if (p > 0) {
             p = p - twoY + 2;

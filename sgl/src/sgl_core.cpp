@@ -125,6 +125,12 @@ void SglCore::push_vertex(SglVertex vertex)
 
 void SglCore::draw_circle(SglVertex center, float radius) {
     //add transforms
+    center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
+    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview: \n" + vertex.to_string());
+    center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
+    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
+    center = contexts.at(current_context).viewport_mat * center;
+    
     renderer.draw_circle(center, radius);
 }
 

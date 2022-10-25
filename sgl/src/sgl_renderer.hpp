@@ -25,9 +25,9 @@ struct SglRenderer
     ~SglRenderer();
 
     void push_vertex(const SglVertex & vertex);
-    void draw_circle(const SglVertex & center, float radius);
-    void draw_ellipse(const SglVertex & center, float a, float b);
-    void draw_arc(const SglVertex & center, float radius, float from, float to);
+    void draw_circle(const SglVertex & center, int radius);
+    void draw_ellipse(const SglVertex & center, int a, int b);
+    void draw_arc(const SglVertex & center, int radius, int from, int to);
 
     private:
         friend struct SglCore;

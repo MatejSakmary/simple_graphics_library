@@ -53,9 +53,9 @@ void SglRenderer::draw_line_high(int x0, int y0, int x1, int y1) {
         d_x = -d_x;
     }
 
-    c0 = 2 * d_y;
-    c1 = c0 - 2 * d_x;
-    p = c0 - d_x;
+    c0 = 2 * d_x;
+    c1 = c0 - 2 * d_y;
+    p = c0 - d_y;
 
     state.currentFramebuffer->set_pixel(x0, y0, state.draw_color);
     
@@ -134,7 +134,7 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
     }
 }
 
-void SglRenderer::draw_circle(const SglVertex & center, float radius) {
+void SglRenderer::draw_circle(const SglVertex & center, int radius) {
     int x, y, p, twoX, twoY;
     int x_c = static_cast<int>(center.at(0));
     int y_c = static_cast<int>(center.at(1));
@@ -159,11 +159,11 @@ void SglRenderer::draw_circle(const SglVertex & center, float radius) {
     }
 }
 
-void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b) {
+void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b) {
     // TODO Sakaci
 }
 
-void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to) {
+void SglRenderer::draw_arc(const SglVertex & center, int radius, int from, int to) {
     // TODO Sakaci
 }
 

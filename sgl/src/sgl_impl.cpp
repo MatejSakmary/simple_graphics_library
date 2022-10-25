@@ -174,6 +174,11 @@ void sglVertex2f(float x, float y)
 
 void sglCircle(float x, float y, float z, float radius)
 {
+	if (radius < 0) {
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE); 
+		return;
+	}
+
 	sglBegin(sglEElementType::SGL_POINTS);
 
 	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglCircle()] Ignoring vertex - no active sglBegin() call"); return; }
@@ -184,6 +189,11 @@ void sglCircle(float x, float y, float z, float radius)
 
 void sglEllipse(float x, float y, float z, float a, float b)
 {
+	if ((a < 0) || (b < 0)) {
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE);
+		return;
+	}
+	
 	sglBegin(sglEElementType::SGL_POINTS);
 	
 	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglEllipse()] Ignoring vertex - no active sglBegin() call"); return; }

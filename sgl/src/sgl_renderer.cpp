@@ -129,10 +129,6 @@ void SglRenderer::draw_sym_pixels(int x_c, int y_c, int x, int y) {
     state.currentFramebuffer->set_pixel(x_c + x, y_c - y, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c - x, y_c + y, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c - x, y_c - y, state.draw_color);
-    state.currentFramebuffer->set_pixel(x_c + y, y_c + x, state.draw_color);
-    state.currentFramebuffer->set_pixel(x_c + y, y_c - x, state.draw_color);
-    state.currentFramebuffer->set_pixel(x_c - y, y_c + x, state.draw_color);
-    state.currentFramebuffer->set_pixel(x_c - y, y_c - x, state.draw_color);
 }
 
 void SglRenderer::draw_circle(const SglVertex & center, int radius) {
@@ -149,6 +145,7 @@ void SglRenderer::draw_circle(const SglVertex & center, int radius) {
     while (x <= y) {
         // SGL_DEBUG_OUT("[draw_circle] offsets are " + std::to_string(x) + " " + std::to_string(y));
         draw_sym_pixels(x_c, y_c, x, y);
+        draw_sym_pixels(x_c, y_c, y, x);
         if (p > 0) {
             p = p - twoY + 2;
             twoY -= 2;
@@ -161,7 +158,45 @@ void SglRenderer::draw_circle(const SglVertex & center, int radius) {
 }
 
 void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b) {
-    // TODO Sakaci
+    int d_x, d_y, p, x, y, b2, a2;
+    int x_c = static_cast<int>(center.at(0));
+    int y_c = static_cast<int>(center.at(1));
+    
+    x = 0;
+    y = b;
+    a2 = a * a;
+    b2 = b * b;
+    d_x = 2 * b2 * x;
+    d_y = 2 * a2 * y;
+    
+    p = b2 - (a2 * b) + (0.25 * a2);
+    
+    while (d_x < d_y) {
+        draw_sym_pixels(x_c, y_c, x, y);
+        if (p >= 0) {
+            --y;
+            d_y -= 2 * a2;
+            p -= d_y;
+        }
+        ++x;
+        d_x += 2 * b2;
+        p += d_x + b2;
+    }
+
+    p = (b2 * ((x + 0.5) * (x + 0.5))) + (a2 * ((y - 1) * (y - 1))) - (a2 * b2);
+    
+    while (y >= 0) {
+        draw_sym_pixels(x_c, y_c, x, y);
+        if (p <= 0)
+        {
+            x++;
+            d_x += 2 * b2;
+            p += d_x;
+        }
+        --y;
+        d_y -= 2 * a2;
+        p += a2 - d_y;
+    }
 }
 
 void SglRenderer::draw_arc(const SglVertex & center, int radius, int from, int to) {

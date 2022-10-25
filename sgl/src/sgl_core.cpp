@@ -153,6 +153,9 @@ void SglCore::draw_ellipse(SglVertex center, float a, float b) {
     // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
     center = contexts.at(current_context).viewport_mat * center;
 
+    a = a * std::sqrt(get_scaling_factor());
+    b = b * std::sqrt(get_scaling_factor());
+
     renderer.draw_ellipse(center, static_cast<int>(a), static_cast<int>(b));
 }
 

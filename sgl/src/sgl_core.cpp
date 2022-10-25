@@ -106,7 +106,7 @@ float SglCore::get_scaling_factor() {
     return  mat.at(0,0) * mat.at(1,1) - mat.at(0, 1) * mat.at(1, 0);
 }
 
-const SglMatrix SglCore::get_matrix() {
+SglMatrix SglCore::get_matrix() {
     SglMatrix mat = SglMatrix(contexts.at(current_context).viewport_mat);
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
@@ -137,13 +137,19 @@ void SglCore::push_vertex(SglVertex vertex)
     renderer.push_vertex(vertex);
 }
 
+void SglCore::push_sym_vertices(int x_c, int y_c, SglVertex vert) {
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 2; ++j) {
+            SglVertex a = SglVertex(x_c + (pow(-1, i) * vert.at(0)), y_c + (pow(-1, j) * vert.at(1)), vert.at(2), vert.at(3));
+            renderer.push_vertex(a);
+        }
+    }
+}
+
 void SglCore::draw_circle(SglVertex center, float radius) 
 {
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] Transforming vertex: \n" + vertex.to_string());
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview: \n" + vertex.to_string());
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
     center = contexts.at(current_context).viewport_mat * center;
 
     radius = radius * std::sqrt(get_scaling_factor());
@@ -153,6 +159,10 @@ void SglCore::draw_circle(SglVertex center, float radius)
 
 
 void SglCore::draw_ellipse(SglVertex center, float a, float b) {
+    int x_c = static_cast<int>(center.at(0));
+    int y_c = static_cast<int>(center.at(1));
+    int z_c = static_cast<int>(center.at(2));
+    
     // SGL_DEBUG_OUT("[SglCore::push_vertex()] Transforming vertex: \n" + vertex.to_string());
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
     // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview: \n" + vertex.to_string());
@@ -163,7 +173,53 @@ void SglCore::draw_ellipse(SglVertex center, float a, float b) {
     a = a * std::sqrt(get_scaling_factor());
     b = b * std::sqrt(get_scaling_factor());
 
-    renderer.draw_ellipse(center, static_cast<int>(a), static_cast<int>(b), get_matrix());
+    // renderer.draw_ellipse(center, static_cast<int>(a), static_cast<int>(b), get_matrix());
+    // SglMatrix mat = get_matrix();
+    int d_x, d_y, p, x, y, b2, a2;
+    int x_c_t = static_cast<int>(center.at(0));
+    int y_c_t = static_cast<int>(center.at(1));
+
+    x = 0;
+    y = b;
+    a2 = a * a;
+    b2 = b * b;
+    d_x = 2 * b2 * x;
+    d_y = 2 * a2 * y;
+    
+    p = b2 - (a2 * b) + (0.25 * a2);
+    
+    while (d_x < d_y) {
+        SglVertex vert = SglVertex(x, y, z_c, 1.0f);
+        SGL_DEBUG_OUT("Vertex is " + std::to_string(vert.at(0)) + " " + std::to_string(vert.at(1)));
+        SglVertex vert_t = (contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * vert);
+        SGL_DEBUG_OUT("Transformed vertex is " + std::to_string(vert_t.at(0)) + " " + std::to_string(vert_t.at(1)));
+        push_sym_vertices(x_c_t, y_c_t, vert_t);
+        if (p >= 0) {
+            --y;
+            d_y -= 2 * a2;
+            p -= d_y;
+        }
+        ++x;
+        d_x += 2 * b2;
+        p += d_x + b2;
+    }
+
+    p = (b2 * ((x + 0.5) * (x + 0.5))) + (a2 * ((y - 1) * (y - 1))) - (a2 * b2);
+    
+    while (y >= 0) {
+        SglVertex vert = SglVertex(x, y, z_c, 1.0f);
+        SglVertex vert_t = (contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * vert);
+        push_sym_vertices(x_c_t, y_c_t, vert_t);
+        if (p <= 0)
+        {
+            x++;
+            d_x += 2 * b2;
+            p += d_x;
+        }
+        --y;
+        d_y -= 2 * a2;
+        p += a2 - d_y;
+    }
 }
 
 

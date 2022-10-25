@@ -24,8 +24,8 @@ struct SglCore
     void destroy_context(int32_t context_idx);
     
     void push_vertex(SglVertex vertex);
-    void push_sym_vertices(int x_c, int y_c, int z_c, int x, int y);
-    
+    void push_sym_vertices(int x_c, int y_c, SglVertex vert);
+
     void draw_circle(SglVertex center, float radius);
     void draw_ellipse(SglVertex center, float a, float b);
     void draw_arc(SglVertex center, float radius, float from, float to);
@@ -41,6 +41,6 @@ struct SglCore
         bool recording;
         int32_t current_context;
         sglEErrorCode error;
-        const SglMatrix get_matrix();
+        SglMatrix get_matrix();
         float get_scaling_factor();
 };

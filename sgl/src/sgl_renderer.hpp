@@ -4,6 +4,7 @@
 
 #include "sgl.h"
 #include "sgl_vertex.hpp"
+#include "sgl_matrix.hpp"
 #include "sgl_frambuffer.hpp"
 
 // Forward decl vertex so we can friend it 
@@ -26,7 +27,7 @@ struct SglRenderer
 
     void push_vertex(const SglVertex & vertex);
     void draw_circle(const SglVertex & center, int radius);
-    void draw_ellipse(const SglVertex & center, int a, int b, const SglMatrix & mat);
+    void draw_ellipse(const SglVertex & center, int a, int b, SglMatrix mat);
     void draw_arc(const SglVertex & center, int radius, int from, int to);
 
     private:

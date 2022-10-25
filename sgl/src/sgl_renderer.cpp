@@ -157,11 +157,12 @@ void SglRenderer::draw_circle(const SglVertex & center, int radius) {
     }
 }
 
-void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, const SglMatrix & mat) {
+void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix mat) {
     int d_x, d_y, p, x, y, b2, a2;
     int x_c = static_cast<int>(center.at(0));
     int y_c = static_cast<int>(center.at(1));
-    
+    int z_c = static_cast<int>(center.at(2));
+
     x = 0;
     y = b;
     a2 = a * a;
@@ -172,9 +173,11 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, const Sgl
     p = b2 - (a2 * b) + (0.25 * a2);
     
     while (d_x < d_y) {
-        // const SglVertex vert = SglVertex(x, y, 0.0f, 1.0f);
-        // const SglVertex vert_t = mat * vert;
-        draw_sym_pixels(x_c, y_c, x, y);
+        SglVertex vert = SglVertex(x, y, z_c, 1.0f);
+        SGL_DEBUG_OUT("Vertex is " + std::to_string(vert.at(0)) + " " + std::to_string(vert.at(1)));
+        SglVertex vert_t = (mat * vert);
+        SGL_DEBUG_OUT("Transformed vertex is " + std::to_string(vert_t.at(0)) + " " + std::to_string(vert_t.at(1)));
+        draw_sym_pixels(x_c, y_c, vert_t.at(0), vert_t.at(1));
         if (p >= 0) {
             --y;
             d_y -= 2 * a2;
@@ -188,7 +191,9 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, const Sgl
     p = (b2 * ((x + 0.5) * (x + 0.5))) + (a2 * ((y - 1) * (y - 1))) - (a2 * b2);
     
     while (y >= 0) {
-        draw_sym_pixels(x_c, y_c, x, y);
+        SglVertex vert = SglVertex(x, y, z_c, 1.0f);
+        SglVertex vert_t = (mat * vert);
+        draw_sym_pixels(x_c, y_c, vert_t.at(0), vert_t.at(1));
         if (p <= 0)
         {
             x++;

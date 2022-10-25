@@ -174,7 +174,7 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, const Sgl
     while (d_x < d_y) {
         // const SglVertex vert = SglVertex(x, y, 0.0f, 1.0f);
         // const SglVertex vert_t = mat * vert;
-        draw_sym_pixels(x_c, y_c, vert_t.at(0), vert_t.at(1));
+        draw_sym_pixels(x_c, y_c, x, y);
         if (p >= 0) {
             --y;
             d_y -= 2 * a2;

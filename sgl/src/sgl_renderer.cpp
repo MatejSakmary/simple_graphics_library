@@ -131,14 +131,16 @@ void SglRenderer::draw_sym_pixels(int x_c, int y_c, int x, int y) {
     state.currentFramebuffer->set_pixel(x_c - x, y_c - y, state.draw_color);
 }
 
-void SglRenderer::draw_sym_pixels_rotated(int x_c, int y_c, int x, int y, float sin_a) {
-    int x1, y1, x2, y2;
+void SglRenderer::draw_sym_pixels_rotated(int x_c, int y_c, int x, int y, float sin_a, float cos_a) {
+    int xh, yh, x1, y1, x2, y2;
     for(int i = 0; i < 2; ++i) {
         for(int j = 0; j < 2; ++j) {
-            x1 = x_c + (pow(-1, i)) * x;
-            y1 = y_c + (pow(-1, j)) * y;
-            x2 = x1 - sin_a * y1;
-            y2 = sin_a * x2 + y1;
+            xh = pow(-1, i) * x;
+            yh = pow(-1, j) * y;
+            x1 = xh - sin_a * yh;
+            y1 = sin_a * x1 + yh;
+            x2 = x_c + x1;
+            y2 = y_c + y1;
             state.currentFramebuffer->set_pixel(static_cast<int>(x2), static_cast<int>(y2), state.draw_color);
         }
     }
@@ -176,6 +178,7 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix
     int y_c = static_cast<int>(center.at(1));
     int z_c = static_cast<int>(center.at(2));
 
+    float cos_a = mat.at(0, 0);
     float sin_a = mat.at(0, 1);
 
     x = 0;
@@ -188,7 +191,7 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix
     p = b2 - (a2 * b) + (0.25 * a2);
     
     while (d_x < d_y) {
-        draw_sym_pixels_rotated(x_c, y_c, x, y, sin_a);
+        draw_sym_pixels_rotated(x_c, y_c, x, y, sin_a, cos_a);
         if (p >= 0) {
             --y;
             d_y -= 2 * a2;
@@ -202,7 +205,7 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix
     p = (b2 * ((x + 0.5) * (x + 0.5))) + (a2 * ((y - 1) * (y - 1))) - (a2 * b2);
     
     while (y >= 0) {
-        draw_sym_pixels_rotated(x_c, y_c, x, y, sin_a);
+        draw_sym_pixels_rotated(x_c, y_c, x, y, sin_a, cos_a);
         if (p <= 0)
         {
             x++;

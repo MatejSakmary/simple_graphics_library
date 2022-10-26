@@ -216,7 +216,7 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix
     }
 }
 
-void SglRenderer::draw_arc(const SglVertex & center, int radius, int from, int to) {
+void SglRenderer::draw_arc(const SglVertex & center, int radius, int from, int to, SglMatrix mat) {
     // TODO Sakaci
 
 }

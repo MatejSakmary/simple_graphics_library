@@ -24,7 +24,6 @@ struct SglCore
     void destroy_context(int32_t context_idx);
     
     void push_vertex(SglVertex vertex);
-    void push_sym_vertices(int x_c, int y_c, SglVertex vert, SglMatrix mat);
 
     void draw_circle(SglVertex center, float radius);
     void draw_ellipse(SglVertex center, float a, float b);

@@ -150,11 +150,7 @@ void SglCore::draw_circle(SglVertex center, float radius)
 }
 
 
-void SglCore::draw_ellipse(SglVertex center, float a, float b) {
-    int x_c = static_cast<int>(center.at(0));
-    int y_c = static_cast<int>(center.at(1));
-    int z_c = static_cast<int>(center.at(2));
-    
+void SglCore::draw_ellipse(SglVertex center, float a, float b) {    
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
     center = contexts.at(current_context).viewport_mat * center;
@@ -167,14 +163,11 @@ void SglCore::draw_ellipse(SglVertex center, float a, float b) {
 
 
 void SglCore::draw_arc(SglVertex center, float radius, float from, float to) {
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] Transforming vertex: \n" + vertex.to_string());
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview: \n" + vertex.to_string());
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
     center = contexts.at(current_context).viewport_mat * center;
 
     radius = radius * std::sqrt(get_scaling_factor());
 
-    renderer.draw_arc(center, static_cast<int>(radius), static_cast<int>(from), static_cast<int>(to));
+    renderer.draw_arc(center, static_cast<int>(radius), static_cast<int>(from), static_cast<int>(to), contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top());
 }

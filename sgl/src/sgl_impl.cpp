@@ -204,6 +204,11 @@ void sglEllipse(float x, float y, float z, float a, float b)
 
 void sglArc(float x, float y, float z, float radius, float from, float to)
 {
+	if (radius < 0) {
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE); 
+		return;
+	}
+
 	sglBegin(sglEElementType::SGL_POINTS);
 	
 	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglArc()] Ignoring vertex - no active sglBegin() call"); return; }
@@ -335,7 +340,7 @@ void sglColor3f(float r, float g, float b)
 {
 	if(!check_recording_status("[sglColor3f()]")) { return; }
 	core->renderer.state.draw_color = Pixel{.r = r, .g = g, .b = b};
-	SGL_DEBUG_OUT("[sglColor3f()] changed color to: " + std::to_string(r)+ " " + std::to_string(g) + " " + std::to_string(b));
+	// SGL_DEBUG_OUT("[sglColor3f()] changed color to: " + std::to_string(r)+ " " + std::to_string(g) + " " + std::to_string(b));
 }
 
 void sglAreaMode(sglEAreaMode mode) 

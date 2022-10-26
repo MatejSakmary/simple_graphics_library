@@ -124,6 +124,25 @@ void SglRenderer::draw_line(const SglVertex & start_v, const SglVertex & end_v) 
     }
 }
 
+void SglRenderer::draw_polyline(int x_c, int y_c, int z_c, const SglVertex & start, const SglVertex & end, SglMatrix mat) {
+    int x0 = static_cast<int>(start.at(0));
+    int y0 = static_cast<int>(start.at(1));
+    int x1 = static_cast<int>(end.at(0));
+    int y1 = static_cast<int>(end.at(1));
+    int d_x = abs(x1 - x0);
+    int d_y = abs(y1 - y0);
+
+    if(d_y < d_x) {
+        if (x0 > x1) draw_line_low(x1, y1, x0, y0);
+        else draw_line_low(x0, y0, x1, y1);
+    }
+    else {
+        if(y0 > y1) draw_line_high(x1, y1, x0, y0);
+        else draw_line_high(x0, y0, x1, y1);
+    }
+}
+
+
 void SglRenderer::draw_sym_pixels(int x_c, int y_c, int x, int y) {
     state.currentFramebuffer->set_pixel(x_c + x, y_c + y, state.draw_color);
     state.currentFramebuffer->set_pixel(x_c + x, y_c - y, state.draw_color);
@@ -216,9 +235,34 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix
     }
 }
 
-void SglRenderer::draw_arc(const SglVertex & center, int radius, int from, int to, SglMatrix mat) {
-    // TODO Sakaci
+void SglRenderer::draw_arc(const SglVertex & center, int radius, float from, float to, SglMatrix mat) {
+    float x1, x2, y1, y2, x_c, y_c, z_c;
 
+    float angle = to - from;
+    int N = round(40 * angle / (2 * M_PI));
+    // SGL_DEBUG_OUT("N is " + std::to_string(N));
+    float alpha = angle / N;
+    // SGL_DEBUG_OUT("Angle is " + std::to_string(alpha));
+    float SA = sin(alpha);
+    // SGL_DEBUG_OUT("SA is " + std::to_string(SA));
+
+    x_c = center.at(0);
+    y_c = center.at(1);
+    z_c = center.at(2);
+
+    x1 = radius * cos(from);
+    y1 = radius * sin(from);
+
+    for (int i = 1; i <= N; ++i) {
+        x2 = x1 - SA * y1;
+        y2 = SA * x2 + y1;
+        SglVertex start = SglVertex(x_c + x1, y_c + y1, center.at(2), center.at(3));
+        SglVertex end = SglVertex(x_c + x2, y_c + y2, center.at(2), center.at(3));
+        // draw_polyline(x_c, y_c, z_c, start, end, mat);
+        draw_line(start, end);
+        x1 = x2;
+        y1 = y2;
+    }
 }
 
 void SglRenderer::recording_start()

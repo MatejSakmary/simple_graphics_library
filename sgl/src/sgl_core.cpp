@@ -137,14 +137,6 @@ void SglCore::push_vertex(SglVertex vertex)
     renderer.push_vertex(vertex);
 }
 
-void SglCore::push_sym_vertices(int x_c, int y_c, SglVertex vert) {
-    for (int i = 0; i < 2; ++i) {
-        for (int j = 0; j < 2; ++j) {
-            SglVertex a = SglVertex(x_c + (pow(-1, i) * vert.at(0)), y_c + (pow(-1, j) * vert.at(1)), vert.at(2), vert.at(3));
-            renderer.push_vertex(a);
-        }
-    }
-}
 
 void SglCore::draw_circle(SglVertex center, float radius) 
 {

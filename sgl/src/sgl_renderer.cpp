@@ -271,6 +271,8 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
         // SGL_DEBUG_OUT("END " + std::to_string(end.at(0)) + " " + std::to_string(end.at(1)));
         
         draw_line(mat * start, mat * end);
+
+        start = end;
     }
 }
 

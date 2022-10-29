@@ -265,9 +265,6 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
     SglVertex start = SglVertex(x1, y1, z_c, center.at(3));        
 
     for (int i = 0; i < N; ++i) {
-        x2 = CA * x1 - SA * y1;
-        y2 = SA * x1 + CA * y1;
-
         auto end = rot_mat * start;
         
         // SGL_DEBUG_OUT("START " + std::to_string(start.at(0)) + " " + std::to_string(start.at(1)));

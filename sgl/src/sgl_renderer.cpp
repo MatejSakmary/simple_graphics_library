@@ -235,13 +235,12 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix
     }
 }
 
-void SglRenderer::draw_arc(const SglVertex & center, int radius, float from, float to, SglMatrix mat) {
+void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat) {
     float x1, x2, y1, y2;
     int x_c, y_c, z_c;
     int x11, y11, x22, y22;
 
-    // Check if from is less than to if not fix
-    // SGL_DEBUG_VAR_OUT(radius);
+    // TODO(osakaci) Check if from is less than to if not fix
 
     float angle = to - from;
     // SGL_DEBUG_OUT("Angle is " + std::to_string(angle));
@@ -253,10 +252,6 @@ void SglRenderer::draw_arc(const SglVertex & center, int radius, float from, flo
     float CA = cos(alpha);
     // SGL_DEBUG_OUT("SA is " + std::to_string(SA));
 
-    x_c = static_cast<int>(center.at(0));
-    y_c = static_cast<int>(center.at(1));
-    z_c = static_cast<int>(center.at(2));
-
     x1 = radius * cos(from);
     y1 = radius * sin(from);
 
@@ -264,28 +259,21 @@ void SglRenderer::draw_arc(const SglVertex & center, int radius, float from, flo
         .type = MatrixType::TRANSLATE,
         .x = center.at(0), .y = center.at(1), .z = center.at(2)
     }); 
+    
+    auto rot_mat = SglMatrix({ .type = MatrixType::ROTATE, .x = 0.0f, .y = 0.0f, .z = alpha });
+
+    SglVertex start = SglVertex(x1, y1, z_c, center.at(3));        
+
     for (int i = 0; i < N; ++i) {
         x2 = CA * x1 - SA * y1;
         y2 = SA * x1 + CA * y1;
-        
-        SglVertex start = SglVertex(x1, y1, z_c, center.at(3));        
-        start = mat * start;
-        // x11 = start.at(0) + x_c;
-        // y11 = start.at(1) + y_c;
-        // start = SglVertex(x11, y11, z_c, start.at(3));
-        
-        SglVertex end = SglVertex(x2, y2, z_c, center.at(3));        
-        end = mat * end;
-        // x22 = end.at(0) + x_c;
-        // y22 = end.at(1) + y_c;
-        // end = SglVertex(x22, y22, z_c, end.at(3));
+
+        auto end = rot_mat * start;
         
         // SGL_DEBUG_OUT("START " + std::to_string(start.at(0)) + " " + std::to_string(start.at(1)));
         // SGL_DEBUG_OUT("END " + std::to_string(end.at(0)) + " " + std::to_string(end.at(1)));
         
-        draw_line(start, end);
-        x1 = x2;
-        y1 = y2;
+        draw_line(mat * start, mat * end);
     }
 }
 

@@ -65,7 +65,7 @@ void SglRenderer::draw_line_low(int x0, int y0, int x1, int y1) {
 
     state.currentFramebuffer->set_pixel(x0, y0, state.draw_color);
     
-    for(int i=x0+1; i < x1; ++i) {
+    for(int i=x0+1; i <= x1; ++i) {
         if(p<0) {
             p += c0;
         } else {
@@ -94,7 +94,7 @@ void SglRenderer::draw_line_high(int x0, int y0, int x1, int y1) {
 
     state.currentFramebuffer->set_pixel(x0, y0, state.draw_color);
     
-    for(int i=y0+1; i < y1; ++i) {
+    for(int i=y0+1; i <= y1; ++i) {
         if(p<0) {
             p += c0;
         } else {

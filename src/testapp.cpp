@@ -26,9 +26,9 @@
 #ifdef TEST1
 #define WIDTH 800
 #define HEIGHT 600
-// #define TEST_1A
+#define TEST_1A
 #define TEST_1B
-// #define TEST_1C
+#define TEST_1C
 #endif
 
 #ifdef TEST2
@@ -1105,8 +1105,6 @@ void processInput(GLFWwindow *window)
     if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
         rot += rotstep;
     }
-
-    // sglSetContext(_contexts[5]);
     // sglClearColor(0, 0, 0, 1);
     // sglClear(SGL_COLOR_BUFFER_BIT | SGL_DEPTH_BUFFER_BIT);
     // DrawTestScene2C();

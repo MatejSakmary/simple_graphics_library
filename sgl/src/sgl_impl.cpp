@@ -204,7 +204,7 @@ void sglEllipse(float x, float y, float z, float a, float b)
 
 void sglArc(float x, float y, float z, float radius, float from, float to)
 {
-	if (radius < 0) {
+	if (radius < 0.0f) {
 		core->set_error(sglEErrorCode::SGL_INVALID_VALUE); 
 		return;
 	}

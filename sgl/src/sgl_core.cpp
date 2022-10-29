@@ -163,11 +163,14 @@ void SglCore::draw_ellipse(SglVertex center, float a, float b) {
 
 
 void SglCore::draw_arc(SglVertex center, float radius, float from, float to) {
-    center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
-    center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
-    center = contexts.at(current_context).viewport_mat * center;
+    // center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
+    // center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
+    // center = contexts.at(current_context).viewport_mat * center;
 
-    radius = radius * std::sqrt(get_scaling_factor());
+    // radius = radius * std::sqrt(get_scaling_factor());
 
-    renderer.draw_arc(center, static_cast<int>(radius), from, to, contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top());
+    SglMatrix mat = SglMatrix(contexts.at(current_context).viewport_mat);
+    mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
+    mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
+    renderer.draw_arc(center, radius, from, to, mat);
 }

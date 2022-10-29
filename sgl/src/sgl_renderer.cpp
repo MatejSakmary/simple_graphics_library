@@ -240,9 +240,12 @@ void SglRenderer::draw_arc(const SglVertex & center, int radius, float from, flo
     int x_c, y_c, z_c;
     int x11, y11, x22, y22;
 
+    // Check if from is less than to if not fix
+    // SGL_DEBUG_VAR_OUT(radius);
+
     float angle = to - from;
     // SGL_DEBUG_OUT("Angle is " + std::to_string(angle));
-    int N = round(40 * angle / (2 * M_PI));
+    int N = int((40.0f * angle) / (2.0f * M_PI));
     // SGL_DEBUG_OUT("N is " + std::to_string(N));
     float alpha = angle / N;
     // SGL_DEBUG_OUT("Angle is " + std::to_string(alpha));
@@ -257,24 +260,28 @@ void SglRenderer::draw_arc(const SglVertex & center, int radius, float from, flo
     x1 = radius * cos(from);
     y1 = radius * sin(from);
 
+    mat = mat * SglMatrix({
+        .type = MatrixType::TRANSLATE,
+        .x = center.at(0), .y = center.at(1), .z = center.at(2)
+    }); 
     for (int i = 0; i < N; ++i) {
         x2 = CA * x1 - SA * y1;
         y2 = SA * x1 + CA * y1;
         
         SglVertex start = SglVertex(x1, y1, z_c, center.at(3));        
         start = mat * start;
-        x11 = start.at(0) + x_c;
-        y11 = start.at(1) + y_c;
-        start = SglVertex(x11, y11, z_c, start.at(3));
+        // x11 = start.at(0) + x_c;
+        // y11 = start.at(1) + y_c;
+        // start = SglVertex(x11, y11, z_c, start.at(3));
         
         SglVertex end = SglVertex(x2, y2, z_c, center.at(3));        
         end = mat * end;
-        x22 = end.at(0) + x_c;
-        y22 = end.at(1) + y_c;
-        end = SglVertex(x22, y22, z_c, end.at(3));
+        // x22 = end.at(0) + x_c;
+        // y22 = end.at(1) + y_c;
+        // end = SglVertex(x22, y22, z_c, end.at(3));
         
-        SGL_DEBUG_OUT("START " + std::to_string(start.at(0)) + " " + std::to_string(start.at(1)));
-        SGL_DEBUG_OUT("END " + std::to_string(end.at(0)) + " " + std::to_string(end.at(1)));
+        // SGL_DEBUG_OUT("START " + std::to_string(start.at(0)) + " " + std::to_string(start.at(1)));
+        // SGL_DEBUG_OUT("END " + std::to_string(end.at(0)) + " " + std::to_string(end.at(1)));
         
         draw_line(start, end);
         x1 = x2;

@@ -124,23 +124,23 @@ void SglRenderer::draw_line(const SglVertex & start_v, const SglVertex & end_v) 
     }
 }
 
-void SglRenderer::draw_polyline(int x_c, int y_c, int z_c, const SglVertex & start, const SglVertex & end, SglMatrix mat) {
-    int x0 = static_cast<int>(start.at(0));
-    int y0 = static_cast<int>(start.at(1));
-    int x1 = static_cast<int>(end.at(0));
-    int y1 = static_cast<int>(end.at(1));
-    int d_x = abs(x1 - x0);
-    int d_y = abs(y1 - y0);
+// void SglRenderer::draw_polyline(int x_c, int y_c, int z_c, const SglVertex & start, const SglVertex & end, SglMatrix mat) {
+//     int x0 = static_cast<int>(start.at(0));
+//     int y0 = static_cast<int>(start.at(1));
+//     int x1 = static_cast<int>(end.at(0));
+//     int y1 = static_cast<int>(end.at(1));
+//     int d_x = abs(x1 - x0);
+//     int d_y = abs(y1 - y0);
 
-    if(d_y < d_x) {
-        if (x0 > x1) draw_line_low(x1, y1, x0, y0);
-        else draw_line_low(x0, y0, x1, y1);
-    }
-    else {
-        if(y0 > y1) draw_line_high(x1, y1, x0, y0);
-        else draw_line_high(x0, y0, x1, y1);
-    }
-}
+//     if(d_y < d_x) {
+//         if (x0 > x1) draw_line_low(x1, y1, x0, y0);
+//         else draw_line_low(x0, y0, x1, y1);
+//     }
+//     else {
+//         if(y0 > y1) draw_line_high(x1, y1, x0, y0);
+//         else draw_line_high(x0, y0, x1, y1);
+//     }
+// }
 
 
 void SglRenderer::draw_sym_pixels(int x_c, int y_c, int x, int y) {
@@ -195,8 +195,8 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix
     int y_c = static_cast<int>(center.at(1));
     int z_c = static_cast<int>(center.at(2));
 
-    float cos_a = mat.at(0, 0);
-    float sin_a = mat.at(0, 1);
+    // float cos_a = mat.at(0, 0);
+    // float sin_a = mat.at(0, 1);
 
     x = 0;
     y = b;
@@ -235,31 +235,39 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix
     }
 }
 
-void SglRenderer::draw_arc(const SglVertex & center, int radius, float from, float to, SglMatrix mat) {
-    float x1, x2, y1, y2, x_c, y_c, z_c;
+void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat) {
+    double x1, x2, y1, y2;
+    int x_c, y_c, z_c;
 
-    float angle = to - from;
-    int N = round(40 * angle / (2 * M_PI));
+    double angle = to - from;
+    // SGL_DEBUG_OUT("Angle is " + std::to_string(angle));
+    int N = ceil(40 * angle / (2 * M_PI));
     // SGL_DEBUG_OUT("N is " + std::to_string(N));
-    float alpha = angle / N;
+    double alpha = angle / N;
     // SGL_DEBUG_OUT("Angle is " + std::to_string(alpha));
-    float SA = sin(alpha);
+    double SA = sin(alpha);
+    double CA = cos(alpha);
     // SGL_DEBUG_OUT("SA is " + std::to_string(SA));
 
-    x_c = center.at(0);
-    y_c = center.at(1);
-    z_c = center.at(2);
-
+    x_c = static_cast<int>(center.at(0));
+    y_c = static_cast<int>(center.at(1));
+    z_c = static_cast<int>(center.at(2));
+    
     x1 = radius * cos(from);
     y1 = radius * sin(from);
 
     for (int i = 1; i <= N; ++i) {
-        x2 = x1 - SA * y1;
-        y2 = SA * x2 + y1;
-        SglVertex start = SglVertex(x_c + x1, y_c + y1, center.at(2), center.at(3));
-        SglVertex end = SglVertex(x_c + x2, y_c + y2, center.at(2), center.at(3));
-        // draw_polyline(x_c, y_c, z_c, start, end, mat);
-        draw_line(start, end);
+        x2 = CA * x1 - SA * y1;
+        y2 = SA * x1 + CA * y1;
+        SglVertex start = SglVertex(x1, y1, z_c, center.at(3));
+        SglVertex end = SglVertex(x2, y2, z_c, center.at(3));        
+        start = mat * start;
+        end = mat * end;
+        SglVertex start1 = SglVertex(start.at(0) + x_c, start.at(1) + y_c, start.at(2), start.at(3));
+        SglVertex end1 = SglVertex(end.at(0) + x_c, end.at(1) + y_c, end.at(2), end.at(3));
+        SGL_DEBUG_OUT("START " + std::to_string(start1.at(0)) + " " + std::to_string(start1.at(1)));
+        SGL_DEBUG_OUT("END " + std::to_string(end1.at(0)) + " " + std::to_string(end1.at(1)));
+        draw_line(start1, end1);
         x1 = x2;
         y1 = y2;
     }

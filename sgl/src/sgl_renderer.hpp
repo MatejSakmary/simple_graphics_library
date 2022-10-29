@@ -28,7 +28,7 @@ struct SglRenderer
     void push_vertex(const SglVertex & vertex);
     void draw_circle(const SglVertex & center, int radius);
     void draw_ellipse(const SglVertex & center, int a, int b, SglMatrix mat);
-    void draw_arc(const SglVertex & center, int radius, float from, float to, SglMatrix mat);
+    void draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat);
 
     private:
         friend struct SglCore;
@@ -37,7 +37,7 @@ struct SglRenderer
         void draw_line_low(int x0, int y0, int x1, int y1);
         void draw_line_high(int x0, int y0, int x1, int y1);
         void draw_line(const SglVertex & start_v, const SglVertex & end_v);
-        void draw_polyline(int x_c, int y_c, int z_c, const SglVertex & start, const SglVertex & end, SglMatrix mat);
+        // void draw_polyline(int x_c, int y_c, int z_c, const SglVertex & start, const SglVertex & end, SglMatrix mat);
         void draw_sym_pixels(int x_c, int y_c, int x, int y);
         void draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int y, SglMatrix mat);
 

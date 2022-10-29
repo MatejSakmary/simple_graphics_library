@@ -235,39 +235,48 @@ void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix
     }
 }
 
-void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat) {
-    double x1, x2, y1, y2;
+void SglRenderer::draw_arc(const SglVertex & center, int radius, float from, float to, SglMatrix mat) {
+    float x1, x2, y1, y2;
     int x_c, y_c, z_c;
+    int x11, y11, x22, y22;
 
-    double angle = to - from;
+    float angle = to - from;
     // SGL_DEBUG_OUT("Angle is " + std::to_string(angle));
-    int N = ceil(40 * angle / (2 * M_PI));
+    int N = round(40 * angle / (2 * M_PI));
     // SGL_DEBUG_OUT("N is " + std::to_string(N));
-    double alpha = angle / N;
+    float alpha = angle / N;
     // SGL_DEBUG_OUT("Angle is " + std::to_string(alpha));
-    double SA = sin(alpha);
-    double CA = cos(alpha);
+    float SA = sin(alpha);
+    float CA = cos(alpha);
     // SGL_DEBUG_OUT("SA is " + std::to_string(SA));
 
     x_c = static_cast<int>(center.at(0));
     y_c = static_cast<int>(center.at(1));
     z_c = static_cast<int>(center.at(2));
-    
+
     x1 = radius * cos(from);
     y1 = radius * sin(from);
 
-    for (int i = 1; i <= N; ++i) {
+    for (int i = 0; i < N; ++i) {
         x2 = CA * x1 - SA * y1;
         y2 = SA * x1 + CA * y1;
-        SglVertex start = SglVertex(x1, y1, z_c, center.at(3));
-        SglVertex end = SglVertex(x2, y2, z_c, center.at(3));        
+        
+        SglVertex start = SglVertex(x1, y1, z_c, center.at(3));        
         start = mat * start;
+        x11 = start.at(0) + x_c;
+        y11 = start.at(1) + y_c;
+        start = SglVertex(x11, y11, z_c, start.at(3));
+        
+        SglVertex end = SglVertex(x2, y2, z_c, center.at(3));        
         end = mat * end;
-        SglVertex start1 = SglVertex(start.at(0) + x_c, start.at(1) + y_c, start.at(2), start.at(3));
-        SglVertex end1 = SglVertex(end.at(0) + x_c, end.at(1) + y_c, end.at(2), end.at(3));
-        SGL_DEBUG_OUT("START " + std::to_string(start1.at(0)) + " " + std::to_string(start1.at(1)));
-        SGL_DEBUG_OUT("END " + std::to_string(end1.at(0)) + " " + std::to_string(end1.at(1)));
-        draw_line(start1, end1);
+        x22 = end.at(0) + x_c;
+        y22 = end.at(1) + y_c;
+        end = SglVertex(x22, y22, z_c, end.at(3));
+        
+        SGL_DEBUG_OUT("START " + std::to_string(start.at(0)) + " " + std::to_string(start.at(1)));
+        SGL_DEBUG_OUT("END " + std::to_string(end.at(0)) + " " + std::to_string(end.at(1)));
+        
+        draw_line(start, end);
         x1 = x2;
         y1 = y2;
     }

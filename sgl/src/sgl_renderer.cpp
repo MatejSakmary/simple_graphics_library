@@ -15,12 +15,17 @@ SglRenderer::~SglRenderer() {}
 void SglRenderer::push_vertex(const SglVertex & vertex)
 {
 
-    if (state.element_type_mode == SGL_POINTS || state.element_type_mode == SGL_POLYGON) {
+    if (state.element_type_mode == SGL_POINTS) {
         for(int i = - static_cast<int>(state.point_size / 2); i <= static_cast<int>(state.point_size / 2); ++i) {
             for(int j = - static_cast<int>(state.point_size / 2); j <= static_cast<int>(state.point_size / 2); ++j) {
                 state.currentFramebuffer->set_pixel(static_cast<int>(vertex.at(0) + i), static_cast<int>(vertex.at(1) + j), state.draw_color);
             }
         }
+    }
+
+    if (state.area_mode == sglEAreaMode::SGL_FILL && state.element_type_mode == sglEElementType::SGL_POLYGON)
+    {
+        vertices.push_back(vertex);
     }
     
     vertices.push_back(vertex);
@@ -262,6 +267,34 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
     }
 }
 
+void SglRenderer::draw_fill_object()
+{
+    struct SglEdge
+    {
+        std::pair<uint, uint> from;
+        std::pair<uint, uint> to;
+    };
+
+    std::vector<SglEdge> edges(vertices.size());
+
+    // NOTE(msakmary) framebuffer (0,0) is bottom left corner
+    auto insert_processed_edge = [&edges](const SglVertex & from, const SglVertex & to, const size_t & i) -> bool
+    {
+        // 2) remove horizontal edges
+        if(from.at(1) == to.at(1)) { return false; }
+        // 1) orient edges top - bottom and shorten them by one pixel
+        if(from.at(1) < to.at(1)) { edges.at(i) = {.from{to.at(0), to.at(1) - 1.0f}, .to{from.at(0), from.at(1)}}; }
+        else                      { edges.at(i) = {.from{from.at(0), from.at(1) - 1.0f}, .to{to.at(0), to.at(1)}}; } 
+        return true;
+    };
+    // each edge consists of two vertices so we start at one so we already have two vertices at the start of the loop
+    for(size_t i = 1, edge_idx = 0; i < vertices.size(); i++)
+    {
+        if (insert_processed_edge(vertices.at(i - 1), vertices.at(i), edge_idx)) { i++;}
+    }
+    // 4) find Y_max, Y_min
+}
+
 void SglRenderer::recording_start()
 {
 }
@@ -270,6 +303,11 @@ void SglRenderer::recording_end()
 {
     if(state.element_type_mode == SGL_LINE_LOOP && vertices.size() == 2) {
         draw_line(vertices[0], vertices[1]);
+    }
+    // TODO(msakmary) Add other objects which are allowed with SGL_FILL - triangle, arc etc...
+    if(state.element_type_mode == SGL_POLYGON && state.area_mode == SGL_FILL)
+    {
+        draw_fill_object();
     }
     vertices.clear();
 }

@@ -6,7 +6,7 @@
 
 #include "sgl.h"
 #include "sgl_context.hpp"
-#include "sgl_frambuffer.hpp"
+#include "sgl_framebuffer.hpp"
 #include "sgl_vertex.hpp"
 #include "sgl_renderer.hpp"
 

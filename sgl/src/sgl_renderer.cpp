@@ -415,7 +415,7 @@ void SglRenderer::draw_fill_object()
         {
             auto & start = edges.at(*(it++));
             auto & end = edges.at(*(it++));
-            SGL_DEBUG_OUT("Filling row of pixels at " + std::to_string(y) + " bounded (" + std::to_string(start.upper_x) + "," + std::to_string(end.upper_x) + ")"); 
+            // SGL_DEBUG_OUT("Filling row of pixels at " + std::to_string(y) + " bounded (" + std::to_string(start.upper_x) + "," + std::to_string(end.upper_x) + ")"); 
             for(uint x = static_cast<uint>(start.upper_x); x <= static_cast<uint>(end.upper_x); x++) 
             {
                 this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);

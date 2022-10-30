@@ -5,7 +5,7 @@
 #include "sgl.h"
 #include "sgl_vertex.hpp"
 #include "sgl_matrix.hpp"
-#include "sgl_frambuffer.hpp"
+#include "sgl_framebuffer.hpp"
 
 // Forward decl vertex so we can friend it 
 struct SglCore;
@@ -41,6 +41,7 @@ struct SglRenderer
         void draw_sym_pixels(int x_c, int y_c, int x, int y);
         void draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int y, SglMatrix mat);
 
+        // Reads *vertices* and draws fill of the polygon specified by vertices
         void draw_fill_object();
         void recording_start();
         void recording_end();

@@ -375,9 +375,29 @@ void sglPointSize(float size)
 	core->renderer.state.point_size = size;
 }
 
-void sglEnable(sglEEnableFlags cap) { cap=SGL_DEPTH_TEST; }
+void sglEnable(sglEEnableFlags cap) 
+{
+	if(!check_recording_status("[sglEnable()]")) { return; }
+	if((cap != sglEEnableFlags::SGL_DEPTH_TEST) && (cap != sglEEnableFlags::SGL_NO_DEPTH_TEST))
+	{
+		SGL_DEBUG_OUT("[sglEnable()] Invalid enum");
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
+	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_DEPTH_TEST; 
+}
 
-void sglDisable(sglEEnableFlags cap) { cap=SGL_NO_DEPTH_TEST; }
+void sglDisable(sglEEnableFlags cap) 
+{
+	if(!check_recording_status("[sglDisable()]")) { return; }
+	if((cap != sglEEnableFlags::SGL_DEPTH_TEST) && (cap != sglEEnableFlags::SGL_NO_DEPTH_TEST))
+	{
+		SGL_DEBUG_OUT("[sglDisble()] Invalid enum");
+		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
+		return;
+	}
+	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_NO_DEPTH_TEST; 
+}
 
 //---------------------------------------------------------------------------
 // RayTracing oriented functions

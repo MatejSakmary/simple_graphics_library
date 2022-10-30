@@ -163,7 +163,7 @@ void SglRenderer::draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int 
     }
 }
 
-void SglRenderer::draw_circle(const SglVertex & center, int radius) {
+void SglRenderer::draw_circle(const SglVertex & center, float radius) {
     int x, y, p, twoX, twoY;
     int x_c = static_cast<int>(center.at(0));
     int y_c = static_cast<int>(center.at(1));
@@ -189,49 +189,37 @@ void SglRenderer::draw_circle(const SglVertex & center, int radius) {
     }
 }
 
-void SglRenderer::draw_ellipse(const SglVertex & center, int a, int b, SglMatrix mat) {
-    int d_x, d_y, p, x, y, b2, a2;
-    int x_c = static_cast<int>(center.at(0));
-    int y_c = static_cast<int>(center.at(1));
-    int z_c = static_cast<int>(center.at(2));
+void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMatrix mat) {
+    float x1, x2, y1, y2;
 
-    // float cos_a = mat.at(0, 0);
-    // float sin_a = mat.at(0, 1);
+    int N = 40;
+    float alpha = 2 * M_PI / N;
 
-    x = 0;
-    y = b;
-    a2 = a * a;
-    b2 = b * b;
-    d_x = 2 * b2 * x;
-    d_y = 2 * a2 * y;
-    
-    p = b2 - (a2 * b) + (0.25 * a2);
-    
-    while (d_x < d_y) {
-        draw_sym_pixels_rotated(x_c, y_c, z_c, x, y, mat);
-        if (p >= 0) {
-            --y;
-            d_y -= 2 * a2;
-            p -= d_y;
-        }
-        ++x;
-        d_x += 2 * b2;
-        p += d_x + b2;
-    }
+    x1 = a;
+    y1 = 0;
 
-    p = (b2 * ((x + 0.5) * (x + 0.5))) + (a2 * ((y - 1) * (y - 1))) - (a2 * b2);
+    mat = mat * SglMatrix({
+        .type = MatrixType::TRANSLATE,
+        .x = center.at(0), .y = center.at(1), .z = center.at(2)
+    });
     
-    while (y >= 0) {
-        draw_sym_pixels_rotated(x_c, y_c, z_c, x, y, mat);
-        if (p <= 0)
-        {
-            x++;
-            d_x += 2 * b2;
-            p += d_x;
-        }
-        --y;
-        d_y -= 2 * a2;
-        p += a2 - d_y;
+    auto rot_mat = SglMatrix({ .type = MatrixType::ROTATE, .x = 0.0f, .y = 0.0f, .z = alpha });
+
+
+    for (int i = 1; i <= N; ++i) {      
+        x2 = a * cos(i * alpha);
+        y2 = b * sin(i * alpha);
+
+        SglVertex start = SglVertex(x1, y1, center.at(2), center.at(3));  
+        SglVertex end = SglVertex(x2, y2, center.at(2), center.at(3));
+
+        // SGL_DEBUG_OUT("START " + std::to_string(start.at(0)) + " " + std::to_string(start.at(1)));
+        // SGL_DEBUG_OUT("END " + std::to_string(end.at(0)) + " " + std::to_string(end.at(1)));
+        
+        draw_line(mat * start, mat * end);
+
+        x1 = x2;
+        y1 = y2;
     }
 }
 
@@ -239,8 +227,6 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
     float x1, x2, y1, y2;
     int x_c, y_c, z_c;
     int x11, y11, x22, y22;
-
-    // TODO(osakaci) Check if from is less than to if not fix
 
     float angle = to - from;
     // SGL_DEBUG_OUT("Angle is " + std::to_string(angle));

@@ -9,16 +9,6 @@ SglFramebuffer::SglFramebuffer(uint32_t width, uint32_t height) :
 SglFramebuffer::~SglFramebuffer()
 {}
 
-Pixel SglFramebuffer::get_pixel(uint32_t x, uint32_t y)
-{
-    return pixels.at(y * width + x);
-}
-
-void SglFramebuffer::set_pixel(uint32_t x, uint32_t y, const Pixel & pixel)
-{
-    pixels.at(y * width + x) = pixel;
-}
-
 void SglFramebuffer::clear_framebuffer(const Pixel & clear_color)
 {
     for(auto & pixel : pixels) { pixel = clear_color; }
@@ -26,4 +16,13 @@ void SglFramebuffer::clear_framebuffer(const Pixel & clear_color)
 
 float* SglFramebuffer::get_framebuffer_pointer() {
     return reinterpret_cast<float*>(pixels.data());
+}
+
+uint32_t SglFramebuffer::get_height() const
+{
+    return height;
+}
+uint32_t SglFramebuffer::get_width() const
+{
+    return width;
 }

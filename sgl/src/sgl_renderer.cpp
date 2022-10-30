@@ -1,4 +1,7 @@
 #include "sgl_renderer.hpp"
+#include <algorithm>
+#include <list>
+#include <numeric>
 
 SglRenderer::SglRenderer() : 
     state{
@@ -26,6 +29,7 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
     if (state.area_mode == sglEAreaMode::SGL_FILL && state.element_type_mode == sglEElementType::SGL_POLYGON)
     {
         vertices.push_back(vertex);
+        return;
     }
     
     vertices.push_back(vertex);
@@ -271,28 +275,170 @@ void SglRenderer::draw_fill_object()
 {
     struct SglEdge
     {
+        // each edge is oriented in such a way so that *from* is the upper points
+        // and *to* is the lower point (from.second is always bigger than to.second)
+        // TODO(msakmary) remove x coordinates from *from* and *to* they are not needed
         std::pair<uint, uint> from;
         std::pair<uint, uint> to;
+        float upper_x;
+        float step;
     };
 
-    std::vector<SglEdge> edges(vertices.size());
+    std::vector<SglEdge> edges;
+    edges.reserve(vertices.size());
+    // vectors of indices into edges
+    std::list<uint> active_edges;
+    std::list<uint> inactive_edges;
 
     // NOTE(msakmary) framebuffer (0,0) is bottom left corner
-    auto insert_processed_edge = [&edges](const SglVertex & from, const SglVertex & to, const size_t & i) -> bool
+    auto insert_processed_edge = [&edges](const SglVertex & from, const SglVertex & to) -> bool
     {
         // 2) remove horizontal edges
         if(from.at(1) == to.at(1)) { return false; }
-        // 1) orient edges top - bottom and shorten them by one pixel
-        if(from.at(1) < to.at(1)) { edges.at(i) = {.from{to.at(0), to.at(1) - 1.0f}, .to{from.at(0), from.at(1)}}; }
-        else                      { edges.at(i) = {.from{from.at(0), from.at(1) - 1.0f}, .to{to.at(0), to.at(1)}}; } 
+        // 1) orient edges top - bottom and shorten them by one pixel (this is in to.at(1) + 1.0f)
+        if(from.at(1) < to.at(1)) 
+        { 
+            edges.emplace_back(SglEdge{
+                .from{to.at(0), to.at(1)},
+                .to{from.at(0), from.at(1) + 1.0f}
+            });
+        }
+        else
+        {
+            edges.emplace_back(SglEdge{
+                .from{from.at(0), from.at(1)},
+                .to{to.at(0), to.at(1) + 1.0f}
+            });
+        } 
+        // x_step = (x_to - x_from) / (y_to - y_from)
+        auto & curr_edge = edges.back();
+        curr_edge.step = (static_cast<float>(curr_edge.to.first) - static_cast<float>(curr_edge.from.first)) / 
+                         (static_cast<float>(curr_edge.to.second + 1.0f) - static_cast<float>(curr_edge.from.second));
+        curr_edge.upper_x = curr_edge.from.first;
         return true;
     };
+
+    // add the first vertex again into vertices - this is because we need to add an edge connecting the
+    // last vertex to the first vertex and this makes it a simple forloop later
+    vertices.push_back(vertices.at(0));
     // each edge consists of two vertices so we start at one so we already have two vertices at the start of the loop
-    for(size_t i = 1, edge_idx = 0; i < vertices.size(); i++)
+    for(size_t i = 1; i < vertices.size(); i++)
     {
-        if (insert_processed_edge(vertices.at(i - 1), vertices.at(i), edge_idx)) { i++;}
+        insert_processed_edge(vertices.at(i - 1), vertices.at(i));
     }
-    // 4) find Y_max, Y_min
+
+    // sort inactive edges by y_upper so that later I can stop inactive checking early
+    std::sort(edges.begin(), edges.end(), [](const SglEdge & first, const SglEdge & second) -> bool
+        { return first.from.second > second.from.second; });
+
+    // fill inactive edges with indices
+    inactive_edges.resize(edges.size());
+    std::iota(inactive_edges.begin(), inactive_edges.end(), 0);
+
+    // check inactive edges and add new active edges if there are some
+    auto check_inactive_edges = [&edges, &inactive_edges, &active_edges](uint y){
+        std::vector<uint> to_remove_edges;
+        for(const auto & edge : inactive_edges)
+        {
+            // if the edge start is equal to y we hit it and we should 
+            // move it to the active lists 
+            if(edges.at(edge).from.second == y) 
+            { 
+                SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is hit at y: " + std::to_string(y) + " adding to active");
+                active_edges.push_back(edge);
+                to_remove_edges.push_back(edge);
+            }
+        }
+        std::for_each(to_remove_edges.begin(), to_remove_edges.end(), [&inactive_edges](const uint remove_edge) { inactive_edges.remove(remove_edge); });
+    };
+
+    // check if any active edge is done processing and should be removed
+    auto check_active_edges = [&edges, &active_edges](uint y){
+        std::vector<uint> to_remove_edges;
+        for(const auto & edge : active_edges)
+        {
+            // if the edge start is equal to y we hit it and we should 
+            // move it to the active lists 
+            if(y < edges.at(edge).to.second) 
+            { 
+                SGL_DEBUG_VAR_OUT(edge);
+                SGL_DEBUG_VAR_OUT(edges.at(edge).to.second);
+                SGL_DEBUG_VAR_OUT(y);
+                SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is finished at y: " + std::to_string(y) + " deleting from active");
+                to_remove_edges.push_back(edge);
+            }
+        }
+        std::for_each(to_remove_edges.begin(), to_remove_edges.end(), [&active_edges](const uint remove_edge) { active_edges.remove(remove_edge); });
+    };
+
+    // sort active edges by x intersection
+    auto shake_sort_active_edges = [&edges, &active_edges](){
+        // cocktail sort copied from https://www.geeksforgeeks.org/cocktail-sort/ and modified for lists using iterators
+        bool swapped = true;
+        int start = 0;
+ 
+        while (swapped) {
+            swapped = false;
+ 
+            auto one_before_end_it = --active_edges.end();
+            for (auto it = active_edges.begin(); it != one_before_end_it; ++it) 
+            {
+                // list iterators don't have + operator defined thus we must only use ++ or -- operations
+                // which would modify the current iterator and the forloop condition would then cause it to
+                // increase/decrease twice. So we need to create a copy of the existing iterator and 
+                // move that copy to access next element
+
+                // TODO(msakmary) This is very cursed, improve if there is time
+                auto it_ = it;
+                if (edges.at(*it).upper_x > edges.at(*(++it_)).upper_x) 
+                {
+                    std::swap(*it, *it_);
+                    swapped = true;
+                }
+            }
+ 
+            if (!swapped){ break; }
+            swapped = false;
+ 
+            for (auto it = --active_edges.end(); it != active_edges.begin(); --it) 
+            {
+                auto it_ = it;
+                // TODO(msakmary) This is very cursed, improve if there is time
+                if (edges.at(*(--it_)).upper_x > edges.at(*it).upper_x) 
+                    std::swap(*it, *it_);
+                    swapped = true;
+            }
+        }
+    };
+
+    auto draw_active_edges = [this, &edges, &active_edges](uint y){
+        for(auto it = active_edges.begin(); it != active_edges.end(); )
+        {
+            auto & start = edges.at(*(it++));
+            auto & end = edges.at(*(it++));
+            for(uint x = static_cast<uint>(start.upper_x); x < static_cast<uint>(end.upper_x); x++) 
+            {
+                this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
+            }
+            start.upper_x -= start.step;
+            end.upper_x -= end.step;
+        }
+    };
+
+    // TODO(msakmary) Add Bounding box to polygon so that I don't iterate over the entire screen
+    for(int y = state.currentFramebuffer->get_height(); y >= 0 ; y--)
+    {
+        // add hit inactive edges to active list (when y == edge.from.y)
+        check_inactive_edges(y);
+        // remove processed edges from active list (when y < edge.to.y)
+        check_active_edges(y);
+        // sort based on x intersections
+        shake_sort_active_edges();
+
+        //draw active edges + update x value
+        draw_active_edges(y);
+    }
+    vertices.clear();
 }
 
 void SglRenderer::recording_start()

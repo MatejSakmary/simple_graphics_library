@@ -41,6 +41,7 @@ struct SglRenderer
         void draw_sym_pixels(int x_c, int y_c, int x, int y);
         void draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int y, SglMatrix mat);
 
+        void draw_fill_object();
         void recording_start();
         void recording_end();
 };

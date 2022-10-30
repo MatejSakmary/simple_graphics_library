@@ -127,13 +127,11 @@ auto SglCore::get_recording() -> bool
 
 void SglCore::push_vertex(SglVertex vertex)
 {
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] Transforming vertex: \n" + vertex.to_string());
     vertex = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * vertex;
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview: \n" + vertex.to_string());
     vertex = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * vertex;
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview and projection: \n" + vertex.to_string());
+    vertex.persp_division();
     vertex = contexts.at(current_context).viewport_mat * vertex;
-    // SGL_DEBUG_OUT("[SglCore::push_vertex()] vertex transformed by modelview, projection and viewport: \n" + vertex.to_string());
+
     renderer.push_vertex(vertex);
 }
 

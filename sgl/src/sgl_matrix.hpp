@@ -14,6 +14,7 @@ enum MatrixType
     TRANSLATE,
     ROTATE,
     ORTHOGRAPHIC,
+    PERSPECTIVE,
     VIEWPORT
 };
 

@@ -45,7 +45,9 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
         vertices.erase(vertices.begin());
     }
     
-    else if ((state.element_type_mode == SGL_LINE_LOOP) && (vertices.size() >= 2)) {
+    else if (((state.element_type_mode == SGL_LINE_LOOP) || 
+              (state.element_type_mode == SGL_POLYGON && state.area_mode == SGL_LINE)) &&
+            (vertices.size() >= 2)) {
         if(vertices.size() == 2) {
             draw_line(vertices[0], vertices[1]);
         }
@@ -313,7 +315,7 @@ void SglRenderer::draw_fill_object()
         // x_step = (x_to - x_from) / (y_to - y_from)
         auto & curr_edge = edges.back();
         curr_edge.step = (static_cast<float>(curr_edge.to.first) - static_cast<float>(curr_edge.from.first)) / 
-                         (static_cast<float>(curr_edge.to.second + 1.0f) - static_cast<float>(curr_edge.from.second));
+                         (static_cast<float>(curr_edge.to.second - 1.0f) - static_cast<float>(curr_edge.from.second));
         curr_edge.upper_x = curr_edge.from.first;
         return true;
     };
@@ -361,9 +363,6 @@ void SglRenderer::draw_fill_object()
             // move it to the active lists 
             if(y < edges.at(edge).to.second) 
             { 
-                SGL_DEBUG_VAR_OUT(edge);
-                SGL_DEBUG_VAR_OUT(edges.at(edge).to.second);
-                SGL_DEBUG_VAR_OUT(y);
                 SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is finished at y: " + std::to_string(y) + " deleting from active");
                 to_remove_edges.push_back(edge);
             }
@@ -416,7 +415,8 @@ void SglRenderer::draw_fill_object()
         {
             auto & start = edges.at(*(it++));
             auto & end = edges.at(*(it++));
-            for(uint x = static_cast<uint>(start.upper_x); x < static_cast<uint>(end.upper_x); x++) 
+            SGL_DEBUG_OUT("Filling row of pixels at " + std::to_string(y) + " bounded (" + std::to_string(start.upper_x) + "," + std::to_string(end.upper_x) + ")"); 
+            for(uint x = static_cast<uint>(start.upper_x); x <= static_cast<uint>(end.upper_x); x++) 
             {
                 this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
             }

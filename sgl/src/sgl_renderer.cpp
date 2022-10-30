@@ -280,10 +280,14 @@ void SglRenderer::draw_fill_object()
         // each edge is oriented in such a way so that *from* is the upper points
         // and *to* is the lower point (from.second is always bigger than to.second)
         // TODO(msakmary) remove x coordinates from *from* and *to* they are not needed
-        std::pair<uint, uint> from;
-        std::pair<uint, uint> to;
+        // std::pair<uint, uint> from;
+        // std::pair<uint, uint> to;
+        uint from_y;
+        uint to_y;
         float upper_x;
-        float step;
+        float upper_z;
+        float step_x;
+        float step_z;
     };
 
     std::vector<SglEdge> edges;
@@ -301,22 +305,32 @@ void SglRenderer::draw_fill_object()
         if(from.at(1) < to.at(1)) 
         { 
             edges.emplace_back(SglEdge{
-                .from{to.at(0), to.at(1)},
-                .to{from.at(0), from.at(1) + 1.0f}
+                .from_y  = static_cast<uint>(to.at(1)),
+                .to_y    = static_cast<uint>(from.at(1) + 1.0f),
+                .upper_x = to.at(0),
+                .upper_z = to.at(2),
+                // x_step = (x_from - x_to) / (y_from - y_to)
+                .step_x  = (from.at(0) - to.at(0)) / ((from.at(1)) - to.at(1)),
+                // x_step = (z_from - z_to) / (y_from - y_to)
+                .step_z  = (from.at(2) - to.at(2)) / ((from.at(1)) - to.at(1))
             });
+            // curr_edge.step_x = (static_cast<float>(curr_edge.to.first) - static_cast<float>(curr_edge.from.first)) / 
+            //                    (static_cast<float>(curr_edge.to.second - 1.0f) - static_cast<float>(curr_edge.from.second));
+            // curr_edge.upper_x = curr_edge.from.first;
         }
         else
         {
             edges.emplace_back(SglEdge{
-                .from{from.at(0), from.at(1)},
-                .to{to.at(0), to.at(1) + 1.0f}
+                .from_y  = static_cast<uint>(from.at(1)),
+                .to_y    = static_cast<uint>(to.at(1) + 1.0f),
+                .upper_x = from.at(0),
+                .upper_z = from.at(2),
+                // x_step = (x_to - x_from) / (y_to - y_from)
+                .step_x  = (to.at(0) - from.at(0)) / ((to.at(1)) - from.at(1)),
+                // x_step = (z_to - z_from) / (y_to - y_from)
+                .step_z  = (to.at(2) - from.at(2)) / ((to.at(1)) - from.at(1))
             });
         } 
-        // x_step = (x_to - x_from) / (y_to - y_from)
-        auto & curr_edge = edges.back();
-        curr_edge.step = (static_cast<float>(curr_edge.to.first) - static_cast<float>(curr_edge.from.first)) / 
-                         (static_cast<float>(curr_edge.to.second - 1.0f) - static_cast<float>(curr_edge.from.second));
-        curr_edge.upper_x = curr_edge.from.first;
         return true;
     };
 
@@ -331,7 +345,7 @@ void SglRenderer::draw_fill_object()
 
     // sort inactive edges by y_upper so that later I can stop inactive checking early
     std::sort(edges.begin(), edges.end(), [](const SglEdge & first, const SglEdge & second) -> bool
-        { return first.from.second > second.from.second; });
+        { return first.from_y > second.from_y; });
 
     // fill inactive edges with indices
     inactive_edges.resize(edges.size());
@@ -344,7 +358,7 @@ void SglRenderer::draw_fill_object()
         {
             // if the edge start is equal to y we hit it and we should 
             // move it to the active lists 
-            if(edges.at(edge).from.second == y) 
+            if(edges.at(edge).from_y == y) 
             { 
                 SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is hit at y: " + std::to_string(y) + " adding to active");
                 active_edges.push_back(edge);
@@ -361,7 +375,7 @@ void SglRenderer::draw_fill_object()
         {
             // if the edge start is equal to y we hit it and we should 
             // move it to the active lists 
-            if(y < edges.at(edge).to.second) 
+            if(y < edges.at(edge).to_y) 
             { 
                 SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is finished at y: " + std::to_string(y) + " deleting from active");
                 to_remove_edges.push_back(edge);
@@ -420,8 +434,8 @@ void SglRenderer::draw_fill_object()
             {
                 this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
             }
-            start.upper_x -= start.step;
-            end.upper_x -= end.step;
+            start.upper_x -= start.step_x;
+            end.upper_x -= end.step_x;
         }
     };
 

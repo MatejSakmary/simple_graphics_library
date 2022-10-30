@@ -15,6 +15,9 @@ struct SglVertex
 
     auto to_string() -> std::string;
     auto at(int idx) const -> float;
+    auto at(int idx) -> float &;
+    // Divide vertex by w
+    void persp_division();
 
     private:
         friend struct SglMatrix;

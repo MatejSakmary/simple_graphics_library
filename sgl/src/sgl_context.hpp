@@ -35,6 +35,7 @@ struct SglContext
     void rotate_y(float angle);
     void scale(float scale_x, float scale_y, float scale_z);
 	void ortho(float left, float right, float bottom, float top, float near, float far);
+	void perspective(float left, float right, float bottom, float top, float near, float far);
 	void viewport(int x, int y, int width, int height);
     void clear(unsigned mask);
 

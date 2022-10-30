@@ -15,7 +15,7 @@ SglRenderer::~SglRenderer() {}
 void SglRenderer::push_vertex(const SglVertex & vertex)
 {
 
-    if (state.element_type_mode == SGL_POINTS) {
+    if (state.element_type_mode == SGL_POINTS || state.element_type_mode == SGL_POLYGON) {
         for(int i = - static_cast<int>(state.point_size / 2); i <= static_cast<int>(state.point_size / 2); ++i) {
             for(int j = - static_cast<int>(state.point_size / 2); j <= static_cast<int>(state.point_size / 2); ++j) {
                 state.currentFramebuffer->set_pixel(static_cast<int>(vertex.at(0) + i), static_cast<int>(vertex.at(1) + j), state.draw_color);

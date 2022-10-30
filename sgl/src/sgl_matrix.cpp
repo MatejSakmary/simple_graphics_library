@@ -55,6 +55,17 @@ SglMatrix::SglMatrix(const MatrixCreateInfo & info) :
                            0.0f           ,            0.0f          ,            0.0f       ,                 1.0f              };
             return;
         }
+        case MatrixType::PERSPECTIVE:
+        {
+            float right = info.right; float left = info.left;
+            float top = info.top; float bottom = info.bottom;
+            float near = info.near; float far = info.far;
+            mat = {(2.0f * near) / (right - left)  ,               0.0f                , (right + left) / (right - left) ,                0.0f                 ,
+                                0.0f               ,  (2.0f * near) / (top - bottom )  , (top + bottom) / (top - bottom) ,                0.0f                 ,
+                                0.0f               ,               0.0f                ,  -(far + near) / (far - near)   ,  -(2.0f * far * near) / (far - near),
+                                0.0f               ,               0.0f                ,            -1.0f                ,                0.0f                 };
+            return;
+        }
         case MatrixType::VIEWPORT:
         {
             mat = { info.left / 2.0f ,        0.0f        ,  0.0f  ,  info.x + (info.left  / 2.0f),

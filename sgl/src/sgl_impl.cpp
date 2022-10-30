@@ -305,7 +305,7 @@ void sglRotate2D(float angle, float centerx, float centery)
 void sglRotateY(float angle) 
 {
 	if(!check_recording_status("[sglRotateY()]")) { return; }
-	core->contexts.at(core->get_context()).rotate_y(angle);
+	core->contexts.at(core->get_context()).rotate_y(-angle);
 }
 
 void sglOrtho(float left, float right, float bottom, float top, float near, float far) 
@@ -319,7 +319,16 @@ void sglOrtho(float left, float right, float bottom, float top, float near, floa
 	core->contexts.at(core->get_context()).ortho(left, right, bottom, top, near, far);
 }
 
-void sglFrustum(float left, float right, float bottom, float top, float near, float far) {}
+void sglFrustum(float left, float right, float bottom, float top, float near, float far) 
+{
+	if(!check_recording_status("[sglFrustum()]")) { return; }
+	if(left == right || bottom == top || near == far)
+	{
+		core->set_error(sglEErrorCode::SGL_INVALID_VALUE);
+		return;
+	}
+	core->contexts.at(core->get_context()).perspective(left, right, bottom, top, near, far);
+}
 
 void sglViewport(int x, int y, int width, int height)
 {
@@ -340,7 +349,6 @@ void sglColor3f(float r, float g, float b)
 {
 	if(!check_recording_status("[sglColor3f()]")) { return; }
 	core->renderer.state.draw_color = Pixel{.r = r, .g = g, .b = b};
-	// SGL_DEBUG_OUT("[sglColor3f()] changed color to: " + std::to_string(r)+ " " + std::to_string(g) + " " + std::to_string(b));
 }
 
 void sglAreaMode(sglEAreaMode mode) 

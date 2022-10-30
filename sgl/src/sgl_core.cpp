@@ -150,30 +150,19 @@ void SglCore::draw_circle(SglVertex center, float radius)
 }
 
 
-void SglCore::draw_ellipse(SglVertex center, float a, float b) {    
-    // center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
-    // center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
-    // center = contexts.at(current_context).viewport_mat * center;
-
-    // a = a * std::sqrt(get_scaling_factor());
-    // b = b * std::sqrt(get_scaling_factor());
-
+void SglCore::draw_ellipse(SglVertex center, float a, float b) {
     SglMatrix mat = SglMatrix(contexts.at(current_context).viewport_mat);
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
+    
     renderer.draw_ellipse(center, a, b, mat);
 }
 
 
 void SglCore::draw_arc(SglVertex center, float radius, float from, float to) {
-    // center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
-    // center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
-    // center = contexts.at(current_context).viewport_mat * center;
-
-    // radius = radius * std::sqrt(get_scaling_factor());
-
     SglMatrix mat = SglMatrix(contexts.at(current_context).viewport_mat);
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
+    
     renderer.draw_arc(center, radius, from, to, mat);
 }

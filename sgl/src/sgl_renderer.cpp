@@ -18,7 +18,6 @@ SglRenderer::~SglRenderer() {}
 
 void SglRenderer::push_vertex(const SglVertex & vertex)
 {
-
     // TODO(osakaci) This function is in great need of rewrite -> I recommend look up table which describes what to draw
     // in each element and area config 
     // example - element = polygon, area = line -> draw line_loop
@@ -187,6 +186,8 @@ void SglRenderer::draw_circle(const SglVertex & center, float radius) {
         twoX += 2;
         x += 1;
     }
+
+    if (state.area_mode == SGL_POINT) push_vertex(center);
 }
 
 void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMatrix mat) {
@@ -218,6 +219,8 @@ void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMa
         x1 = x2;
         y1 = y2;
     }
+
+    if (state.area_mode == SGL_POINT) push_vertex(mat * center);
 }
 
 void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat) {
@@ -257,6 +260,8 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
 
         start = end;
     }
+
+    if (state.area_mode == SGL_POINT) push_vertex(mat * center);
 }
 
 void SglRenderer::draw_fill_object()

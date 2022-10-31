@@ -307,6 +307,7 @@ void SglRenderer::draw_fill_object()
         // 2) remove horizontal edges
         if(from.at(1) == to.at(1)) { return false; }
         // 1) orient edges top - bottom and shorten them by one pixel (this is in to.at(1) + 1.0f)
+        // TODO(msakmary) CONTINUE HERE - store 1 - 1/z into the depth buffer
         if(from.at(1) < to.at(1)) 
         { 
             edges.emplace_back(SglEdge{

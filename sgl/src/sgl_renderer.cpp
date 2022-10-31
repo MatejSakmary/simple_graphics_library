@@ -142,24 +142,6 @@ void SglRenderer::draw_line(const SglVertex & start_v, const SglVertex & end_v) 
     }
 }
 
-// void SglRenderer::draw_polyline(int x_c, int y_c, int z_c, const SglVertex & start, const SglVertex & end, SglMatrix mat) {
-//     int x0 = static_cast<int>(start.at(0));
-//     int y0 = static_cast<int>(start.at(1));
-//     int x1 = static_cast<int>(end.at(0));
-//     int y1 = static_cast<int>(end.at(1));
-//     int d_x = abs(x1 - x0);
-//     int d_y = abs(y1 - y0);
-
-//     if(d_y < d_x) {
-//         if (x0 > x1) draw_line_low(x1, y1, x0, y0);
-//         else draw_line_low(x0, y0, x1, y1);
-//     }
-//     else {
-//         if(y0 > y1) draw_line_high(x1, y1, x0, y0);
-//         else draw_line_high(x0, y0, x1, y1);
-//     }
-// }
-
 
 void SglRenderer::draw_sym_pixels(int x_c, int y_c, int x, int y) {
     state.currentFramebuffer->set_pixel(x_c + x, y_c + y, state.draw_color);

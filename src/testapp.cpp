@@ -34,10 +34,10 @@
 #ifdef TEST2
 #define WIDTH 800
 #define HEIGHT 600
-#define TEST_2A
+// #define TEST_2A
 #define TEST_2B
-#define TEST_2C
-#define TEST_2D
+// #define TEST_2C
+// #define TEST_2D
 #endif
 
 #ifdef TEST3

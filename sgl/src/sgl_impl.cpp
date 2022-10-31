@@ -91,6 +91,11 @@ float *sglGetColorBufferPointer(void)
 	return core->contexts.at(core->get_context()).framebuffer.get_framebuffer_pointer();
 }
 
+float *sglGetDepthBufferPointer(void)
+{
+	return core->contexts.at(core->get_context()).framebuffer.get_depthbuffer_pointer();
+}
+
 //---------------------------------------------------------------------------
 // Drawing functions
 //---------------------------------------------------------------------------
@@ -384,6 +389,8 @@ void sglEnable(sglEEnableFlags cap)
 		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
 		return;
 	}
+	// TODO(msakmary) error prone -> figure out a way to do this better
+	core->renderer.state.depth_test = sglEEnableFlags::SGL_DEPTH_TEST;
 	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_DEPTH_TEST; 
 }
 
@@ -396,6 +403,7 @@ void sglDisable(sglEEnableFlags cap)
 		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
 		return;
 	}
+	core->renderer.state.depth_test = sglEEnableFlags::SGL_NO_DEPTH_TEST;
 	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_NO_DEPTH_TEST; 
 }
 

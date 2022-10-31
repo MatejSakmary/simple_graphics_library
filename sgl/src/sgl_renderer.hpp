@@ -16,6 +16,7 @@ struct DrawState
     float point_size;
     sglEAreaMode area_mode;
     sglEElementType element_type_mode;
+    sglEEnableFlags depth_test;
     SglFramebuffer* currentFramebuffer;
 };
 

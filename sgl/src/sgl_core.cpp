@@ -50,7 +50,9 @@ void SglCore::set_context(int32_t context_idx)
     SGL_DEBUG_OUT("[SglCore::set_context()] Setting context with index " +
         std::to_string(context_idx) + " as active context"); 
     current_context = context_idx;
+    // TODO(msakmary) very error prone code -> think about better way of doing this
     renderer.state.currentFramebuffer = &contexts.at(current_context).framebuffer;
+    renderer.state.depth_test = contexts.at(current_context).capabilites;
 }
 
 auto SglCore::get_context() -> int32_t
@@ -127,10 +129,16 @@ auto SglCore::get_recording() -> bool
 
 void SglCore::push_vertex(SglVertex vertex)
 {
+    // SGL_DEBUG_OUT("Got vertex " + vertex.to_string());
     vertex = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * vertex;
+    // SGL_DEBUG_OUT("MODELVIEW MATRIX IS\n" + contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top().to_string());
+    // SGL_DEBUG_OUT("After MODELVIEW TRANSFORM " + vertex.to_string());
     vertex = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * vertex;
+    // SGL_DEBUG_OUT("After PROJECTION TRANSFORM " + vertex.to_string());
     vertex.persp_division();
+    // SGL_DEBUG_OUT("After perspective division " + vertex.to_string());
     vertex = contexts.at(current_context).viewport_mat * vertex;
+    // SGL_DEBUG_OUT("After viewport transform " + vertex.to_string());
 
     renderer.push_vertex(vertex);
 }

@@ -253,6 +253,8 @@ extern "C"
 	   - none
 	*/
 	float *sglGetColorBufferPointer(void);
+	// DEBUG ONLY
+	float *sglGetDepthBufferPointer(void);
 
 	//---------------------------------------------------------------------------
 	// Drawing functions

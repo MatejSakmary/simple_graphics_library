@@ -26,6 +26,9 @@ void SglFramebuffer::clear_framebuffer(const Pixel & clear_color, uint32_t mask)
 float* SglFramebuffer::get_framebuffer_pointer() {
     return reinterpret_cast<float*>(pixels.data());
 }
+float* SglFramebuffer::get_depthbuffer_pointer() {
+    return reinterpret_cast<float*>(depth.data());
+}
 
 uint32_t SglFramebuffer::get_height() const
 {

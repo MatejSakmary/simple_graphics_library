@@ -10,8 +10,8 @@
 /// uncomment the tests you wish to run
 
 // #define TEST0
-#define TEST1
-//#define TEST2
+// #define TEST1
+#define TEST2
 //#define TEST3
 //#define TEST4
 //#define TEST5
@@ -34,10 +34,10 @@
 #ifdef TEST2
 #define WIDTH 800
 #define HEIGHT 600
-#define TEST_2A
-#define TEST_2B
+// #define TEST_2A
+// #define TEST_2B
 #define TEST_2C
-#define TEST_2D
+// #define TEST_2D
 #endif
 
 #ifdef TEST3
@@ -99,6 +99,7 @@ static int _contexts[10];
 
 float tx = 0, ty = 0, tz = 0, tstep = 0.2;
 float rot = M_PI / 3, rotstep = 0.1;
+bool show_depth = false;
 
 unsigned int runMultiplier;
 
@@ -333,9 +334,9 @@ void DrawTestScene2C(void)
 
     // lower row without depth test
     sglDisable(SGL_DEPTH_TEST);
-    placeCube(-1, -2, 0);
-    placeCube(1, -2, 0);
-    placeCube(0, -1.5, 0);
+    // placeCube(-1, -2, 0);
+    // placeCube(1, -2, 0);
+    // placeCube(0, -1.5, 0);
 }
 
 /// render a non-convex polygon
@@ -1105,6 +1106,14 @@ void processInput(GLFWwindow *window)
     if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
         rot += rotstep;
     }
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        SGL_DEBUG_OUT("Setting show_depth to true");
+        show_depth = true;
+    }
+    if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+        SGL_DEBUG_OUT("Setting show_depth to false");
+        show_depth = false;
+    }
     // sglClearColor(0, 0, 0, 1);
     // sglClear(SGL_COLOR_BUFFER_BIT | SGL_DEPTH_BUFFER_BIT);
     // DrawTestScene2C();
@@ -1533,7 +1542,7 @@ int main(int argc, char **argv)
         NFFStore nffstore;
 
         /// read in the NFF file
-        const char *scenename = "cornell-spheres.nff";
+        const char *scenename = "resources/cornell-spheres.nff";
 
         FILE *f = fopen(scenename, "rt");
         if (!f)
@@ -1739,9 +1748,17 @@ int main(int argc, char **argv)
         glfwPollEvents();
         processInput(window);
         float *cb = sglGetColorBufferPointer();
+        if(show_depth){
+            cb = sglGetDepthBufferPointer();
+        }
         if (cb)
         {
-            glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_FLOAT, cb);
+            if(show_depth)
+            {
+                glDrawPixels(WIDTH, HEIGHT, GL_RED, GL_FLOAT, cb);
+            } else {
+                glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_FLOAT, cb);
+            };
         }
 
         // swap buffers (float buffering)

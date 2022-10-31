@@ -9,6 +9,7 @@ SglRenderer::SglRenderer() :
        .point_size = 1.0f,
        .area_mode = sglEAreaMode::SGL_FILL,
        .element_type_mode = sglEElementType::SGL_POINTS,
+       .depth_test = sglEEnableFlags::SGL_NO_DEPTH_TEST,
        .currentFramebuffer = nullptr
     },
     vertices{} {}
@@ -18,6 +19,12 @@ SglRenderer::~SglRenderer() {}
 void SglRenderer::push_vertex(const SglVertex & vertex)
 {
 
+    // TODO(osakaci) This function is in great need of rewrite -> I recommend look up table which describes what to draw
+    // in each element and area config 
+    // example - element = polygon, area = line -> draw line_loop
+    //         - element = line,    area = fill -> draw line
+    //         etc...
+    // also the vertices handling is not ideal, plase make this more clear
     if (state.element_type_mode == SGL_POINTS) {
         for(int i = - static_cast<int>(state.point_size / 2); i <= static_cast<int>(state.point_size / 2); ++i) {
             for(int j = - static_cast<int>(state.point_size / 2); j <= static_cast<int>(state.point_size / 2); ++j) {
@@ -280,8 +287,6 @@ void SglRenderer::draw_fill_object()
         // each edge is oriented in such a way so that *from* is the upper points
         // and *to* is the lower point (from.second is always bigger than to.second)
         // TODO(msakmary) remove x coordinates from *from* and *to* they are not needed
-        // std::pair<uint, uint> from;
-        // std::pair<uint, uint> to;
         uint from_y;
         uint to_y;
         float upper_x;
@@ -314,9 +319,6 @@ void SglRenderer::draw_fill_object()
                 // x_step = (z_from - z_to) / (y_from - y_to)
                 .step_z  = (from.at(2) - to.at(2)) / ((from.at(1)) - to.at(1))
             });
-            // curr_edge.step_x = (static_cast<float>(curr_edge.to.first) - static_cast<float>(curr_edge.from.first)) / 
-            //                    (static_cast<float>(curr_edge.to.second - 1.0f) - static_cast<float>(curr_edge.from.second));
-            // curr_edge.upper_x = curr_edge.from.first;
         }
         else
         {
@@ -340,6 +342,7 @@ void SglRenderer::draw_fill_object()
     // each edge consists of two vertices so we start at one so we already have two vertices at the start of the loop
     for(size_t i = 1; i < vertices.size(); i++)
     {
+        SGL_DEBUG_OUT("1/z of current vertex is " + std::to_string(vertices.at(i-1).at(2)) + " giving depth of " + std::to_string(1.0f / vertices.at(i-1).at(2)));
         insert_processed_edge(vertices.at(i - 1), vertices.at(i));
     }
 
@@ -360,7 +363,7 @@ void SglRenderer::draw_fill_object()
             // move it to the active lists 
             if(edges.at(edge).from_y == y) 
             { 
-                SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is hit at y: " + std::to_string(y) + " adding to active");
+                // SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is hit at y: " + std::to_string(y) + " adding to active");
                 active_edges.push_back(edge);
                 to_remove_edges.push_back(edge);
             }
@@ -377,7 +380,7 @@ void SglRenderer::draw_fill_object()
             // move it to the active lists 
             if(y < edges.at(edge).to_y) 
             { 
-                SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is finished at y: " + std::to_string(y) + " deleting from active");
+                // SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is finished at y: " + std::to_string(y) + " deleting from active");
                 to_remove_edges.push_back(edge);
             }
         }
@@ -432,13 +435,29 @@ void SglRenderer::draw_fill_object()
             // SGL_DEBUG_OUT("Filling row of pixels at " + std::to_string(y) + " bounded (" + std::to_string(start.upper_x) + "," + std::to_string(end.upper_x) + ")"); 
             for(uint x = static_cast<uint>(start.upper_x); x <= static_cast<uint>(end.upper_x); x++) 
             {
-                this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
+                if(this->state.depth_test == sglEEnableFlags::SGL_DEPTH_TEST)
+                {
+                    // lerp between start.z and end.z based on the x parameter
+                    float t = (static_cast<float>(x) - start.upper_x) / (end.upper_x - start.upper_x);
+                    if(x == static_cast<uint>(start.upper_x)) { t = 0.0f; }
+
+                    float depth = ((1.0f - t) * start.upper_z) + (t * end.upper_z); 
+                    // there is something closer in the depth buffer -> ignore this write
+                    if(depth < this->state.currentFramebuffer->get_depth(x, y)) { continue; }
+                    this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
+                    this->state.currentFramebuffer->set_depth(x, y, depth);
+                } else {
+                    this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
+                }
             }
             start.upper_x -= start.step_x;
+            start.upper_z -= start.step_z;
             end.upper_x -= end.step_x;
+            end.upper_z -= end.step_z;
         }
     };
 
+    // ============================ SCANLINE MAIN LOOP =========================================
     // TODO(msakmary) Add Bounding box to polygon so that I don't iterate over the entire screen
     for(int y = state.currentFramebuffer->get_height(); y >= 0 ; y--)
     {
@@ -448,7 +467,6 @@ void SglRenderer::draw_fill_object()
         check_active_edges(y);
         // sort based on x intersections
         shake_sort_active_edges();
-
         //draw active edges + update x value
         draw_active_edges(y);
     }

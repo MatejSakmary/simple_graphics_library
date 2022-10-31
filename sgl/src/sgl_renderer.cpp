@@ -202,9 +202,6 @@ void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMa
         .type = MatrixType::TRANSLATE,
         .x = center.at(0), .y = center.at(1), .z = center.at(2)
     });
-    
-    auto rot_mat = SglMatrix({ .type = MatrixType::ROTATE, .x = 0.0f, .y = 0.0f, .z = alpha });
-
 
     for (int i = 1; i <= N; ++i) {      
         x2 = a * cos(i * alpha);

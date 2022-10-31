@@ -444,7 +444,7 @@ void SglRenderer::draw_fill_object()
 
                     float depth = ((1.0f - t) * start.upper_z) + (t * end.upper_z); 
                     // there is something closer in the depth buffer -> ignore this write
-                    if(depth < this->state.currentFramebuffer->get_depth(x, y)) { continue; }
+                    if(depth > this->state.currentFramebuffer->get_depth(x, y)) { continue; }
                     this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
                     this->state.currentFramebuffer->set_depth(x, y, depth);
                 } else {

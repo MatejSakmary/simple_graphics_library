@@ -34,10 +34,10 @@
 #ifdef TEST2
 #define WIDTH 800
 #define HEIGHT 600
-// #define TEST_2A
-// #define TEST_2B
+#define TEST_2A
+#define TEST_2B
 #define TEST_2C
-// #define TEST_2D
+#define TEST_2D
 #endif
 
 #ifdef TEST3
@@ -316,7 +316,7 @@ void DrawTestScene2C(void)
     // set the projection matrix
     sglMatrixMode(SGL_PROJECTION);
     sglLoadIdentity();
-    sgluPerspective(45, (float)WIDTH / HEIGHT, 0.1, 10.0);
+    sgluPerspective(45, (float)WIDTH / HEIGHT, 0.1, 20.0);
 
     // set the modelview matrix
     sglMatrixMode(SGL_MODELVIEW);
@@ -334,9 +334,9 @@ void DrawTestScene2C(void)
 
     // lower row without depth test
     sglDisable(SGL_DEPTH_TEST);
-    // placeCube(-1, -2, 0);
-    // placeCube(1, -2, 0);
-    // placeCube(0, -1.5, 0);
+    placeCube(-1, -2, 0);
+    placeCube(1, -2, 0);
+    placeCube(0, -1.5, 0);
 }
 
 /// render a non-convex polygon
@@ -1085,25 +1085,35 @@ void processInput(GLFWwindow *window)
     }
 
     /// rotate and translate cubes in test 2C
+    bool updated = false;
     if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+        updated = true;
         tx -= tstep;
     }
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+        updated = true;
         ty += tstep;
     }
     if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+        updated = true;
         tx += tstep;
     }
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+        updated = true;
         ty -= tstep;
     }
-    if(glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS){
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS &&
+       glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
+        updated = true;
         tz += tstep;
     }
-    if(glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS){
+    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS &&
+       glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
+        updated = true;
         tz -= tstep;
     }
     if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
+        updated = true;
         rot += rotstep;
     }
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
@@ -1114,9 +1124,14 @@ void processInput(GLFWwindow *window)
         SGL_DEBUG_OUT("Setting show_depth to false");
         show_depth = false;
     }
-    // sglClearColor(0, 0, 0, 1);
-    // sglClear(SGL_COLOR_BUFFER_BIT | SGL_DEPTH_BUFFER_BIT);
-    // DrawTestScene2C();
+#ifdef TEST_2C
+    if (updated)
+    {
+        sglClearColor(0, 0, 0, 1);
+        sglClear(SGL_COLOR_BUFFER_BIT | SGL_DEPTH_BUFFER_BIT);
+        DrawTestScene2C();
+    }
+#endif
 }
 
 // #endif

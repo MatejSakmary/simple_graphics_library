@@ -99,6 +99,7 @@ static int _contexts[10];
 
 float tx = 0, ty = 0, tz = 0, tstep = 0.2;
 float rot = M_PI / 3, rotstep = 0.1;
+bool show_depth = false;
 
 unsigned int runMultiplier;
 
@@ -315,7 +316,7 @@ void DrawTestScene2C(void)
     // set the projection matrix
     sglMatrixMode(SGL_PROJECTION);
     sglLoadIdentity();
-    sgluPerspective(45, (float)WIDTH / HEIGHT, 0.1, 10.0);
+    sgluPerspective(45, (float)WIDTH / HEIGHT, 0.1, 20.0);
 
     // set the modelview matrix
     sglMatrixMode(SGL_MODELVIEW);
@@ -1084,30 +1085,53 @@ void processInput(GLFWwindow *window)
     }
 
     /// rotate and translate cubes in test 2C
+    bool updated = false;
     if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+        updated = true;
         tx -= tstep;
     }
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+        updated = true;
         ty += tstep;
     }
     if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+        updated = true;
         tx += tstep;
     }
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+        updated = true;
         ty -= tstep;
     }
-    if(glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS){
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS &&
+       glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
+        updated = true;
         tz += tstep;
     }
-    if(glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS){
+    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS &&
+       glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
+        updated = true;
         tz -= tstep;
     }
     if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
+        updated = true;
         rot += rotstep;
     }
-    // sglClearColor(0, 0, 0, 1);
-    // sglClear(SGL_COLOR_BUFFER_BIT | SGL_DEPTH_BUFFER_BIT);
-    // DrawTestScene2C();
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        SGL_DEBUG_OUT("Setting show_depth to true");
+        show_depth = true;
+    }
+    if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+        SGL_DEBUG_OUT("Setting show_depth to false");
+        show_depth = false;
+    }
+#ifdef TEST_2C
+    if (updated)
+    {
+        sglClearColor(0, 0, 0, 1);
+        sglClear(SGL_COLOR_BUFFER_BIT | SGL_DEPTH_BUFFER_BIT);
+        DrawTestScene2C();
+    }
+#endif
 }
 
 // #endif
@@ -1533,7 +1557,7 @@ int main(int argc, char **argv)
         NFFStore nffstore;
 
         /// read in the NFF file
-        const char *scenename = "cornell-spheres.nff";
+        const char *scenename = "resources/cornell-spheres.nff";
 
         FILE *f = fopen(scenename, "rt");
         if (!f)
@@ -1739,9 +1763,17 @@ int main(int argc, char **argv)
         glfwPollEvents();
         processInput(window);
         float *cb = sglGetColorBufferPointer();
+        if(show_depth){
+            cb = sglGetDepthBufferPointer();
+        }
         if (cb)
         {
-            glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_FLOAT, cb);
+            if(show_depth)
+            {
+                glDrawPixels(WIDTH, HEIGHT, GL_RED, GL_FLOAT, cb);
+            } else {
+                glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_FLOAT, cb);
+            };
         }
 
         // swap buffers (float buffering)

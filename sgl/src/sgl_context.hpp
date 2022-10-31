@@ -3,7 +3,7 @@
 #include <stack>
 #include <functional>
 
-#include "sgl_frambuffer.hpp"
+#include "sgl_framebuffer.hpp"
 #include "sgl_matrix.hpp"
 #include "sgl.h"
 
@@ -19,6 +19,7 @@ struct SglContext
     SglContextInitInfo info;
     SglFramebuffer framebuffer;
     Pixel clear_color;
+    sglEEnableFlags capabilites;
 
     SglContext(const SglContextInitInfo & info);
     ~SglContext();

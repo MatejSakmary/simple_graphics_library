@@ -122,5 +122,5 @@ void SglContext::viewport(int x, int y, int width, int height)
 
 void SglContext::clear(unsigned mask)
 {
-    framebuffer.clear_framebuffer(clear_color);
+    framebuffer.clear_framebuffer(clear_color, mask);
 }

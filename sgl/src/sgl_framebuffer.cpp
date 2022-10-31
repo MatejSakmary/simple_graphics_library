@@ -1,29 +1,40 @@
-#include "sgl_frambuffer.hpp"
+#include "sgl_framebuffer.hpp"
 
 #include <cstring>
 
 SglFramebuffer::SglFramebuffer(uint32_t width, uint32_t height) :
-    width{width}, height{height}, pixels(width * height, {0,0,0}) 
+    width{width}, height{height}, pixels(width * height, {0,0,0}), depth(width * height, 1.0f) 
 {}
 
 SglFramebuffer::~SglFramebuffer()
 {}
 
-Pixel SglFramebuffer::get_pixel(uint32_t x, uint32_t y)
+void SglFramebuffer::clear_framebuffer(const Pixel & clear_color, uint32_t mask)
 {
-    return pixels.at(y * width + x);
-}
-
-void SglFramebuffer::set_pixel(uint32_t x, uint32_t y, const Pixel & pixel)
-{
-    pixels.at(y * width + x) = pixel;
-}
-
-void SglFramebuffer::clear_framebuffer(const Pixel & clear_color)
-{
-    for(auto & pixel : pixels) { pixel = clear_color; }
+    if(mask & sglEClearBit::SGL_COLOR_BUFFER_BIT)
+    {
+        SGL_DEBUG_OUT("[SglFramebuffer::clear_framebuffer()] Clearing pixel buffer");
+        for(auto & pixel : pixels) { pixel = clear_color; }
+    }
+    if(mask & sglEClearBit::SGL_DEPTH_BUFFER_BIT)
+    {
+        SGL_DEBUG_OUT("[SglFramebuffer::clear_framebuffer()] Clearing depth buffer");
+        for(auto & pixel : depth) { pixel = 1.0f; }
+    }
 }
 
 float* SglFramebuffer::get_framebuffer_pointer() {
     return reinterpret_cast<float*>(pixels.data());
+}
+float* SglFramebuffer::get_depthbuffer_pointer() {
+    return reinterpret_cast<float*>(depth.data());
+}
+
+uint32_t SglFramebuffer::get_height() const
+{
+    return height;
+}
+uint32_t SglFramebuffer::get_width() const
+{
+    return width;
 }

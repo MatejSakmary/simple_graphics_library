@@ -1,3 +1,4 @@
+#include <array>
 //---------------------------------------------------------------------------
 // testapp.cpp
 // Testing file for the Simple Graphics Library (SGL)
@@ -1763,14 +1764,33 @@ int main(int argc, char **argv)
         glfwPollEvents();
         processInput(window);
         float *cb = sglGetColorBufferPointer();
+        std:array<float, WIDTH * HEIGHT * sizeof(float)> rescaled_depth;
         if(show_depth){
+            // rescale depth buffer
             cb = sglGetDepthBufferPointer();
+            memcpy(rescaled_depth.data(), cb, rescaled_depth.size());
+            float min = 1.0f;
+            float max = 0.0f;
+            for(int i = 0; i < WIDTH * HEIGHT * sizeof(float); i++)
+            {
+                if(cb[i] < min && cb[i] >= 0.5f) 
+                {
+                    min = cb[i];
+                }
+                if(cb[i] > max) {max = cb[i];}
+            }
+            for(int i = 0; i < WIDTH * HEIGHT * sizeof(float); i++)
+            {
+                rescaled_depth[i] = cb[i];
+                rescaled_depth[i] -= min;
+                rescaled_depth[i] /= (max - min);
+            }
         }
         if (cb)
         {
             if(show_depth)
             {
-                glDrawPixels(WIDTH, HEIGHT, GL_RED, GL_FLOAT, cb);
+                glDrawPixels(WIDTH, HEIGHT, GL_LUMINANCE, GL_FLOAT, rescaled_depth.data());
             } else {
                 glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_FLOAT, cb);
             };

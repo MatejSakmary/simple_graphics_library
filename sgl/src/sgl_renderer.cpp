@@ -16,6 +16,8 @@ SglRenderer::SglRenderer() :
 
 SglRenderer::~SglRenderer() {}
 
+
+
 void SglRenderer::push_vertex(const SglVertex & vertex)
 {
     // TODO(osakaci) This function is in great need of rewrite -> I recommend look up table which describes what to draw

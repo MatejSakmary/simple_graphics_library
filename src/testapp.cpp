@@ -88,7 +88,7 @@
 #include "util/nffread.h"
 #include "util/nffstore.h"
 #include "util/timer.h"
-#include "macros.hpp"
+#include "../sgl/src/macros.hpp"
 #include "sgl.h"
 
 #define PRINTVAR(a) cerr << #a "\t" << a << endl;

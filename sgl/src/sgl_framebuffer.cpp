@@ -3,7 +3,7 @@
 #include <cstring>
 
 SglFramebuffer::SglFramebuffer(uint32_t width, uint32_t height) :
-    width{width}, height{height}, pixels(width * height, {0,0,0}), depth(width * height, 1.0f) 
+    pixels(width * height, {0,0,0}), depth(width * height, 1.0f),  width{width}, height{height}
 {}
 
 SglFramebuffer::~SglFramebuffer()

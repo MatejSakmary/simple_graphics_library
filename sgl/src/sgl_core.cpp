@@ -1,9 +1,9 @@
 #include "sgl_core.hpp"
 
 SglCore::SglCore() : 
+    recording{false},
     current_context{-1},
-    error{sglEErrorCode::SGL_NO_ERROR},
-    recording{false}
+    error{sglEErrorCode::SGL_NO_ERROR}
     {}
 
 SglCore::~SglCore() {}
@@ -11,7 +11,7 @@ SglCore::~SglCore() {}
 auto SglCore::create_context(int32_t width, int32_t height) -> int32_t
 {
     // try to find any free context slots
-    for(int32_t i = 0; i < contexts.size(); i++)
+    for(int32_t i = 0; i < static_cast<int32_t>(contexts.size()); i++)
     {
         if(contexts.at(i).released) 
         {
@@ -38,7 +38,7 @@ auto SglCore::create_context(int32_t width, int32_t height) -> int32_t
 
 void SglCore::set_context(int32_t context_idx)
 {
-    if(context_idx > contexts.size() || 
+    if(context_idx > static_cast<int32_t>(contexts.size()) || 
        contexts.at(context_idx).released ) 
     {
         // SGL_DEBUG_OUT("[SglCore::set_context()] Context at index " +
@@ -68,7 +68,7 @@ auto SglCore::get_context() -> int32_t
 void SglCore::destroy_context(int32_t context_idx)
 {
     // check if context_idx is valid
-    if(context_idx > contexts.size() || 
+    if(context_idx > static_cast<int32_t>(contexts.size()) || 
        contexts.at(context_idx).released ) 
     {
         // SGL_DEBUG_OUT("[SglCore::destroy_context()] Context at index " +

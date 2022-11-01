@@ -152,14 +152,14 @@ void SglRenderer::draw_sym_pixels(int x_c, int y_c, int x, int y) {
 }
 
 void SglRenderer::draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int y, SglMatrix mat) {
-    int xh, yh, x1, y1, x2, y2;
+    int x1, y1;
     for(int i = 0; i < 2; ++i) {
         for(int j = 0; j < 2; ++j) {
             SglVertex help = SglVertex(pow(-1, i) * x, pow(-1, j) * y, z_c, 1.0f);
             help = mat * help;
-            x2 = x_c + help.at(0);
-            y2 = y_c + help.at(1);
-            state.currentFramebuffer->set_pixel(static_cast<int>(x2), static_cast<int>(y2), state.draw_color);
+            x1 = x_c + help.at(0);
+            y1 = y_c + help.at(1);
+            state.currentFramebuffer->set_pixel(static_cast<int>(x1), static_cast<int>(y1), state.draw_color);
         }
     }
 }
@@ -226,20 +226,15 @@ void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMa
 }
 
 void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat) {
-    float x1, x2, y1, y2;
-    int x_c, y_c, z_c;
-    int x11, y11, x22, y22;
+    float x1, y1;
+    int z_c = center.at(2);
 
     float angle = to - from;
     // SGL_DEBUG_OUT("Angle is " + std::to_string(angle));
     int N = int((40.0f * angle) / (2.0f * M_PI));
     // SGL_DEBUG_OUT("N is " + std::to_string(N));
     float alpha = angle / N;
-    // SGL_DEBUG_OUT("Angle is " + std::to_string(alpha));
-    float SA = sin(alpha);
-    float CA = cos(alpha);
-    // SGL_DEBUG_OUT("SA is " + std::to_string(SA));
-
+    
     x1 = radius * cos(from);
     y1 = radius * sin(from);
 
@@ -250,7 +245,7 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
     
     auto rot_mat = SglMatrix({ .type = MatrixType::ROTATE, .x = 0.0f, .y = 0.0f, .z = alpha });
 
-    SglVertex start = SglVertex(x1, y1, z_c, center.at(3));        
+    SglVertex start = SglVertex(x1, y1, z_c, center.at(3));
 
     for (int i = 0; i < N; ++i) {
         auto end = rot_mat * start;
@@ -378,7 +373,6 @@ void SglRenderer::draw_fill_object()
     auto shake_sort_active_edges = [&edges, &active_edges](){
         // cocktail sort copied from https://www.geeksforgeeks.org/cocktail-sort/ and modified for lists using iterators
         bool swapped = true;
-        int start = 0;
  
         while (swapped) {
             swapped = false;
@@ -407,9 +401,10 @@ void SglRenderer::draw_fill_object()
             {
                 auto it_ = it;
                 // TODO(msakmary) This is very cursed, improve if there is time
-                if (edges.at(*(--it_)).upper_x > edges.at(*it).upper_x) 
+                if (edges.at(*(--it_)).upper_x > edges.at(*it).upper_x) {
                     std::swap(*it, *it_);
                     swapped = true;
+                }
             }
         }
     };

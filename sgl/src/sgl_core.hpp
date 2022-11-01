@@ -9,6 +9,7 @@
 #include "sgl_framebuffer.hpp"
 #include "sgl_vertex.hpp"
 #include "sgl_renderer.hpp"
+#include "macros.hpp"
 
 struct SglCore
 {

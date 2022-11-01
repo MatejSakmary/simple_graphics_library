@@ -6,6 +6,7 @@
 #include "sgl_vertex.hpp"
 #include "sgl_matrix.hpp"
 #include "sgl_framebuffer.hpp"
+#include "macros.hpp"
 
 // Forward decl vertex so we can friend it 
 struct SglCore;

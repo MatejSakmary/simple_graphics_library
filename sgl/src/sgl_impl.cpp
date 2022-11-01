@@ -8,6 +8,7 @@
 //---------------------------------------------------------------------------
 
 #include "sgl.h"
+#include "macros.hpp"
 #include "sgl_core.hpp"
 #include "sgl_vertex.hpp"
 
@@ -380,10 +381,12 @@ void sglPointSize(float size)
 	core->renderer.state.point_size = size;
 }
 
+
+// TODO(sakacond) CHECK AND FIX ENABLE FLAGS
 void sglEnable(sglEEnableFlags cap) 
 {
 	if(!check_recording_status("[sglEnable()]")) { return; }
-	if((cap != sglEEnableFlags::SGL_DEPTH_TEST) && (cap != sglEEnableFlags::SGL_NO_DEPTH_TEST))
+	if((cap != sglEEnableFlags::SGL_DEPTH_TEST) && (cap != sglEEnableFlags::SGL_DEPTH_TEST))
 	{
 		SGL_DEBUG_OUT("[sglEnable()] Invalid enum");
 		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
@@ -394,17 +397,18 @@ void sglEnable(sglEEnableFlags cap)
 	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_DEPTH_TEST; 
 }
 
+// TODO(sakacond) CHECK AND FIX ENABLE FLAGS
 void sglDisable(sglEEnableFlags cap) 
 {
 	if(!check_recording_status("[sglDisable()]")) { return; }
-	if((cap != sglEEnableFlags::SGL_DEPTH_TEST) && (cap != sglEEnableFlags::SGL_NO_DEPTH_TEST))
+	if((cap != sglEEnableFlags::SGL_DEPTH_TEST) && (cap != sglEEnableFlags::SGL_DEPTH_TEST))
 	{
 		SGL_DEBUG_OUT("[sglDisble()] Invalid enum");
 		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
 		return;
 	}
-	core->renderer.state.depth_test = sglEEnableFlags::SGL_NO_DEPTH_TEST;
-	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_NO_DEPTH_TEST; 
+	core->renderer.state.depth_test = sglEEnableFlags::SGL_DEPTH_TEST;
+	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_DEPTH_TEST; 
 }
 
 //---------------------------------------------------------------------------

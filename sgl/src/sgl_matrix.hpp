@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "sgl.h"
+#include "macros.hpp"
 #include "sgl_vertex.hpp"
 
 enum MatrixType

@@ -9,7 +9,7 @@ SglRenderer::SglRenderer() :
        .point_size = 1.0f,
        .area_mode = sglEAreaMode::SGL_FILL,
        .element_type_mode = sglEElementType::SGL_POINTS,
-       .depth_test = sglEEnableFlags::SGL_NO_DEPTH_TEST,
+       .depth_test = sglEEnableFlags::SGL_DEPTH_TEST,
        .currentFramebuffer = nullptr
     },
     vertices{} {}

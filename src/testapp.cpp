@@ -11,8 +11,8 @@
 /// uncomment the tests you wish to run
 
 // #define TEST0
-// #define TEST1
-#define TEST2
+#define TEST1
+// #define TEST2
 //#define TEST3
 //#define TEST4
 //#define TEST5
@@ -88,6 +88,7 @@
 #include "util/nffread.h"
 #include "util/nffstore.h"
 #include "util/timer.h"
+#include "macros.hpp"
 #include "sgl.h"
 
 #define PRINTVAR(a) cerr << #a "\t" << a << endl;

@@ -3,6 +3,8 @@
 #include <cstdint>
 
 #include "sgl.h"
+#include "macros.hpp"
+
 struct Pixel
 {
     float r;

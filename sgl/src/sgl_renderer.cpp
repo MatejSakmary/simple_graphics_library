@@ -86,7 +86,7 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
     }
 }
 
-void SglRenderer::draw_point(const SglVertex point) {
+void SglRenderer::draw_point(const SglVertex & point) {
     int half_size = static_cast<int>(state.point_size / 2);
             
     // If the point size is 1 the half size will be 0 therefore both
@@ -262,12 +262,17 @@ void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMa
         // SGL_DEBUG_OUT("END " + std::to_string(end.at(0)) + " " + std::to_string(end.at(1)));
         
         draw_line(mat * start, mat * end);
+        
+        vertices.push_back(mat * start);
+        vertices.push_back(mat * end);
 
         x1 = x2;
         y1 = y2;
     }
 
-    if (state.area_mode == SGL_POINT) push_vertex(mat * center);
+    if (state.area_mode == sglEAreaMode::SGL_FILL) draw_fill_object();
+
+    else if (state.area_mode == sglEAreaMode::SGL_POINT) push_vertex(mat * center);
 }
 
 void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat) {
@@ -514,5 +519,6 @@ void SglRenderer::recording_end()
     {
         draw_fill_object();
     }
+
     vertices.clear();
 }

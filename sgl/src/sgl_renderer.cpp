@@ -329,6 +329,19 @@ void SglRenderer::draw_fill_object()
         float step_z;
     };
 
+    struct AABB
+    {
+        int upRight[2];
+        int downLeft[2];
+
+        AABB(int max_x, int max_y, int min_x, int min_y) {
+            this->upRight[0] = max_x;
+            this->upRight[1] = max_y;
+            this->downLeft[0] = min_x;
+            this->downLeft[1] = min_y;
+        }
+    };
+
     std::vector<SglEdge> edges;
     edges.reserve(vertices.size());
     // vectors of indices into edges
@@ -494,6 +507,7 @@ void SglRenderer::draw_fill_object()
 
     // ============================ SCANLINE MAIN LOOP =========================================
     // TODO(msakmary) Add Bounding box to polygon so that I don't iterate over the entire screen
+    
     for(int y = state.currentFramebuffer->get_height(); y >= 0 ; y--)
     {
         // add hit inactive edges to active list (when y == edge.from.y)

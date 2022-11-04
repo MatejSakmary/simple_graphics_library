@@ -4,7 +4,7 @@
 #include <string>
 #include <cmath>
 
-#include "../include/sgl.h"
+#include "sgl.h"
 #include "macros.hpp"
 #include "sgl_vertex.hpp"
 

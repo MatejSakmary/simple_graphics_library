@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <limits>
 
-#include "../include/sgl.h"
+#include "sgl.h"
 #include "macros.hpp"
 
 struct Pixel

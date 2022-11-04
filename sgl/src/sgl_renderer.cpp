@@ -26,43 +26,77 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
     //         - element = line,    area = fill -> draw line
     //         etc...
     // also the vertices handling is not ideal, plase make this more clear
-    if (state.element_type_mode == SGL_POINTS) {
-        for(int i = - static_cast<int>(state.point_size / 2); i <= static_cast<int>(state.point_size / 2); ++i) {
-            for(int j = - static_cast<int>(state.point_size / 2); j <= static_cast<int>(state.point_size / 2); ++j) {
-                state.currentFramebuffer->set_pixel(static_cast<int>(vertex.at(0) + i), static_cast<int>(vertex.at(1) + j), state.draw_color);
+    // READY FOR REVIEW
+    
+    switch (state.element_type_mode) {
+        case sglEElementType::SGL_POINTS:
+            draw_point(vertex);
+            break;
+        
+        case sglEElementType::SGL_LINES:
+            vertices.push_back(vertex);
+            // If there are 2 vertices already in vertex vector we will draw them
+            // and clear the vector.
+            if (vertices.size() == 2) {
+                draw_line(vertices[0], vertices[1]);
+                vertices.clear();
             }
-        }
-    }
+            break;
+        
+        case sglEElementType::SGL_LINE_STRIP:
+            vertices.push_back(vertex);
+            // If there are 2 vertices in the vertex vector we will draw them
+            // and then we erase the older vector.
+            if (vertices.size() == 2) {
+                draw_line(vertices[0], vertices[1]);
+                vertices.erase(vertices.begin());
+            }
+            break;
+        
+        case sglEElementType::SGL_LINE_LOOP:
+            vertices.push_back(vertex);
+            // TODO sakacond add comment
+            if(vertices.size() == 2) {
+                draw_line(vertices[0], vertices[1]);
+            }
+            else if(vertices.size() == 3) {
+                SglVertex first = vertices[0];
+                draw_line(vertices[1], vertices[2]);
+                vertices.erase(vertices.begin()+1);
+            }
+            break;
 
-    if (state.area_mode == sglEAreaMode::SGL_FILL && state.element_type_mode == sglEElementType::SGL_POLYGON)
-    {
-        vertices.push_back(vertex);
-        return;
+        case sglEElementType::SGL_POLYGON:
+            vertices.push_back(vertex);
+            // TODO sakacond add comment
+            if ((state.area_mode == sglEAreaMode::SGL_LINE) && (vertices.size() >= 2)) {
+                if(vertices.size() == 2) {
+                    draw_line(vertices[0], vertices[1]);
+                }
+                else if(vertices.size() == 3) {
+                    SglVertex first = vertices[0];
+                    draw_line(vertices[1], vertices[2]);
+                    vertices.erase(vertices.begin()+1);
+                }
+            }
+            break;
+        
+        default:
+            break;
     }
-    
-    vertices.push_back(vertex);
+}
 
-    // SGL_DEBUG_OUT("[Vertices] are " + std::to_string(vertices.size()));
-    if ((state.element_type_mode == SGL_LINES) && (vertices.size() == 2)) {
-        draw_line(vertices[0], vertices[1]);
-        vertices.clear();
-    }
-
-    else if ((state.element_type_mode == SGL_LINE_STRIP) && (vertices.size() == 2)) {
-        draw_line(vertices[0], vertices[1]);
-        vertices.erase(vertices.begin());
-    }
-    
-    else if (((state.element_type_mode == SGL_LINE_LOOP) || 
-              (state.element_type_mode == SGL_POLYGON && state.area_mode == SGL_LINE)) &&
-            (vertices.size() >= 2)) {
-        if(vertices.size() == 2) {
-            draw_line(vertices[0], vertices[1]);
-        }
-        else if(vertices.size() == 3) {
-            SglVertex first = vertices[0];
-            draw_line(vertices[1], vertices[2]);
-            vertices.erase(vertices.begin()+1);
+void SglRenderer::draw_point(const SglVertex point) {
+    int half_size = static_cast<int>(state.point_size / 2);
+            
+    // If the point size is 1 the half size will be 0 therefore both
+    // for loops will happen only once and draw the point itself
+    // otherwise it will create a square point around the vertex
+    for(int i = -half_size; i <= half_size; ++i) {
+        for(int j = -half_size; j <= half_size; ++j) {
+            int x = static_cast<int>(point.at(0) + i);
+            int y = static_cast<int>(point.at(1) + j);
+            state.currentFramebuffer->set_pixel(x, y, state.draw_color);
         }
     }
 }

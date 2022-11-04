@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "sgl.h"
+#include "../include/sgl.h"
 #include "sgl_vertex.hpp"
 #include "sgl_matrix.hpp"
 #include "sgl_framebuffer.hpp"
@@ -36,6 +36,7 @@ struct SglRenderer
         friend struct SglCore;
         std::vector<SglVertex> vertices;
 
+        void draw_point(const SglVertex point);
         void draw_line_low(int x0, int y0, int x1, int y1);
         void draw_line_high(int x0, int y0, int x1, int y1);
         void draw_line(const SglVertex & start_v, const SglVertex & end_v);

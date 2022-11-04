@@ -2,7 +2,7 @@
 #include <vector>
 #include <cstdint>
 
-#include "sgl.h"
+#include "../include/sgl.h"
 #include "macros.hpp"
 
 struct Pixel

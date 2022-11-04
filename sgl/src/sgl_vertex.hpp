@@ -3,7 +3,7 @@
 #include <array>
 #include <string>
 
-#include "sgl.h"
+#include "../include/sgl.h"
 
 // forward declare matrix so we can friend it
 struct SglMatrix;

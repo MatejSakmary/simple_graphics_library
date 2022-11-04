@@ -308,6 +308,7 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
 
     vertices.push_back(mat * center);
 
+    // TODO sakacond, this filling is shit
     if (state.area_mode == sglEAreaMode::SGL_FILL) draw_fill_object();
 
     if (state.area_mode == sglEAreaMode::SGL_POINT) push_vertex(mat * center);

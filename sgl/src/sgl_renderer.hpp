@@ -40,7 +40,7 @@ struct SglRenderer
         void draw_line_low(int x0, int y0, int x1, int y1);
         void draw_line_high(int x0, int y0, int x1, int y1);
         void draw_line(const SglVertex & start_v, const SglVertex & end_v);
-        void draw_sym_pixels(int x_c, int y_c, int x, int y);
+        void draw_sym_pixels(int x_c, int y_c, int z_c, int x, int y);
         void draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int y, SglMatrix mat);
 
         // Reads *vertices* and draws fill of the polygon specified by vertices

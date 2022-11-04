@@ -27,7 +27,7 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
     //         etc...
     // also the vertices handling is not ideal, plase make this more clear
     // READY FOR REVIEW
-    
+
     switch (state.element_type_mode) {
         case sglEElementType::SGL_POINTS:
             draw_point(vertex);
@@ -178,11 +178,21 @@ void SglRenderer::draw_line(const SglVertex & start_v, const SglVertex & end_v) 
 }
 
 
-void SglRenderer::draw_sym_pixels(int x_c, int y_c, int x, int y) {
-    state.currentFramebuffer->set_pixel(x_c + x, y_c + y, state.draw_color);
-    state.currentFramebuffer->set_pixel(x_c + x, y_c - y, state.draw_color);
-    state.currentFramebuffer->set_pixel(x_c - x, y_c + y, state.draw_color);
-    state.currentFramebuffer->set_pixel(x_c - x, y_c - y, state.draw_color);
+void SglRenderer::draw_sym_pixels(int x_c, int y_c, int z_c, int x, int y) {
+    if (state.area_mode != sglEAreaMode::SGL_FILL) {
+        state.currentFramebuffer->set_pixel(x_c + x, y_c + y, state.draw_color);
+        state.currentFramebuffer->set_pixel(x_c + x, y_c - y, state.draw_color);
+        state.currentFramebuffer->set_pixel(x_c - x, y_c + y, state.draw_color);
+        state.currentFramebuffer->set_pixel(x_c - x, y_c - y, state.draw_color);
+    }
+    else {
+        SglVertex start1 =  SglVertex(x_c + x, y_c + y, z_c, 1.0f);
+        SglVertex end1 =    SglVertex(x_c + x, y_c - y, z_c, 1.0f);
+        SglVertex start2 =  SglVertex(x_c - x, y_c + y, z_c, 1.0f);
+        SglVertex end2 =    SglVertex(x_c - x, y_c - y, z_c, 1.0f);
+        draw_line(start1, end1);
+        draw_line(start2, end2);
+    }
 }
 
 void SglRenderer::draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int y, SglMatrix mat) {
@@ -202,6 +212,7 @@ void SglRenderer::draw_circle(const SglVertex & center, float radius) {
     int x, y, p, twoX, twoY;
     int x_c = static_cast<int>(center.at(0));
     int y_c = static_cast<int>(center.at(1));
+    int z_c = static_cast<int>(center.at(2));
 
     x = 0;
     y = radius;
@@ -211,8 +222,8 @@ void SglRenderer::draw_circle(const SglVertex & center, float radius) {
 
     while (x <= y) {
         // SGL_DEBUG_OUT("[draw_circle] offsets are " + std::to_string(x) + " " + std::to_string(y));
-        draw_sym_pixels(x_c, y_c, x, y);
-        draw_sym_pixels(x_c, y_c, y, x);
+        draw_sym_pixels(x_c, y_c, z_c, x, y);
+        draw_sym_pixels(x_c, y_c, z_c, y, x);
         if (p > 0) {
             p = p - twoY + 2;
             twoY -= 2;
@@ -223,7 +234,7 @@ void SglRenderer::draw_circle(const SglVertex & center, float radius) {
         x += 1;
     }
 
-    if (state.area_mode == SGL_POINT) push_vertex(center);
+    if (state.area_mode == sglEAreaMode::SGL_POINT) push_vertex(center);
 }
 
 void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMatrix mat) {

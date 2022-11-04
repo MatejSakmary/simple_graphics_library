@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <cstdint>
+#include <limits>
 
 #include "../include/sgl.h"
 #include "macros.hpp"

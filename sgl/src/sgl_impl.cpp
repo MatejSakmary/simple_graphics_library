@@ -386,14 +386,14 @@ void sglPointSize(float size)
 void sglEnable(sglEEnableFlags cap) 
 {
 	if(!check_recording_status("[sglEnable()]")) { return; }
-	if((cap != sglEEnableFlags::SGL_DEPTH_TEST) && (cap != sglEEnableFlags::SGL_DEPTH_TEST))
+	if((cap != sglEEnableFlags::SGL_DEPTH_TEST))
 	{
 		SGL_DEBUG_OUT("[sglEnable()] Invalid enum");
 		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
 		return;
 	}
 	// TODO(msakmary) error prone -> figure out a way to do this better
-	core->renderer.state.depth_test = sglEEnableFlags::SGL_DEPTH_TEST;
+	core->renderer.state.depth_test = true;
 	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_DEPTH_TEST; 
 }
 
@@ -401,13 +401,13 @@ void sglEnable(sglEEnableFlags cap)
 void sglDisable(sglEEnableFlags cap) 
 {
 	if(!check_recording_status("[sglDisable()]")) { return; }
-	if((cap != sglEEnableFlags::SGL_DEPTH_TEST) && (cap != sglEEnableFlags::SGL_DEPTH_TEST))
+	if((cap != sglEEnableFlags::SGL_DEPTH_TEST))
 	{
 		SGL_DEBUG_OUT("[sglDisble()] Invalid enum");
 		core->set_error(sglEErrorCode::SGL_INVALID_ENUM);
 		return;
 	}
-	core->renderer.state.depth_test = sglEEnableFlags::SGL_DEPTH_TEST;
+	core->renderer.state.depth_test = false;
 	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_DEPTH_TEST; 
 }
 

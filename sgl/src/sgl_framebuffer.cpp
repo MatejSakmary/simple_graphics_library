@@ -19,7 +19,7 @@ void SglFramebuffer::clear_framebuffer(const Pixel & clear_color, uint32_t mask)
     if(mask & sglEClearBit::SGL_DEPTH_BUFFER_BIT)
     {
         SGL_DEBUG_OUT("[SglFramebuffer::clear_framebuffer()] Clearing depth buffer");
-        for(auto & pixel : depth) { pixel = 1.0f; }
+        for(auto & pixel : depth) { pixel = std::numeric_limits<float>::max(); }
     }
 }
 

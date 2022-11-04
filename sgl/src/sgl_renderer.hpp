@@ -17,7 +17,7 @@ struct DrawState
     float point_size;
     sglEAreaMode area_mode;
     sglEElementType element_type_mode;
-    sglEEnableFlags depth_test;
+    bool depth_test;
     SglFramebuffer* currentFramebuffer;
 };
 
@@ -45,8 +45,9 @@ struct SglRenderer
 
         // Reads *vertices* and draws fill of the polygon specified by vertices
         void draw_fill_object();
-        // algorithm for drawing simplest polygon
-        void fill_triangles();
+        
+        // TODO sakacond (was not enough time before deadline, will finish later)
+        // void draw_fill_triangles();
 
         void recording_start();
         void recording_end();

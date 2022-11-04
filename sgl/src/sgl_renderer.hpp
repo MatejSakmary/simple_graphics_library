@@ -45,6 +45,9 @@ struct SglRenderer
 
         // Reads *vertices* and draws fill of the polygon specified by vertices
         void draw_fill_object();
+        // algorithm for drawing simplest polygon
+        void fill_triangles();
+
         void recording_start();
         void recording_end();
 };

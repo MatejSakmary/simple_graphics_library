@@ -81,6 +81,14 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
             }
             break;
         
+        case sglEElementType::SGL_TRIANGLES:
+            vertices.push_back(vertex);
+            if (vertices.size() % 3 == 0) {
+                int last_index = static_cast<int>(vertices.size()) - 1;
+                draw_line(vertices.at(last_index), vertices.at(last_index -1));
+                draw_line(vertices.at(last_index - 1), vertices.at(last_index - 2));
+                draw_line(vertices.at(last_index - 2), vertices.at(last_index));
+            }
         default:
             break;
     }
@@ -258,12 +266,9 @@ void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMa
         SglVertex start = SglVertex(x1, y1, center.at(2), center.at(3));  
         SglVertex end = SglVertex(x2, y2, center.at(2), center.at(3));
 
-        // SGL_DEBUG_OUT("START " + std::to_string(start.at(0)) + " " + std::to_string(start.at(1)));
-        // SGL_DEBUG_OUT("END " + std::to_string(end.at(0)) + " " + std::to_string(end.at(1)));
-        
         draw_line(mat * start, mat * end);
         
-        vertices.push_back(mat * start);
+        if(i == 1) vertices.push_back(mat * start);
         vertices.push_back(mat * end);
 
         x1 = x2;
@@ -271,8 +276,7 @@ void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMa
     }
 
     if (state.area_mode == sglEAreaMode::SGL_FILL) draw_fill_object();
-
-    else if (state.area_mode == sglEAreaMode::SGL_POINT) push_vertex(mat * center);
+    if (state.area_mode == sglEAreaMode::SGL_POINT) push_vertex(mat * center);
 }
 
 void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat) {
@@ -295,12 +299,13 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
 
     SglVertex start = SglVertex(x1, y1, z_c, center.at(3));
 
+    vertices.push_back(mat * start);
+
     for (int i = 0; i < N; ++i) {
         auto end = rot_mat * start;
         
         draw_line(mat * start, mat * end);
         
-        vertices.push_back(mat * start);
         vertices.push_back(mat * end);
         
         start = end;
@@ -308,9 +313,7 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
 
     vertices.push_back(mat * center);
 
-    // TODO sakacond, this filling is shit
     if (state.area_mode == sglEAreaMode::SGL_FILL) draw_fill_object();
-
     if (state.area_mode == sglEAreaMode::SGL_POINT) push_vertex(mat * center);
 }
 
@@ -384,15 +387,31 @@ void SglRenderer::draw_fill_object()
         return true;
     };
 
+    int max_x = 0;
+    int max_y = 0;
+    int min_x = state.currentFramebuffer->get_width();
+    int min_y = state.currentFramebuffer->get_height();
     // add the first vertex again into vertices - this is because we need to add an edge connecting the
     // last vertex to the first vertex and this makes it a simple forloop later
     vertices.push_back(vertices.at(0));
+    if (vertices.at(0).at(0) > max_x) max_x = vertices.at(0).at(0);
+    if (vertices.at(0).at(1) > max_y) max_y = vertices.at(0).at(1);
+    if (vertices.at(0).at(0) < min_x) min_x = vertices.at(0).at(0);
+    if (vertices.at(0).at(1) < min_y) min_y = vertices.at(0).at(1);
     // each edge consists of two vertices so we start at one so we already have two vertices at the start of the loop
     for(size_t i = 1; i < vertices.size(); i++)
     {
         SGL_DEBUG_OUT("1/z of current vertex is " + std::to_string(vertices.at(i-1).at(2)) + " giving depth of " + std::to_string(1.0f / vertices.at(i-1).at(2)));
         insert_processed_edge(vertices.at(i - 1), vertices.at(i));
+
+
+        if (vertices.at(i).at(0) > max_x) max_x = vertices.at(i).at(0);
+        if (vertices.at(i).at(1) > max_y) max_y = vertices.at(i).at(1);
+        if (vertices.at(i).at(0) < min_x) min_x = vertices.at(i).at(0);
+        if (vertices.at(i).at(1) < min_y) min_y = vertices.at(i).at(1);
     }
+
+    AABB boundingBox = AABB(max_x, max_y, min_x, min_y);
 
     // sort inactive edges by y_upper so that later I can stop inactive checking early
     std::sort(edges.begin(), edges.end(), [](const SglEdge & first, const SglEdge & second) -> bool
@@ -507,8 +526,7 @@ void SglRenderer::draw_fill_object()
 
     // ============================ SCANLINE MAIN LOOP =========================================
     // TODO(msakmary) Add Bounding box to polygon so that I don't iterate over the entire screen
-    
-    for(int y = state.currentFramebuffer->get_height(); y >= 0 ; y--)
+    for(int y = boundingBox.upRight[1]; y >= boundingBox.downLeft[1] ; y--)
     {
         // add hit inactive edges to active list (when y == edge.from.y)
         check_inactive_edges(y);
@@ -522,6 +540,10 @@ void SglRenderer::draw_fill_object()
     vertices.clear();
 }
 
+void SglRenderer::fill_triangles() {
+    return;
+}
+
 void SglRenderer::recording_start()
 {
 }
@@ -531,10 +553,12 @@ void SglRenderer::recording_end()
     if(state.element_type_mode == SGL_LINE_LOOP && vertices.size() == 2) {
         draw_line(vertices[0], vertices[1]);
     }
+
+    SGL_DEBUG_OUT("Number of vertices: " + std::to_string(vertices.size()));
     // TODO(msakmary) Add other objects which are allowed with SGL_FILL - triangle, arc etc...
-    if(state.element_type_mode == SGL_POLYGON && state.area_mode == SGL_FILL)
-    {
-        draw_fill_object();
+    if (state.area_mode == sglEAreaMode::SGL_FILL) {
+        if (state.element_type_mode == sglEElementType::SGL_TRIANGLES) fill_triangles();
+        else if (state.element_type_mode == sglEElementType::SGL_POLYGON) draw_fill_object();
     }
 
     vertices.clear();

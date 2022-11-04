@@ -280,9 +280,7 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
     int z_c = center.at(2);
 
     float angle = to - from;
-    // SGL_DEBUG_OUT("Angle is " + std::to_string(angle));
     int N = int((40.0f * angle) / (2.0f * M_PI));
-    // SGL_DEBUG_OUT("N is " + std::to_string(N));
     float alpha = angle / N;
     
     x1 = radius * cos(from);
@@ -300,15 +298,19 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
     for (int i = 0; i < N; ++i) {
         auto end = rot_mat * start;
         
-        // SGL_DEBUG_OUT("START " + std::to_string(start.at(0)) + " " + std::to_string(start.at(1)));
-        // SGL_DEBUG_OUT("END " + std::to_string(end.at(0)) + " " + std::to_string(end.at(1)));
-        
         draw_line(mat * start, mat * end);
-
+        
+        vertices.push_back(mat * start);
+        vertices.push_back(mat * end);
+        
         start = end;
     }
 
-    if (state.area_mode == SGL_POINT) push_vertex(mat * center);
+    vertices.push_back(mat * center);
+
+    if (state.area_mode == sglEAreaMode::SGL_FILL) draw_fill_object();
+
+    if (state.area_mode == sglEAreaMode::SGL_POINT) push_vertex(mat * center);
 }
 
 void SglRenderer::draw_fill_object()

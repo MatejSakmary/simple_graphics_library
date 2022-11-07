@@ -55,7 +55,8 @@ struct Polygon : Primitive
 
 struct Scene
 {
-    std::vector<Primitive> primitives;
+    std::vector<Sphere> spheres;
+    std::vector<Polygon> polygons;
 
     Scene();
     ~Scene();

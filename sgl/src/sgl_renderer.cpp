@@ -619,204 +619,32 @@ void SglRenderer::push_material(
     materials.push_back(Material(r, g, b, kd, ks, shine, T, ior));
 }
 
-void SglRenderer::draw_primitive(const Sphere & sphere) {
-
-}
-
-void SglRenderer::draw_primitive(const Polygon & polygon) {
-
-}
-
-void SglRenderer::render_scene() {
-    
+void SglRenderer::raytrace_sphere(const Sphere & sphere) {
+    // TODO sakacond with raytracing
 }
 
 
-// void SglRenderer::draw_fill_triangles()
-// {
-//     // TODO sakacond fast triangle algorithm
-//     struct SglEdge
-//     {
-//         uint from_y;
-//         uint to_y;
-//         float upper_x;
-//         float upper_z;
-//         float step_x;
-//         float step_z;
-//     };
-
-//     struct SglTriangle
-//     {
-//         SglEdge a;
-//         SglEdge b;
-//         SglEdge c;
-//     };
-
-//     std::vector<SglEdge> edges;
-//     std::vector<SglTriangle> triangles;
-
-//     edges.reserve(vertices.size());
-//     // vectors of indices into edges
-//     std::list<uint> active_edges;
-//     std::list<uint> inactive_edges;
-
-//     // NOTE(msakmary) framebuffer (0,0) is bottom left corner
-//     auto insert_processed_edge = [&edges](const SglVertex & from, const SglVertex & to) -> bool
-//     {
-//         // 2) remove horizontal edges
-//         if(from.at(1) == to.at(1)) { return false; }
-//         // 1) orient edges top - bottom and shorten them by one pixel (this is in to.at(1) + 1.0f)
-//         if(from.at(1) < to.at(1)) 
-//         { 
-//             edges.emplace_back(SglEdge{
-//                 .from_y  = static_cast<uint>(to.at(1)),
-//                 .to_y    = static_cast<uint>(from.at(1) + 1.0f),
-//                 .upper_x = to.at(0),
-//                 .upper_z = to.at(2),
-//                 // x_step = (x_from - x_to) / (y_from - y_to)
-//                 .step_x  = (from.at(0) - to.at(0)) / ((from.at(1)) - to.at(1)),
-//                 // x_step = (z_from - z_to) / (y_from - y_to)
-//                 .step_z  = (from.at(2) - to.at(2)) / ((from.at(1)) - to.at(1)),
-//             });
-//         }
-//         else
-//         {
-//             edges.emplace_back(SglEdge{
-//                 .from_y  = static_cast<uint>(from.at(1)),
-//                 .to_y    = static_cast<uint>(to.at(1) + 1.0f),
-//                 .upper_x = from.at(0),
-//                 .upper_z = from.at(2),
-//                 // x_step = (x_to - x_from) / (y_to - y_from)
-//                 .step_x  = (to.at(0) - from.at(0)) / ((to.at(1)) - from.at(1)),
-//                 // x_step = (z_to - z_from) / (y_to - y_from)
-//                 .step_z  = (to.at(2) - from.at(2)) / ((to.at(1)) - from.at(1)),
-//             });
-//         } 
-//         return true;
-//     };
+void SglRenderer::raytrace_polygon(const Polygon & polygon) {
+    // TODO sakacond with raytracing
+}
 
 
-//     for(size_t i = 0; i < vertices.size(); i++)
-//     {
-//         SGL_DEBUG_OUT("1/z of current vertex is " + std::to_string(vertices.at(i-1).at(2)) + " giving depth of " + std::to_string(1.0f / vertices.at(i-1).at(2)));
-//         insert_processed_edge(vertices.at(i - 1), vertices.at(i));
-//         if ((i + 1) % 3 == 0) {
-//             triangles.push_back(SglTriangle{
-//                 .a = edges.at(i-2),
-//                 .b = edges.at(i-1),
-//                 .c = edges.at(i)
-//             });
-//         }
-//     }
+void SglRenderer::raytrace_scene() {
+    for (Sphere s: scene.spheres) raytrace_sphere(s);
+    for (Polygon p: scene.polygons) raytrace_polygon(p);
+}
 
-//     // sort inactive edges by y_upper so that later I can stop inactive checking early
-//     std::sort(edges.begin(), edges.end(), [](const SglEdge & first, const SglEdge & second) -> bool
-//         { return first.from_y > second.from_y; });
 
-//     // fill inactive edges with indices
-//     inactive_edges.resize(edges.size());
-//     std::iota(inactive_edges.begin(), inactive_edges.end(), 0);
+void SglRenderer::draw_sphere(const Sphere & sphere) {
 
-//     // check inactive edges and add new active edges if there are some
-//     auto check_inactive_edges = [&edges, &inactive_edges, &active_edges](uint y){
-//         std::vector<uint> to_remove_edges;
-//         for(const auto & edge : inactive_edges)
-//         {
-//             // if the edge start is equal to y we hit it and we should 
-//             // move it to the active lists 
-//             if(edges.at(edge).from_y == y) 
-//             { 
-//                 // SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is hit at y: " + std::to_string(y) + " adding to active");
-//                 active_edges.push_back(edge);
-//                 to_remove_edges.push_back(edge);
-//             }
-//         }
-//         std::for_each(to_remove_edges.begin(), to_remove_edges.end(), [&inactive_edges](const uint remove_edge) { inactive_edges.remove(remove_edge); });
-//     };
+}
 
-//     // check if any active edge is done processing and should be removed
-//     auto check_active_edges = [&edges, &active_edges](uint y){
-//         std::vector<uint> to_remove_edges;
-//         for(const auto & edge : active_edges)
-//         {
-//             // if the edge start is equal to y we hit it and we should 
-//             // move it to the active lists 
-//             if(y < edges.at(edge).to_y) 
-//             { 
-//                 // SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is finished at y: " + std::to_string(y) + " deleting from active");
-//                 to_remove_edges.push_back(edge);
-//             }
-//         }
-//         std::for_each(to_remove_edges.begin(), to_remove_edges.end(), [&active_edges](const uint remove_edge) { active_edges.remove(remove_edge); });
-//     };
+void SglRenderer::draw_polygon(const Polygon & polygon) {
 
-//     // sort active edges by x intersection
-//     auto shake_sort_active_edges = [&edges, &active_edges](){
-//         // cocktail sort copied from https://www.geeksforgeeks.org/cocktail-sort/ and modified for lists using iterators
-//         bool swapped = true;
- 
-//         while (swapped) {
-//             swapped = false;
- 
-//             auto one_before_end_it = --active_edges.end();
-//             for (auto it = active_edges.begin(); it != one_before_end_it; ++it) 
-//             {
-//                 auto it_ = it;
-//                 if (edges.at(*it).upper_x > edges.at(*(++it_)).upper_x) 
-//                 {
-//                     std::swap(*it, *it_);
-//                     swapped = true;
-//                 }
-//             }
- 
-//             if (!swapped){ break; }
-//             swapped = false;
- 
-//             for (auto it = --active_edges.end(); it != active_edges.begin(); --it) 
-//             {
-//                 auto it_ = it;
-//                 // TODO(msakmary) This is very cursed, improve if there is time
-//                 if (edges.at(*(--it_)).upper_x > edges.at(*it).upper_x) {
-//                     std::swap(*it, *it_);
-//                     swapped = true;
-//                 }
-//             }
-//         }
-//     };
+}
 
-//     auto draw_active_edges = [this, &edges, &active_edges](uint y){
-//         for(auto it = active_edges.begin(); it != active_edges.end(); )
-//         {
-//             auto & start = edges.at(*(it++));
-//             auto & end = edges.at(*(it++));
-//             // SGL_DEBUG_OUT("Filling row of pixels at " + std::to_string(y) + " bounded (" + std::to_string(start.upper_x) + "," + std::to_string(end.upper_x) + ")"); 
-//             for(uint x = static_cast<uint>(start.upper_x); x <= static_cast<uint>(end.upper_x); x++) 
-//             {
-//                 if(this->state.depth_test == sglEEnableFlags::SGL_DEPTH_TEST)
-//                 {
-//                     // lerp between start.z and end.z based on the x parameter
-//                     float t = (static_cast<float>(x) - start.upper_x) / (end.upper_x - start.upper_x);
-//                     if(x == static_cast<uint>(start.upper_x)) { t = 0.0f; }
 
-//                     float depth = ((1.0f - t) * start.upper_z) + (t * end.upper_z); 
-//                     // there is something closer in the depth buffer -> ignore this write
-//                     if(depth > this->state.currentFramebuffer->get_depth(x, y)) { continue; }
-//                     this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
-//                     this->state.currentFramebuffer->set_depth(x, y, depth);
-//                 } else {
-//                     this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
-//                 }
-//             }
-//             start.upper_x -= start.step_x;
-//             start.upper_z -= start.step_z;
-//             end.upper_x -= end.step_x;
-//             end.upper_z -= end.step_z;
-//         }
-//     };
-
-//     for(SglTriangle triangle: triangles) {
-        
-//     }
-    
-//     vertices.clear();
-// }
+void SglRenderer::rasterize_scene() {
+    for (Sphere s: scene.spheres) draw_sphere(s);
+    for (Polygon p: scene.polygons) draw_polygon(p);
+}

@@ -58,6 +58,7 @@ Material::~Material() {}
 // }
 
 Scene::Scene() :
-    primitives{} {}
+    spheres{},
+    polygons{} {}
 
 Scene::~Scene() {}

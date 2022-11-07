@@ -73,7 +73,7 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
                     poly.material = materials.back();
                     for (int i = 0; i < 3; ++i)
                         poly.vertices.push_back(vertices.at(i));
-                    scene.primitives.push_back(poly);
+                    scene.polygons.push_back(poly);
                     vertices.clear();
                 }
                 else {
@@ -109,11 +109,13 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
 
 void SglRenderer::push_sphere(const SglVertex & center, float radius) {
     if (state.defining_scene) {
-        Sphere sphere;
-        sphere.material = materials.back();
-        sphere.center = center;
-        sphere.radius = radius;
-        if (materials.size() != 0) scene.primitives.push_back(sphere);
+        if (materials.size() != 0) { 
+            Sphere sphere;
+            sphere.material = materials.back();
+            sphere.center = center;
+            sphere.radius = radius;
+            scene.spheres.push_back(sphere);
+        }
     }
     // TODO ERRORS
 }
@@ -630,17 +632,19 @@ void SglRenderer::raytrace_polygon(const Polygon & polygon) {
 
 
 void SglRenderer::raytrace_scene() {
+    rasterize_scene();
     for (Sphere s: scene.spheres) raytrace_sphere(s);
     for (Polygon p: scene.polygons) raytrace_polygon(p);
 }
 
 
 void SglRenderer::draw_sphere(const Sphere & sphere) {
-
+    draw_circle(sphere.center, sphere.radius);
 }
 
 void SglRenderer::draw_polygon(const Polygon & polygon) {
-
+    for (int i = 0; i < 3; ++i) vertices.push_back(polygon.vertices.at(i));
+    draw_fill_object();
 }
 
 

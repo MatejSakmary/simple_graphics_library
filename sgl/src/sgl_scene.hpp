@@ -36,6 +36,8 @@ struct Primitive
 {
     Material material;
     // Primitive(const Material & material);
+    virtual SglVertex compute_normal_vector(const SglVertex & vector);
+    virtual bool intersection(const SglVertex & vector);
 };
 
 struct Sphere : Primitive 
@@ -44,11 +46,18 @@ struct Sphere : Primitive
     float radius;
     // Sphere(const Material & material, const SglVertex & center, float radius);
     // ~Sphere();
+    SglVertex compute_normal_vector(const SglVertex & vector) override;
+    bool intersection(const SglVertex & vector) override;
 };
 
 struct Polygon : Primitive 
 {
     std::vector<SglVertex> vertices;
+    bool computed;
+    SglVertex norm;
+
+    SglVertex compute_normal_vector(const SglVertex & vector) override;
+    bool intersection(const SglVertex & vector) override;
     // Polygon(const Material & material, const SglVertex & v1, const SglVertex & v2, const SglVertex & v3);
     // ~Primitive();
 };

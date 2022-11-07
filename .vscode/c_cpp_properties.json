@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${default}",
+                "${workspaceFolder}/sgl/include",
                 "${workspaceFolder}/sgl/include"
             ],
             "compilerPath": "/usr/bin/clang",

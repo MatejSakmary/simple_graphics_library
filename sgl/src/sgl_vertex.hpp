@@ -10,6 +10,7 @@ struct SglMatrix;
 
 struct SglVertex
 {
+    SglVertex();
     SglVertex(float x, float y, float z, float w);
     ~SglVertex();
 
@@ -21,6 +22,5 @@ struct SglVertex
 
     private:
         friend struct SglMatrix;
-        SglVertex();
         std::array<float, 4> vert;
 };

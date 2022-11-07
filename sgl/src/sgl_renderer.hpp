@@ -6,6 +6,7 @@
 #include "sgl_vertex.hpp"
 #include "sgl_matrix.hpp"
 #include "sgl_framebuffer.hpp"
+#include "sgl_scene.hpp"
 #include "macros.hpp"
 
 // Forward decl vertex so we can friend it 
@@ -19,11 +20,15 @@ struct DrawState
     sglEElementType element_type_mode;
     bool depth_test;
     SglFramebuffer* currentFramebuffer;
+    bool defining_scene;
 };
 
 struct SglRenderer
 {
     DrawState state;
+    Scene scene;
+    std::vector<Material> materials;
+
     SglRenderer();
     ~SglRenderer();
 
@@ -31,6 +36,18 @@ struct SglRenderer
     void draw_circle(const SglVertex & center, float radius);
     void draw_ellipse(const SglVertex & center, float a, float b, SglMatrix mat);
     void draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat);
+    void push_sphere(const SglVertex & center, float radius);
+
+    void push_material(
+        float r,
+        float g,
+        float b,
+        float kd,
+        float ks,
+        float shine,
+        float T,
+        float ior
+    );
 
     private:
         friend struct SglCore;
@@ -48,6 +65,11 @@ struct SglRenderer
         
         // TODO sakacond (was not enough time before deadline, will finish later)
         // void draw_fill_triangles();
+
+        // RayTracing functions
+        void draw_primitive(const Sphere & sphere);
+        void draw_primitive(const Polygon & polygon);
+        void render_scene();
 
         void recording_start();
         void recording_end();

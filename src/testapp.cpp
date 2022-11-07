@@ -12,8 +12,8 @@
 
 // #define TEST0
 // #define TEST1
-#define TEST2
-//#define TEST3
+// #define TEST2
+#define TEST3
 //#define TEST4
 //#define TEST5
 
@@ -35,18 +35,18 @@
 #ifdef TEST2
 #define WIDTH 800
 #define HEIGHT 600
-// #define TEST_2A
+#define TEST_2A
 #define TEST_2B
-// #define TEST_2C
-// #define TEST_2D
+#define TEST_2C
+#define TEST_2D
 #endif
 
 #ifdef TEST3
 #define WIDTH 512
 #define HEIGHT 512
 #define TEST_3A
-#define TEST_3B
-#define TEST_3C
+// #define TEST_3B
+// #define TEST_3C
 #endif
 
 #ifdef TEST4

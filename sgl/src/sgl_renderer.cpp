@@ -10,8 +10,11 @@ SglRenderer::SglRenderer() :
        .area_mode = sglEAreaMode::SGL_FILL,
        .element_type_mode = sglEElementType::SGL_POINTS,
        .depth_test = false,
-       .currentFramebuffer = nullptr
+       .currentFramebuffer = nullptr,
+       .defining_scene = false
     },
+    scene{ Scene() },
+    materials{},
     vertices{} {}
 
 SglRenderer::~SglRenderer() {}
@@ -21,11 +24,6 @@ SglRenderer::~SglRenderer() {}
 void SglRenderer::push_vertex(const SglVertex & vertex)
 {
     // TODO(osakaci) This function is in great need of rewrite -> I recommend look up table which describes what to draw
-    // in each element and area config 
-    // example - element = polygon, area = line -> draw line_loop
-    //         - element = line,    area = fill -> draw line
-    //         etc...
-    // also the vertices handling is not ideal, plase make this more clear
     // READY FOR REVIEW
 
     switch (state.element_type_mode) {
@@ -69,14 +67,29 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
         case sglEElementType::SGL_POLYGON:
             vertices.push_back(vertex);
             // TODO sakacond add comment
-            if ((state.area_mode == sglEAreaMode::SGL_LINE) && (vertices.size() >= 2)) {
-                if(vertices.size() == 2) {
-                    draw_line(vertices[0], vertices[1]);
+            if (state.defining_scene && vertices.size() == 3) {
+                if (materials.size() != 0) { 
+                    Polygon poly;
+                    poly.material = materials.back();
+                    for (int i = 0; i < 3; ++i)
+                        poly.vertices.push_back(vertices.at(i));
+                    scene.primitives.push_back(poly);
+                    vertices.clear();
                 }
-                else if(vertices.size() == 3) {
-                    SglVertex first = vertices[0];
-                    draw_line(vertices[1], vertices[2]);
-                    vertices.erase(vertices.begin()+1);
+                else {
+                    //TODO sakacond ERROR 
+                }
+            }
+            else {
+                if ((state.area_mode == sglEAreaMode::SGL_LINE) && (vertices.size() >= 2)) {
+                    if(vertices.size() == 2) {
+                        draw_line(vertices[0], vertices[1]);
+                    }
+                    else if(vertices.size() == 3) {
+                        SglVertex first = vertices[0];
+                        draw_line(vertices[1], vertices[2]);
+                        vertices.erase(vertices.begin()+1);
+                    }
                 }
             }
             break;
@@ -92,6 +105,17 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
         default:
             break;
     }
+}
+
+void SglRenderer::push_sphere(const SglVertex & center, float radius) {
+    if (state.defining_scene) {
+        Sphere sphere;
+        sphere.material = materials.back();
+        sphere.center = center;
+        sphere.radius = radius;
+        if (materials.size() != 0) scene.primitives.push_back(sphere);
+    }
+    // TODO ERRORS
 }
 
 void SglRenderer::draw_point(const SglVertex & point) {
@@ -556,6 +580,58 @@ void SglRenderer::draw_fill_object()
     vertices.clear();
 }
 
+void SglRenderer::recording_start()
+{
+}
+
+void SglRenderer::recording_end()
+{
+    if(state.element_type_mode == SGL_LINE_LOOP && vertices.size() == 2) {
+        draw_line(vertices[0], vertices[1]);
+    }
+
+    SGL_DEBUG_OUT("Number of vertices: " + std::to_string(vertices.size()));
+    // TODO(msakmary) Add other objects which are allowed with SGL_FILL - triangle, arc etc...
+    if (state.area_mode == sglEAreaMode::SGL_FILL) {
+        if (state.element_type_mode == sglEElementType::SGL_TRIANGLES || 
+            state.element_type_mode == sglEElementType::SGL_POLYGON) 
+        {
+            draw_fill_object();
+        }
+    }
+
+    vertices.clear();
+}
+
+
+// Raytrace functions
+
+void SglRenderer::push_material(
+        float r,
+        float g,
+        float b,
+        float kd,
+        float ks,
+        float shine,
+        float T,
+        float ior) 
+{
+    materials.push_back(Material(r, g, b, kd, ks, shine, T, ior));
+}
+
+void SglRenderer::draw_primitive(const Sphere & sphere) {
+
+}
+
+void SglRenderer::draw_primitive(const Polygon & polygon) {
+
+}
+
+void SglRenderer::render_scene() {
+    
+}
+
+
 // void SglRenderer::draw_fill_triangles()
 // {
 //     // TODO sakacond fast triangle algorithm
@@ -744,26 +820,3 @@ void SglRenderer::draw_fill_object()
     
 //     vertices.clear();
 // }
-
-void SglRenderer::recording_start()
-{
-}
-
-void SglRenderer::recording_end()
-{
-    if(state.element_type_mode == SGL_LINE_LOOP && vertices.size() == 2) {
-        draw_line(vertices[0], vertices[1]);
-    }
-
-    SGL_DEBUG_OUT("Number of vertices: " + std::to_string(vertices.size()));
-    // TODO(msakmary) Add other objects which are allowed with SGL_FILL - triangle, arc etc...
-    if (state.area_mode == sglEAreaMode::SGL_FILL) {
-        if (state.element_type_mode == sglEElementType::SGL_TRIANGLES || 
-            state.element_type_mode == sglEElementType::SGL_POLYGON) 
-        {
-            draw_fill_object();
-        }
-    }
-
-    vertices.clear();
-}

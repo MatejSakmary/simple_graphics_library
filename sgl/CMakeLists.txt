@@ -10,6 +10,7 @@ add_library(${PROJECT_NAME} STATIC
     "src/sgl_matrix.cpp"
     "src/sgl_vertex.cpp"
     "src/sgl_renderer.cpp"
+    "src/sgl_scene.cpp"
 )
 
 if(SGL_LOG_DEBUG_OUTPUT)

@@ -382,7 +382,6 @@ void sglPointSize(float size)
 }
 
 
-// TODO(sakacond) CHECK AND FIX ENABLE FLAGS
 void sglEnable(sglEEnableFlags cap) 
 {
 	if(!check_recording_status("[sglEnable()]")) { return; }
@@ -397,7 +396,7 @@ void sglEnable(sglEEnableFlags cap)
 	core->contexts.at(core->get_context()).capabilites = sglEEnableFlags::SGL_DEPTH_TEST; 
 }
 
-// TODO(sakacond) CHECK AND FIX ENABLE FLAGS
+
 void sglDisable(sglEEnableFlags cap) 
 {
 	if(!check_recording_status("[sglDisable()]")) { return; }
@@ -415,15 +414,29 @@ void sglDisable(sglEEnableFlags cap)
 // RayTracing oriented functions
 //---------------------------------------------------------------------------
 
-void sglBeginScene() {}
+void sglBeginScene() 
+{
+	if ((core->get_context() == -1) || core->get_recording()) core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+	core->renderer.state.defining_scene = true;
+}
 
-void sglEndScene() {}
+void sglEndScene() 
+{
+	if ((core->get_context() == -1) || core->get_recording()) core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+	core->renderer.state.defining_scene = false;
+}
 
 void sglSphere(const float x,
 			   const float y,
 			   const float z,
 			   const float radius)
 {
+	if 	(
+			(core->get_context() == -1) || 
+			core->get_recording() || 
+			!core->renderer.state.defining_scene
+		) core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+	core->renderer.push_sphere(SglVertex(x, y, z, 1.0f), radius);
 }
 
 void sglMaterial(const float r,
@@ -435,6 +448,11 @@ void sglMaterial(const float r,
 				 const float T,
 				 const float ior)
 {
+	if 	(
+			(core->get_context() == -1) || 
+			core->get_recording()
+		) core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
+	core->renderer.push_material(r, g, b, kd, ks, shine, T, ior);
 }
 
 void sglPointLight(const float x,
@@ -444,16 +462,24 @@ void sglPointLight(const float x,
 				   const float g,
 				   const float b)
 {
+
 }
 
-void sglRayTraceScene() {}
+void sglRayTraceScene() 
+{
 
-void sglRasterizeScene() {}
+}
+
+void sglRasterizeScene() 
+{
+
+}
 
 void sglEnvironmentMap(const int width,
 					   const int height,
 					   float *texels)
 {
+
 }
 
 void sglEmissiveMaterial(const float r,
@@ -463,4 +489,5 @@ void sglEmissiveMaterial(const float r,
 						 const float c1,
 						 const float c2)
 {
+
 }

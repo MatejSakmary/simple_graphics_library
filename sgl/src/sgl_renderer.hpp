@@ -69,7 +69,6 @@ struct SglRenderer
         // RayTracing functions
         void raytrace_sphere(const Sphere & sphere);
         void raytrace_polygon(const Polygon & polygon);
-        void raytrace_scene();
 
 
         // Rasterizing primitives functions
@@ -79,4 +78,7 @@ struct SglRenderer
 
         void recording_start();
         void recording_end();
+
+    public:
+        void raytrace_scene();
 };

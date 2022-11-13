@@ -467,7 +467,7 @@ void sglPointLight(const float x,
 
 void sglRayTraceScene() 
 {
-
+	core->renderer.raytrace_scene();
 }
 
 void sglRasterizeScene() 

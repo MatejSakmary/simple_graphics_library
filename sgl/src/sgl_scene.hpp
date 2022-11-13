@@ -62,6 +62,12 @@ struct Polygon : Primitive
     // ~Primitive();
 };
 
+struct Light 
+{
+    SglVertex source;
+    float color[3] = {0.0f, 0.0f, 0.0f};
+};
+
 struct Scene
 {
     std::vector<Sphere> spheres;

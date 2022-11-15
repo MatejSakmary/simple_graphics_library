@@ -172,3 +172,12 @@ void SglCore::draw_arc(SglVertex center, float radius, float from, float to) {
     
     renderer.draw_arc(center, radius, from, to, mat);
 }
+
+
+void SglCore::raytrace_scene() {
+    SglMatrix mat = SglMatrix(contexts.at(current_context).viewport_mat);
+    mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
+    mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
+    
+    renderer.raytrace_scene(mat);
+}

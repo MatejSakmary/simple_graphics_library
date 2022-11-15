@@ -68,8 +68,8 @@ struct SglRenderer
         // void draw_fill_triangles();
 
         // RayTracing functions
-        void raytrace_sphere(const Sphere & sphere);
-        void raytrace_polygon(const Polygon & polygon);
+        void raytrace_sphere(const Sphere & sphere, SglMatrix mat);
+        void raytrace_polygon(const Polygon & polygon, SglMatrix mat);
 
 
         // Rasterizing primitives functions
@@ -81,5 +81,5 @@ struct SglRenderer
         void recording_end();
 
     public:
-        void raytrace_scene();
+        void raytrace_scene(const SglMatrix & mat);
 };

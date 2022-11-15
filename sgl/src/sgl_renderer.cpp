@@ -627,24 +627,27 @@ void SglRenderer::push_material(
     materials.push_back(Material(r, g, b, kd, ks, shine, T, ior));
 }
 
-void SglRenderer::raytrace_sphere(const Sphere & sphere) {
-    for (Sphere sphere : scene.spheres) {
-        
-    }
+void SglRenderer::raytrace_sphere(const Sphere & sphere, SglMatrix mat) {
+    Sphere s = Sphere();
+    s.center = mat * sphere.center;
+    s.material = sphere.material;
+    s.radius = sphere.radius;
+
+    Ray r;
+
+    bool intersected = s.intersection(r);
 }
 
 
-void SglRenderer::raytrace_polygon(const Polygon & polygon) {
-    for (Polygon poly : scene.polygons) {
-
-    }
+void SglRenderer::raytrace_polygon(const Polygon & polygon, SglMatrix mat) {
+    //todo 
 }
 
 
-void SglRenderer::raytrace_scene() {
+void SglRenderer::raytrace_scene(const SglMatrix & mat) {
     // rasterize_scene();
-    for (Sphere s: scene.spheres) raytrace_sphere(s);
-    for (Polygon p: scene.polygons) raytrace_polygon(p);
+    for (Sphere s: scene.spheres) raytrace_sphere(s, mat);
+    for (Polygon p: scene.polygons) raytrace_polygon(p, mat);
 }
 
 

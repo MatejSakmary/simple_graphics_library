@@ -45,16 +45,6 @@ SglVertex SglVertex::normalize() {
 }
 
 
-SglVertex & SglVertex::operator+(const SglVertex & B) {
-    return SglVertex(
-        this->at(0) + B.at(0),
-        this->at(1) + B.at(1),
-        this->at(2) + B.at(2),
-        this->at(3) + B.at(3)
-        );
-}
-
-
 float SglVertex::get_norm() {
     return sqrt(this->at(0) * this->at(0) + this->at(1) * this->at(1) + this->at(2) * this->at(2));
 }

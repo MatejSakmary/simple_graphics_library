@@ -467,13 +467,13 @@ void sglPointLight(const float x,
 
 void sglRayTraceScene() 
 {
-	core->renderer.raytrace_scene();
+	core->raytrace_scene();
 }
 
-void sglRasterizeScene() 
-{
+// void sglRasterizeScene() 
+// {
 
-}
+// }
 
 void sglEnvironmentMap(const int width,
 					   const int height,

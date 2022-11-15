@@ -33,6 +33,8 @@ struct SglCore
     void set_recording(bool new_recording);
     auto get_recording() -> bool;
 
+    void raytrace_scene();
+
     sglEErrorCode get_error();
     void set_error(sglEErrorCode error_code);
 

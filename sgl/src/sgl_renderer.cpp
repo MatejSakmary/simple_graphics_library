@@ -628,17 +628,21 @@ void SglRenderer::push_material(
 }
 
 void SglRenderer::raytrace_sphere(const Sphere & sphere) {
-    // TODO sakacond with raytracing
+    for (Sphere sphere : scene.spheres) {
+        
+    }
 }
 
 
 void SglRenderer::raytrace_polygon(const Polygon & polygon) {
-    // TODO sakacond with raytracing
+    for (Polygon poly : scene.polygons) {
+
+    }
 }
 
 
 void SglRenderer::raytrace_scene() {
-    rasterize_scene();
+    // rasterize_scene();
     for (Sphere s: scene.spheres) raytrace_sphere(s);
     for (Polygon p: scene.polygons) raytrace_polygon(p);
 }

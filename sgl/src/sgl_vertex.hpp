@@ -20,12 +20,16 @@ struct SglVertex
     auto at(int idx) -> float &;
     // Divide vertex by w
     void persp_division();
-    SglVertex cross_product(const SglVertex &A, const SglVertex &B);
-    float dot_product(const SglVertex &A, const SglVertex &B);
+    
+    float get_norm();
+
     SglVertex normalize();
 
     private:
         friend struct SglMatrix;
         std::array<float, 4> vert;
-        float get_norm();
 };
+
+
+SglVertex cross_product(const SglVertex &A, const SglVertex &B);
+float dot_product(const SglVertex &A, const SglVertex &B);

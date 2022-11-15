@@ -34,20 +34,6 @@ auto SglVertex::to_string() -> std::string
     return s.str();
 }
 
-SglVertex SglVertex::cross_product(const SglVertex &A, const SglVertex &B)
-{
-    return SglVertex(
-        A.at(1) * B.at(2) - A.at(2) * B.at(1), 
-        A.at(2) * B.at(0) - A.at(0) * B.at(3), 
-        A.at(0) * B.at(1) - A.at(1) * B.at(0), 
-        1.0f);
-}
-
-float SglVertex::dot_product(const SglVertex &A, const SglVertex &B)
-{
-    return (A.at(0) * B.at(0)) + (A.at(1) * B.at(1)) + (A.at(2) * B.at(2));
-}
-
 SglVertex SglVertex::normalize() {
     float norm = this->get_norm();
     
@@ -59,6 +45,30 @@ SglVertex SglVertex::normalize() {
 }
 
 
+SglVertex & SglVertex::operator+(const SglVertex & B) {
+    return SglVertex(
+        this->at(0) + B.at(0),
+        this->at(1) + B.at(1),
+        this->at(2) + B.at(2),
+        this->at(3) + B.at(3)
+        );
+}
+
+
 float SglVertex::get_norm() {
     return sqrt(this->at(0) * this->at(0) + this->at(1) * this->at(1) + this->at(2) * this->at(2));
+}
+
+SglVertex cross_product(const SglVertex &A, const SglVertex &B)
+{
+    return SglVertex(
+        A.at(1) * B.at(2) - A.at(2) * B.at(1), 
+        A.at(2) * B.at(0) - A.at(0) * B.at(3), 
+        A.at(0) * B.at(1) - A.at(1) * B.at(0), 
+        1.0f);
+}
+
+float dot_product(const SglVertex &A, const SglVertex &B)
+{
+    return (A.at(0) * B.at(0)) + (A.at(1) * B.at(1)) + (A.at(2) * B.at(2));
 }

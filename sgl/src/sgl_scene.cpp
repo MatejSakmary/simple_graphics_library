@@ -37,7 +37,7 @@ Material::~Material() {}
 // These virtual functions will never be used.
 SglVertex Primitive::compute_normal_vector(const SglVertex & vector) { return SglVertex(0.0f, 0.0f, 0.0f, 1.0f); }
 
-bool Primitive::intersection(const SglVertex & vector) { 
+bool Primitive::intersection(const Ray & ray) { 
     return false; 
 }
 
@@ -48,7 +48,7 @@ SglVertex Polygon::compute_normal_vector(const SglVertex & vector) {
         return norm;
     }
 
-    norm = norm.cross_product(this->vertices.at(0), this->vertices.at(1));
+    norm = cross_product(this->vertices.at(0), this->vertices.at(1));
     norm = norm.normalize();
 
     computed = true;
@@ -65,18 +65,52 @@ PointLight::PointLight(float x, float y, float z, float r, float g, float b) {
 
 PointLight::~PointLight() {}
 
-bool Polygon::intersection(const SglVertex & vector) {
+bool Polygon::intersection(const Ray & ray) {
     // TODO sakacond
     return false;
 }
 
 SglVertex Sphere::compute_normal_vector(const SglVertex & vector) {
-    
-    return SglVertex(0.0f, 0.0f, 0.0f, 1.0f);
+    SglVertex normal = SglVertex(
+        vector.at(0) - this->center.at(0),
+        vector.at(1) - this->center.at(1),
+        vector.at(2) - this->center.at(2),
+        0.0f
+    );
+
+    return normal.normalize();
 }
 
-bool Sphere::intersection(const SglVertex & vector) {
-    // TODO sakacond
+bool Sphere::intersection(const Ray & ray) {
+    float x, y;
+
+    SglVertex center_vector(
+        this->center.at(0) - ray.origin.at(0),
+        this->center.at(1) - ray.origin.at(1),
+        this->center.at(2) - ray.origin.at(2),
+        0.0f
+    );
+
+    float angle = dot_product(center_vector, ray.direction);
+    
+    SglVertex p = SglVertex(
+        ray.origin.at(0) + ray.direction.at(0) * angle,
+        ray.origin.at(1) + ray.direction.at(1) * angle,
+        ray.origin.at(2) + ray.direction.at(2) * angle,
+        ray.origin.at(3) + ray.direction.at(3) * angle
+        );
+
+    y = SglVertex(
+        this->center.at(0) - p.at(0),
+        this->center.at(1) - p.at(1),
+        this->center.at(2) - p.at(2),
+        this->center.at(3) - p.at(3)
+    ).get_norm();
+
+    if (y <= radius) {
+        return true;
+    }
+
     return false;
 }
 

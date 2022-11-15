@@ -6,6 +6,13 @@
 #include "sgl_matrix.hpp"
 
 
+
+struct Ray {
+    SglVertex origin;
+    SglVertex direction;
+};
+
+
 struct Material
 {
     float r;
@@ -37,7 +44,7 @@ struct Primitive
     Material material;
     // Primitive(const Material & material);
     virtual SglVertex compute_normal_vector(const SglVertex & vector);
-    virtual bool intersection(const SglVertex & vector);
+    virtual bool intersection(const Ray & ray);
 };
 
 struct Sphere : Primitive 
@@ -47,7 +54,7 @@ struct Sphere : Primitive
     // Sphere(const Material & material, const SglVertex & center, float radius);
     // ~Sphere();
     SglVertex compute_normal_vector(const SglVertex & vector) override;
-    bool intersection(const SglVertex & vector) override;
+    bool intersection(const Ray & ray) override;
 };
 
 struct Polygon : Primitive 
@@ -57,7 +64,7 @@ struct Polygon : Primitive
     SglVertex norm;
 
     SglVertex compute_normal_vector(const SglVertex & vector) override;
-    bool intersection(const SglVertex & vector) override;
+    bool intersection(const Ray & ray) override;
     // Polygon(const Material & material, const SglVertex & v1, const SglVertex & v2, const SglVertex & v3);
     // ~Primitive();
 };

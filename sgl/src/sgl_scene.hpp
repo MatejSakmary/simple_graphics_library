@@ -62,16 +62,20 @@ struct Polygon : Primitive
     // ~Primitive();
 };
 
-struct Light 
+struct PointLight 
 {
     SglVertex source;
     float color[3] = {0.0f, 0.0f, 0.0f};
+
+    PointLight(float x, float y, float z, float r, float g, float b);
+    ~PointLight();
 };
 
 struct Scene
 {
     std::vector<Sphere> spheres;
     std::vector<Polygon> polygons;
+    std::vector<PointLight> lights;
 
     Scene();
     ~Scene();

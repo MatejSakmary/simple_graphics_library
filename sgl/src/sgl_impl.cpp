@@ -462,7 +462,7 @@ void sglPointLight(const float x,
 				   const float g,
 				   const float b)
 {
-
+	core->renderer.push_light(x, y, z, r, g, b);
 }
 
 void sglRayTraceScene() 

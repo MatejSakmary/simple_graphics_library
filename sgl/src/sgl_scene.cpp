@@ -36,25 +36,34 @@ Material::~Material() {}
 
 // These virtual functions will never be used.
 SglVertex Primitive::compute_normal_vector(const SglVertex & vector) { return SglVertex(0.0f, 0.0f, 0.0f, 1.0f); }
-bool Primitive::intersection(const SglVertex & vector) { return false; }
+
+bool Primitive::intersection(const SglVertex & vector) { 
+    return false; 
+}
 
 
 // Intersection and raytrace needed functions
 SglVertex Polygon::compute_normal_vector(const SglVertex & vector) {
-     // TODO sakacond compute from vertices, set computed to true, set norm, return norm
     if (computed) {
         return norm;
     }
 
-    float x = 0.0f;
-    float y = 0.0f;
-    float z = 0.0f;
+    norm = norm.cross_product(this->vertices.at(0), this->vertices.at(1));
+    norm = norm.normalize();
 
     computed = true;
-    norm = SglVertex(x, y, z, 1.0f);
 
     return norm;
 }
+
+PointLight::PointLight(float x, float y, float z, float r, float g, float b) {
+    this->source = SglVertex(x, y, z, 1.0f);
+    this->color[0] = r;
+    this->color[1] = g;
+    this->color[2] = b;
+}
+
+PointLight::~PointLight() {}
 
 bool Polygon::intersection(const SglVertex & vector) {
     // TODO sakacond
@@ -62,7 +71,7 @@ bool Polygon::intersection(const SglVertex & vector) {
 }
 
 SglVertex Sphere::compute_normal_vector(const SglVertex & vector) {
-    // TODO sakacond
+    
     return SglVertex(0.0f, 0.0f, 0.0f, 1.0f);
 }
 

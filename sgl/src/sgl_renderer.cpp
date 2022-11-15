@@ -120,6 +120,12 @@ void SglRenderer::push_sphere(const SglVertex & center, float radius) {
     // TODO ERRORS
 }
 
+void SglRenderer::push_light(float x, float y, float z, float r, float g, float b) {
+    PointLight light = PointLight(x, y, z, r, g, b);
+    scene.lights.push_back(light);
+}
+
+
 void SglRenderer::draw_point(const SglVertex & point) {
     int half_size = static_cast<int>(state.point_size / 2);
             

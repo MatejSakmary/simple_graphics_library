@@ -37,6 +37,7 @@ struct SglRenderer
     void draw_ellipse(const SglVertex & center, float a, float b, SglMatrix mat);
     void draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat);
     void push_sphere(const SglVertex & center, float radius);
+    void push_light(float x, float y, float z, float r, float g, float b);
 
     void push_material(
         float r,

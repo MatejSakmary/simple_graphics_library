@@ -6,7 +6,7 @@
 
 #include "sgl.h"
 #include "macros.hpp"
-#include "sgl_vertex.hpp"
+#include "sgl_vec4.hpp"
 
 enum MatrixType
 {
@@ -42,11 +42,12 @@ struct SglMatrix
     SglMatrix(const MatrixCreateInfo & info);
     ~SglMatrix();
     SglMatrix operator * (const SglMatrix & other );
-    SglVertex operator * (const SglVertex & other );
+    Vec4 operator * (const Vec4 & other );
     SglMatrix operator + (const SglMatrix & other );
 
     auto at(int x, int y) -> float&;
     auto to_string() const -> std::string;
+    bool invert();
 
     private:
         friend struct SglVertex;

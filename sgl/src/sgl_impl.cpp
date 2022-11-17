@@ -10,7 +10,7 @@
 #include "sgl.h"
 #include "macros.hpp"
 #include "sgl_core.hpp"
-#include "sgl_vertex.hpp"
+#include "sgl_vec4.hpp"
 
 // sglCore instance
 std::unique_ptr<SglCore> core = nullptr;
@@ -163,19 +163,19 @@ void sglEnd(void)
 void sglVertex4f(float x, float y, float z, float w) 
 {
 	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglVertex4f()] Ignoring vertex - no active sglBegin() call"); return; }
-	core->push_vertex(SglVertex(x, y, z, w));
+	core->push_vertex(Vec4(x, y, z, w));
 }
 
 void sglVertex3f(float x, float y, float z)
 {
 	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglVertex3f()] Ignoring vertex - no active sglBegin() call"); return; }
-	core->push_vertex(SglVertex(x, y, z, 1.0f));
+	core->push_vertex(Vec4(x, y, z, 1.0f));
 }
 
 void sglVertex2f(float x, float y)
 {
 	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglVertex2f()] Ignoring vertex - no active sglBegin() call"); return; }
-	core->push_vertex(SglVertex(x, y, 0.0f, 1.0f));
+	core->push_vertex(Vec4(x, y, 0.0f, 1.0f));
 }
 
 void sglCircle(float x, float y, float z, float radius)
@@ -188,7 +188,7 @@ void sglCircle(float x, float y, float z, float radius)
 	sglBegin(sglEElementType::SGL_POINTS);
 
 	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglCircle()] Ignoring vertex - no active sglBegin() call"); return; }
-	core->draw_circle(SglVertex(x, y, z, 1.0f), radius);
+	core->draw_circle(Vec4(x, y, z, 1.0f), radius);
 	
 	sglEnd();
 }
@@ -203,7 +203,7 @@ void sglEllipse(float x, float y, float z, float a, float b)
 	sglBegin(sglEElementType::SGL_POINTS);
 	
 	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglEllipse()] Ignoring vertex - no active sglBegin() call"); return; }
-	core->draw_ellipse(SglVertex(x, y, z, 1.0f), a, b);
+	core->draw_ellipse(Vec4(x, y, z, 1.0f), a, b);
 	
 	sglEnd();
 }
@@ -218,7 +218,7 @@ void sglArc(float x, float y, float z, float radius, float from, float to)
 	sglBegin(sglEElementType::SGL_POINTS);
 	
 	if(!core->get_recording()) { SGL_DEBUG_OUT("[sglArc()] Ignoring vertex - no active sglBegin() call"); return; }
-	core->draw_arc(SglVertex(x, y, z, 1.0f), radius, from, to);
+	core->draw_arc(Vec4(x, y, z, 1.0f), radius, from, to);
 	
 	sglEnd();
 }
@@ -436,7 +436,7 @@ void sglSphere(const float x,
 			core->get_recording() || 
 			!core->renderer.state.defining_scene
 		) core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
-	core->renderer.push_sphere(SglVertex(x, y, z, 1.0f), radius);
+	core->renderer.push_sphere(Vec4(x, y, z, 1.0f), radius);
 }
 
 void sglMaterial(const float r,

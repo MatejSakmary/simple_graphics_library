@@ -21,7 +21,7 @@ SglRenderer::~SglRenderer() {}
 
 
 
-void SglRenderer::push_vertex(const SglVertex & vertex)
+void SglRenderer::push_vertex(const Vec4 & vertex)
 {
     // TODO(osakaci) This function is in great need of rewrite -> I recommend look up table which describes what to draw
     // READY FOR REVIEW
@@ -58,7 +58,7 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
                 draw_line(vertices[0], vertices[1]);
             }
             else if(vertices.size() == 3) {
-                SglVertex first = vertices[0];
+                Vec4 first = vertices[0];
                 draw_line(vertices[1], vertices[2]);
                 vertices.erase(vertices.begin()+1);
             }
@@ -68,16 +68,16 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
             vertices.push_back(vertex);
             // TODO sakacond add comment
             if (state.defining_scene && vertices.size() == 3) {
-                if (materials.size() != 0) { 
+                if (!materials.empty()) {
                     Polygon poly;
-                    poly.material = materials.back();
+                    poly.materialIndex = materials.size() - 1;
                     for (int i = 0; i < 3; ++i)
                         poly.vertices.push_back(vertices.at(i));
                     scene.polygons.push_back(poly);
                     vertices.clear();
                 }
                 else {
-                    //TODO sakacond ERROR 
+                    //TODO sakacond ERROR material not defined
                 }
             }
             else {
@@ -86,7 +86,7 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
                         draw_line(vertices[0], vertices[1]);
                     }
                     else if(vertices.size() == 3) {
-                        SglVertex first = vertices[0];
+                        Vec4 first = vertices[0];
                         draw_line(vertices[1], vertices[2]);
                         vertices.erase(vertices.begin()+1);
                     }
@@ -107,11 +107,11 @@ void SglRenderer::push_vertex(const SglVertex & vertex)
     }
 }
 
-void SglRenderer::push_sphere(const SglVertex & center, float radius) {
+void SglRenderer::push_sphere(const Vec4 & center, float radius) {
     if (state.defining_scene) {
-        if (materials.size() != 0) { 
+        if (!materials.empty()) {
             Sphere sphere;
-            sphere.material = materials.back();
+            sphere.materialIndex = materials.size() - 1;
             sphere.center = center;
             sphere.radius = radius;
             scene.spheres.push_back(sphere);
@@ -126,7 +126,7 @@ void SglRenderer::push_light(float x, float y, float z, float r, float g, float 
 }
 
 
-void SglRenderer::draw_point(const SglVertex & point) {
+void SglRenderer::draw_point(const Vec4 & point) {
     int half_size = static_cast<int>(state.point_size / 2);
             
     // If the point size is 1 the half size will be 0 therefore both
@@ -199,7 +199,7 @@ void SglRenderer::draw_line_high(int x0, int y0, int x1, int y1) {
     }
 }
 
-void SglRenderer::draw_line(const SglVertex & start_v, const SglVertex & end_v) {
+void SglRenderer::draw_line(const Vec4 & start_v, const Vec4 & end_v) {
     int x0 = static_cast<int>(start_v.at(0));
     int y0 = static_cast<int>(start_v.at(1));
     int x1 = static_cast<int>(end_v.at(0));
@@ -228,10 +228,10 @@ void SglRenderer::draw_sym_pixels(int x_c, int y_c, int z_c, int x, int y) {
     }
     
     else {
-        SglVertex start1 =  SglVertex(x_c + x, y_c + y - 1, z_c, 1.0f);
-        SglVertex end1 =    SglVertex(x_c + x, y_c - y + 1, z_c, 1.0f);
-        SglVertex start2 =  SglVertex(x_c - x, y_c + y - 1, z_c, 1.0f);
-        SglVertex end2 =    SglVertex(x_c - x, y_c - y + 1, z_c, 1.0f);
+        Vec4 start1 =  Vec4(x_c + x, y_c + y - 1, z_c, 1.0f);
+        Vec4 end1 =    Vec4(x_c + x, y_c - y + 1, z_c, 1.0f);
+        Vec4 start2 =  Vec4(x_c - x, y_c + y - 1, z_c, 1.0f);
+        Vec4 end2 =    Vec4(x_c - x, y_c - y + 1, z_c, 1.0f);
         draw_line(start1, end1);
         draw_line(start2, end2);
     }
@@ -241,7 +241,7 @@ void SglRenderer::draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int 
     int x1, y1;
     for(int i = 0; i < 2; ++i) {
         for(int j = 0; j < 2; ++j) {
-            SglVertex help = SglVertex(pow(-1, i) * x, pow(-1, j) * y, z_c, 1.0f);
+            Vec4 help = Vec4(pow(-1, i) * x, pow(-1, j) * y, z_c, 1.0f);
             help = mat * help;
             x1 = x_c + help.at(0);
             y1 = y_c + help.at(1);
@@ -250,7 +250,7 @@ void SglRenderer::draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int 
     }
 }
 
-void SglRenderer::draw_circle(const SglVertex & center, float radius) {
+void SglRenderer::draw_circle(const Vec4 & center, float radius) {
     if (state.area_mode == sglEAreaMode::SGL_POINT) {
         push_vertex(center);
         return;
@@ -285,7 +285,7 @@ void SglRenderer::draw_circle(const SglVertex & center, float radius) {
 
 }
 
-void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMatrix mat) {
+void SglRenderer::draw_ellipse(const Vec4 & center, float a, float b, SglMatrix mat) {
     if (state.area_mode == sglEAreaMode::SGL_POINT) {
         push_vertex(mat * center);
         return;
@@ -307,8 +307,8 @@ void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMa
         x2 = a * cos(i * alpha);
         y2 = b * sin(i * alpha);
 
-        SglVertex start = SglVertex(x1, y1, center.at(2), center.at(3));  
-        SglVertex end = SglVertex(x2, y2, center.at(2), center.at(3));
+        Vec4 start = Vec4(x1, y1, center.at(2), center.at(3));
+        Vec4 end = Vec4(x2, y2, center.at(2), center.at(3));
 
         draw_line(mat * start, mat * end);
         
@@ -322,7 +322,7 @@ void SglRenderer::draw_ellipse(const SglVertex & center, float a, float b, SglMa
     if (state.area_mode == sglEAreaMode::SGL_FILL) draw_fill_object();
 }
 
-void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat) {
+void SglRenderer::draw_arc(const Vec4 & center, float radius, float from, float to, SglMatrix mat) {
 
     if (state.area_mode == sglEAreaMode::SGL_POINT) {
         push_vertex(mat * center);
@@ -346,7 +346,7 @@ void SglRenderer::draw_arc(const SglVertex & center, float radius, float from, f
     
     auto rot_mat = SglMatrix({ .type = MatrixType::ROTATE, .x = 0.0f, .y = 0.0f, .z = alpha });
 
-    SglVertex start = SglVertex(x1, y1, z_c, center.at(3));
+    Vec4 start = Vec4(x1, y1, z_c, center.at(3));
 
     vertices.push_back(mat * start);
 
@@ -400,7 +400,7 @@ void SglRenderer::draw_fill_object()
     std::list<uint> inactive_edges;
 
     // NOTE(msakmary) framebuffer (0,0) is bottom left corner
-    auto insert_processed_edge = [&edges](const SglVertex & from, const SglVertex & to) -> bool
+    auto insert_processed_edge = [&edges](const Vec4 & from, const Vec4 & to) -> bool
     {
         // 2) remove horizontal edges
         if(from.at(1) == to.at(1)) { return false; }
@@ -628,14 +628,14 @@ void SglRenderer::push_material(
 }
 
 void SglRenderer::raytrace_sphere(const Sphere & sphere, SglMatrix mat) {
-    Sphere s = Sphere();
-    s.center = mat * sphere.center;
-    s.material = sphere.material;
-    s.radius = sphere.radius;
-
-    Ray r;
-
-    bool intersected = s.intersection(r);
+//    Sphere s = Sphere();
+//    s.center = mat * sphere.center;
+//    s.material = sphere.material;
+//    s.radius = sphere.radius;
+//
+//    Ray r;
+//    float t;
+//    bool intersected = s.intersection(r, t);
 }
 
 
@@ -646,8 +646,8 @@ void SglRenderer::raytrace_polygon(const Polygon & polygon, SglMatrix mat) {
 
 void SglRenderer::raytrace_scene(const SglMatrix & mat) {
     // rasterize_scene();
-    for (Sphere s: scene.spheres) raytrace_sphere(s, mat);
-    for (Polygon p: scene.polygons) raytrace_polygon(p, mat);
+    for (Sphere &s: scene.spheres) raytrace_sphere(s, mat);
+    for (Polygon &p: scene.polygons) raytrace_polygon(p, mat);
 }
 
 
@@ -664,4 +664,31 @@ void SglRenderer::draw_polygon(const Polygon & polygon) {
 void SglRenderer::rasterize_scene() {
     for (Sphere s: scene.spheres) draw_sphere(s);
     for (Polygon p: scene.polygons) draw_polygon(p);
+}
+
+Vec4 SglRenderer::phong_color() { //TODO add parameters depending on actual implementation (RAY, CAM, POINT, NORMAL, LIGHT, MATERIALID ...)
+    //TMP variables TODO REPLACE
+    Vec4 point, lightPos, normal, camPos;
+    unsigned materialId;
+    PointLight pl(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+    Vec4 lightDir = (lightPos - point).normalize();
+    Vec4 viewDir = (camPos - point).normalize();
+    Vec4 reflectDir = reflect(lightDir * (-1.0f), normal).normalize();
+
+    float cosAlpha = std::max(dot_product(lightDir, normal), 0.0f);
+    float cosBeta = std::max(dot_product(reflectDir, viewDir), 0.0f);
+
+    Vec4 result; //NOT PROUD OF THIS, WE BETTER SWITCH TO VEC3
+    //DIFFUSE
+    result.at(0) = materials[materialId].kd * pl.color[0] * cosAlpha;
+    result.at(1) = materials[materialId].kd * pl.color[1] * cosAlpha;
+    result.at(2) = materials[materialId].kd * pl.color[2] * cosAlpha;
+    //SPECULAR
+    float cosBetaShine = std::pow(cosBeta, materials[materialId].shine);
+    result.at(0) += materials[materialId].ks * pl.color[0] * cosBetaShine;
+    result.at(1) += materials[materialId].ks * pl.color[1] * cosBetaShine;
+    result.at(2) += materials[materialId].ks * pl.color[2] * cosBetaShine;
+
+    return result;
 }

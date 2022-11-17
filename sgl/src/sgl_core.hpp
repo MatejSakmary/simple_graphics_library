@@ -7,7 +7,7 @@
 #include "sgl.h"
 #include "sgl_context.hpp"
 #include "sgl_framebuffer.hpp"
-#include "sgl_vertex.hpp"
+#include "sgl_vec4.hpp"
 #include "sgl_renderer.hpp"
 #include "macros.hpp"
 
@@ -24,11 +24,11 @@ struct SglCore
     void set_context(int32_t context_idx);
     void destroy_context(int32_t context_idx);
     
-    void push_vertex(SglVertex vertex);
+    void push_vertex(Vec4 vertex);
 
-    void draw_circle(SglVertex center, float radius);
-    void draw_ellipse(SglVertex center, float a, float b);
-    void draw_arc(SglVertex center, float radius, float from, float to);
+    void draw_circle(Vec4 center, float radius);
+    void draw_ellipse(Vec4 center, float a, float b);
+    void draw_arc(Vec4 center, float radius, float from, float to);
     
     void set_recording(bool new_recording);
     auto get_recording() -> bool;

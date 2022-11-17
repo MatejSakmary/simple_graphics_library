@@ -20,7 +20,7 @@ Material::Material(
         float shine,
         float T,
         float ior
-        ) 
+        )
 {
     this->r     = r;
     this->g     = g;
@@ -35,15 +35,15 @@ Material::Material(
 Material::~Material() {}
 
 // These virtual functions will never be used.
-SglVertex Primitive::compute_normal_vector(const SglVertex & vector) { return SglVertex(0.0f, 0.0f, 0.0f, 1.0f); }
+Vec4 Primitive::compute_normal_vector(const Vec4 & vector) { return Vec4(0.0f, 0.0f, 0.0f, 1.0f); }
 
-bool Primitive::intersection(const Ray & ray) { 
-    return false; 
+bool Primitive::intersection(const Ray &ray, float &t) {
+    return false;
 }
 
 
 // Intersection and raytrace needed functions
-SglVertex Polygon::compute_normal_vector(const SglVertex & vector) {
+Vec4 Polygon::compute_normal_vector(const Vec4 & vector) {
     if (computed) {
         return norm;
     }
@@ -57,7 +57,7 @@ SglVertex Polygon::compute_normal_vector(const SglVertex & vector) {
 }
 
 PointLight::PointLight(float x, float y, float z, float r, float g, float b) {
-    this->source = SglVertex(x, y, z, 1.0f);
+    this->source = Vec4(x, y, z, 1.0f);
     this->color[0] = r;
     this->color[1] = g;
     this->color[2] = b;
@@ -65,13 +65,34 @@ PointLight::PointLight(float x, float y, float z, float r, float g, float b) {
 
 PointLight::~PointLight() {}
 
-bool Polygon::intersection(const Ray & ray) {
-    // TODO sakacond
-    return false;
+// Find intersection point - from PBRT - www.pbrt.org
+bool Polygon::intersection(const Ray &ray, float &t) {
+    const Vec4 e1 = this->vertices[1] - this->vertices[0];
+    const Vec4 e2 = this->vertices[2] - this->vertices[0];
+
+    Vec4 s1 = cross_product(e1, e2);
+    float divisor = dot_product(s1, e1);
+    float invDivisor = 1.0f / divisor;
+    // Compute first barycentric coordinate
+    Vec4 d = ray.origin - this->vertices[0];
+    float b1 = dot_product(d, s1) * invDivisor;
+    if (b1 < 0. || b1 > 1.)
+        return false;
+    // Compute second barycentric coordinate
+    Vec4 s2 = cross_product(d, e1);
+    float b2 = dot_product(ray.direction, s2) * invDivisor;
+    if (b2 < 0. || b1 + b2 > 1.)
+        return false;
+    // Compute _t_ to intersection point
+    float tt = dot_product(e2, s2) * invDivisor;
+    if (tt < 0) // In original algo there is tt < 0 || tt > maxT
+        return false;
+    t = tt;
+    return true;
 }
 
-SglVertex Sphere::compute_normal_vector(const SglVertex & vector) {
-    SglVertex normal = SglVertex(
+Vec4 Sphere::compute_normal_vector(const Vec4 & vector) {
+    Vec4 normal = Vec4(
         vector.at(0) - this->center.at(0),
         vector.at(1) - this->center.at(1),
         vector.at(2) - this->center.at(2),
@@ -81,37 +102,22 @@ SglVertex Sphere::compute_normal_vector(const SglVertex & vector) {
     return normal.normalize();
 }
 
-bool Sphere::intersection(const Ray & ray) {
-    float x, y;
+// source: http://www.devmaster.net/wiki/Ray-sphere_intersection
+bool Sphere::intersection(const Ray &ray, float &t) {
+    const Vec4 dst = ray.origin - this->center;
+    const float b = dot_product(dst, ray.direction);
+    const float c = dot_product(dst, dst) - radius*radius;
+    const float d = b*b - c;
 
-    SglVertex center_vector(
-        this->center.at(0) - ray.origin.at(0),
-        this->center.at(1) - ray.origin.at(1),
-        this->center.at(2) - ray.origin.at(2),
-        0.0f
-    );
+    if(d > 0) {
+        t = -b - sqrtf(d);
+        if (t < 0.0f)
+            t = -b + sqrtf(d);
 
-    float angle = dot_product(center_vector, ray.direction);
-    
-    SglVertex p = SglVertex(
-        ray.origin.at(0) + ray.direction.at(0) * angle,
-        ray.origin.at(1) + ray.direction.at(1) * angle,
-        ray.origin.at(2) + ray.direction.at(2) * angle,
-        ray.origin.at(3) + ray.direction.at(3) * angle
-        );
-
-    y = SglVertex(
-        this->center.at(0) - p.at(0),
-        this->center.at(1) - p.at(1),
-        this->center.at(2) - p.at(2),
-        this->center.at(3) - p.at(3)
-    ).get_norm();
-
-    if (y <= radius) {
         return true;
     }
-
     return false;
+
 }
 
 Scene::Scene() :

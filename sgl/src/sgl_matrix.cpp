@@ -1,5 +1,6 @@
 #include "sgl_matrix.hpp"
 
+#include <cmath>
 #include <sstream>
 
 SglMatrix::SglMatrix(const std::array<float, 16> & mat) : mat{mat} {};
@@ -104,9 +105,9 @@ auto SglMatrix::at (int x, int y) -> float&
 };
 
 
-SglVertex SglMatrix::operator * (const SglVertex & other )
+Vec4 SglMatrix::operator * (const Vec4 & other )
 {
-    SglVertex res_vert = SglVertex();
+    Vec4 res_vert = Vec4();
     // RET = OTHER_MAT * THIS_VERT
     //                            
     // #      row > # # # #       # 
@@ -160,4 +161,81 @@ SglMatrix SglMatrix::operator + (const SglMatrix & other )
         ret_mat.mat[i] += mat[i];
     }
     return ret_mat;
+}
+// inverse matrix computation using gauss_jacobi method
+// source: N.R. in C
+// if matrix is regular = computatation successfull = returns true
+// in case of singular matrix returns false
+bool SglMatrix::invert() {
+    int indxc[4],indxr[4],ipiv[4];
+    int i,icol,irow,j,k,l,ll,n;
+    float big,dum,pivinv,temp;
+
+    // satisfy the compiler
+    icol = irow = 0;
+    // the size of the matrix
+    n = 4;
+
+    for ( j = 0 ; j < n ; j++) /* zero pivots */
+        ipiv[j] = 0;
+    for ( i = 0; i < n; i++)
+    {
+        big = 0.0;
+        for (j = 0 ; j < n ; j++)
+            if (ipiv[j] != 1)
+                for ( k = 0 ; k<n ; k++)
+                {
+                    if (ipiv[k] == 0)
+                    {
+                        if (std::fabs(this->at(k,j)) >= big)
+                        {
+                            big = std::fabs(this->at(k,j));
+                            irow = j;
+                            icol = k;
+                        }
+                    }
+                    else
+                    if (ipiv[k] > 1)
+                        return false; /* singular matrix */
+                }
+        ++(ipiv[icol]);
+        if (irow != icol)
+        {
+            for ( l = 0 ; l<n ; l++)
+            {
+                temp = this->at(l,icol);
+                this->at(l,icol) = this->at(l,irow);
+                this->at(l,irow) = temp;
+            }
+        }
+        indxr[i] = irow;
+        indxc[i] = icol;
+        if (this->at(icol,icol) == 0.0f)
+            return false; /* singular matrix */
+
+        pivinv = 1.0f / this->at(icol, icol);
+        this->at(icol, icol) = 1.0 ;
+        for ( l = 0 ; l<n ; l++)
+            this->at(l, icol) = this->at(l, icol) * pivinv ;
+        for (ll = 0 ; ll < n ; ll++)
+            if (ll != icol)
+            {
+                dum = this->at(icol,ll);
+                this->at(icol,ll) = 0.0;
+                for ( l = 0 ; l<n ; l++)
+                    this->at(l,ll) = this->at(l, ll) - this->at(l, icol) * dum ;
+            }
+    }
+    for ( l = n; l--; )
+    {
+        if (indxr[l] != indxc[l])
+            for ( k = 0; k<n ; k++)
+            {
+                temp = this->at(indxr[l],k);
+                this->at(indxr[l], k) = this->at(indxc[l], k);
+                this->at(indxc[l], k) = temp;
+            }
+    }
+
+    return true ; // matrix is regular .. inversion has been succesfull
 }

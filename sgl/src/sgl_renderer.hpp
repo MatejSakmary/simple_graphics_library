@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "sgl.h"
-#include "sgl_vertex.hpp"
+#include "sgl_vec4.hpp"
 #include "sgl_matrix.hpp"
 #include "sgl_framebuffer.hpp"
 #include "sgl_scene.hpp"
@@ -32,11 +32,11 @@ struct SglRenderer
     SglRenderer();
     ~SglRenderer();
 
-    void push_vertex(const SglVertex & vertex);
-    void draw_circle(const SglVertex & center, float radius);
-    void draw_ellipse(const SglVertex & center, float a, float b, SglMatrix mat);
-    void draw_arc(const SglVertex & center, float radius, float from, float to, SglMatrix mat);
-    void push_sphere(const SglVertex & center, float radius);
+    void push_vertex(const Vec4 & vertex);
+    void draw_circle(const Vec4 & center, float radius);
+    void draw_ellipse(const Vec4 & center, float a, float b, SglMatrix mat);
+    void draw_arc(const Vec4 & center, float radius, float from, float to, SglMatrix mat);
+    void push_sphere(const Vec4 & center, float radius);
     void push_light(float x, float y, float z, float r, float g, float b);
 
     void push_material(
@@ -52,12 +52,12 @@ struct SglRenderer
 
     private:
         friend struct SglCore;
-        std::vector<SglVertex> vertices;
+        std::vector<Vec4> vertices;
 
-        void draw_point(const SglVertex & point);
+        void draw_point(const Vec4 & point);
         void draw_line_low(int x0, int y0, int x1, int y1);
         void draw_line_high(int x0, int y0, int x1, int y1);
-        void draw_line(const SglVertex & start_v, const SglVertex & end_v);
+        void draw_line(const Vec4 & start_v, const Vec4 & end_v);
         void draw_sym_pixels(int x_c, int y_c, int z_c, int x, int y);
         void draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int y, SglMatrix mat);
 
@@ -70,6 +70,7 @@ struct SglRenderer
         // RayTracing functions
         void raytrace_sphere(const Sphere & sphere, SglMatrix mat);
         void raytrace_polygon(const Polygon & polygon, SglMatrix mat);
+        Vec4 phong_color(); //TODO
 
 
         // Rasterizing primitives functions

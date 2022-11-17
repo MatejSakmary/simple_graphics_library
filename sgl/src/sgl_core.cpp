@@ -127,7 +127,7 @@ auto SglCore::get_recording() -> bool
     return recording;
 }
 
-void SglCore::push_vertex(SglVertex vertex)
+void SglCore::push_vertex(Vec4 vertex)
 {
     // SGL_DEBUG_OUT("Got vertex " + vertex.to_string());
     vertex = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * vertex;
@@ -144,7 +144,7 @@ void SglCore::push_vertex(SglVertex vertex)
 }
 
 
-void SglCore::draw_circle(SglVertex center, float radius) 
+void SglCore::draw_circle(Vec4 center, float radius)
 {
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * center;
     center = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * center;
@@ -156,7 +156,7 @@ void SglCore::draw_circle(SglVertex center, float radius)
 }
 
 
-void SglCore::draw_ellipse(SglVertex center, float a, float b) {
+void SglCore::draw_ellipse(Vec4 center, float a, float b) {
     SglMatrix mat = SglMatrix(contexts.at(current_context).viewport_mat);
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
@@ -165,7 +165,7 @@ void SglCore::draw_ellipse(SglVertex center, float a, float b) {
 }
 
 
-void SglCore::draw_arc(SglVertex center, float radius, float from, float to) {
+void SglCore::draw_arc(Vec4 center, float radius, float from, float to) {
     SglMatrix mat = SglMatrix(contexts.at(current_context).viewport_mat);
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();

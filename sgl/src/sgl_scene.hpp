@@ -2,14 +2,14 @@
 
 #include <vector>
 
-#include "sgl_vertex.hpp"
+#include "sgl_vec4.hpp"
 #include "sgl_matrix.hpp"
 
 
 
 struct Ray {
-    SglVertex origin;
-    SglVertex direction;
+    Vec4 origin;
+    Vec4 direction;
 };
 
 
@@ -41,37 +41,37 @@ struct Material
 
 struct Primitive 
 {
-    Material material;
+    unsigned materialIndex;
     // Primitive(const Material & material);
-    virtual SglVertex compute_normal_vector(const SglVertex & vector);
-    virtual bool intersection(const Ray & ray);
+    virtual Vec4 compute_normal_vector(const Vec4 & vector);
+    virtual bool intersection(const Ray &ray, float &t);
 };
 
 struct Sphere : Primitive 
 {
-    SglVertex center;
+    Vec4 center;
     float radius;
-    // Sphere(const Material & material, const SglVertex & center, float radius);
+    // Sphere(const Material & material, const Vec4 & center, float radius);
     // ~Sphere();
-    SglVertex compute_normal_vector(const SglVertex & vector) override;
-    bool intersection(const Ray & ray) override;
+    Vec4 compute_normal_vector(const Vec4 & vector) override;
+    bool intersection(const Ray &ray, float &t) override;
 };
 
 struct Polygon : Primitive 
 {
-    std::vector<SglVertex> vertices;
+    std::vector<Vec4> vertices;
     bool computed;
-    SglVertex norm;
+    Vec4 norm;
 
-    SglVertex compute_normal_vector(const SglVertex & vector) override;
-    bool intersection(const Ray & ray) override;
-    // Polygon(const Material & material, const SglVertex & v1, const SglVertex & v2, const SglVertex & v3);
+    Vec4 compute_normal_vector(const Vec4 & vector) override;
+    bool intersection(const Ray &ray, float &t) override;
+    // Polygon(const Material & material, const Vec4 & v1, const Vec4 & v2, const Vec4 & v3);
     // ~Primitive();
 };
 
 struct PointLight 
 {
-    SglVertex source;
+    Vec4 source;
     float color[3] = {0.0f, 0.0f, 0.0f};
 
     PointLight(float x, float y, float z, float r, float g, float b);
@@ -86,6 +86,6 @@ struct Scene
 
     Scene();
     ~Scene();
-    // void add_sphere(const Material & material, const SglVertex & center, float radius);
-    // void add_polygon(const Material & material, const SglVertex & v1, const SglVertex & v2, const SglVertex & v3);
+    // void add_sphere(const Material & material, const Vec4 & center, float radius);
+    // void add_polygon(const Material & material, const Vec4 & v1, const Vec4 & v2, const Vec4 & v3);
 };

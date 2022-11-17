@@ -9,11 +9,11 @@
 // forward declare matrix so we can friend it
 struct SglMatrix;
 
-struct SglVertex
+struct Vec4
 {
-    SglVertex();
-    SglVertex(float x, float y, float z, float w);
-    ~SglVertex();
+    Vec4();
+    Vec4(float x, float y, float z, float w);
+    ~Vec4();
 
     auto to_string() -> std::string;
     auto at(int idx) const -> float;
@@ -23,7 +23,11 @@ struct SglVertex
     
     float get_norm();
 
-    SglVertex normalize();
+    Vec4 normalize();
+
+
+    Vec4 operator - (const Vec4 &rhs) const;
+    Vec4 operator * (float scalar) const;
 
     private:
         friend struct SglMatrix;
@@ -31,5 +35,6 @@ struct SglVertex
 };
 
 
-SglVertex cross_product(const SglVertex &A, const SglVertex &B);
-float dot_product(const SglVertex &A, const SglVertex &B);
+Vec4 cross_product(const Vec4 &A, const Vec4 &B);
+float dot_product(const Vec4 &A, const Vec4 &B);
+Vec4 reflect(const Vec4 &A, const Vec4 &normal);

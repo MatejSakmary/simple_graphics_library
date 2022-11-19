@@ -1603,7 +1603,7 @@ int main(int argc, char **argv)
         cout << "test 3a..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "sphere.nff";
+        const char *sceneFile = "resources/sphere.nff";
         sglSetContext(_contexts[1]);
         double time = RayTraceScene(sceneFile, runMultiplier);
         totalTime += time;

@@ -644,8 +644,17 @@ void SglRenderer::raytrace_polygon(const Polygon & polygon, SglMatrix mat) {
 }
 
 
+#include <iostream>
 void SglRenderer::raytrace_scene(const SglMatrix & mat) {
+
     // rasterize_scene();
+    for (int x = 0; x < state.currentFramebuffer->get_width(); x++)
+    {
+        for(int y = 0; y < state.currentFramebuffer->get_height(); y++)
+        {
+            // auto col = trace_ray(gen_ray());
+        }
+    }
     for (Sphere &s: scene.spheres) raytrace_sphere(s, mat);
     for (Polygon &p: scene.polygons) raytrace_polygon(p, mat);
 }

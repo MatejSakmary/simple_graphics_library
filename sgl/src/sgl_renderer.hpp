@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "sgl.h"
-#include "sgl_vec4.hpp"
+#include "sgl_vec.hpp"
 #include "sgl_matrix.hpp"
 #include "sgl_framebuffer.hpp"
 #include "sgl_scene.hpp"
@@ -68,6 +68,8 @@ struct SglRenderer
         // void draw_fill_triangles();
 
         // RayTracing functions
+        void gen_ray();
+        // vec4 trace_ray();
         void raytrace_sphere(const Sphere & sphere, SglMatrix mat);
         void raytrace_polygon(const Polygon & polygon, SglMatrix mat);
         Vec4 phong_color(); //TODO

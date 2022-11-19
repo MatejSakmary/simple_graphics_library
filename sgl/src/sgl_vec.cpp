@@ -1,7 +1,4 @@
-#include "sgl_vec4.hpp"
-
-#include <sstream>
-#include <algorithm>
+#include "sgl_vec.hpp"
 
 Vec4::Vec4(float x, float y, float z, float w) : vert{{x, y, z , w}} {}
 Vec4::Vec4() : vert{{0.0f, 0.0f, 0.0f, 0.0f}} {}
@@ -77,4 +74,3 @@ float dot_product(const Vec4 &A, const Vec4 &B)
 Vec4 reflect(const Vec4 &A, const Vec4 &normal) {
     return A - (normal * 2 * (dot_product(A, normal)));
 }
-

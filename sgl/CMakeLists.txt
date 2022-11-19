@@ -8,7 +8,7 @@ add_library(${PROJECT_NAME} STATIC
     "src/sgl_core.cpp"
     "src/sgl_framebuffer.cpp"
     "src/sgl_matrix.cpp"
-    "src/sgl_vertex.cpp"
+    "src/sgl_vec.cpp"
     "src/sgl_renderer.cpp"
     "src/sgl_scene.cpp"
 )

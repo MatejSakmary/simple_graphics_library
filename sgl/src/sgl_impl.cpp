@@ -10,7 +10,7 @@
 #include "sgl.h"
 #include "macros.hpp"
 #include "sgl_core.hpp"
-#include "sgl_vec4.hpp"
+#include "sgl_vec.hpp"
 
 // sglCore instance
 std::unique_ptr<SglCore> core = nullptr;

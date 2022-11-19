@@ -6,7 +6,7 @@
 
 #include "sgl.h"
 #include "macros.hpp"
-#include "sgl_vec4.hpp"
+#include "sgl_vec.hpp"
 
 enum MatrixType
 {

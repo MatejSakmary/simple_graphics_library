@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "sgl_vec4.hpp"
+#include "sgl_vec.hpp"
 #include "sgl_matrix.hpp"
 
 

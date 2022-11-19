@@ -7,7 +7,7 @@
 #include "sgl.h"
 #include "sgl_context.hpp"
 #include "sgl_framebuffer.hpp"
-#include "sgl_vec4.hpp"
+#include "sgl_vec.hpp"
 #include "sgl_renderer.hpp"
 #include "macros.hpp"
 

@@ -21,7 +21,7 @@ SglRenderer::~SglRenderer() {}
 
 
 
-void SglRenderer::push_vertex(const Vec4 & vertex)
+void SglRenderer::push_vertex(const f32vec4 & vertex)
 {
     // TODO(osakaci) This function is in great need of rewrite -> I recommend look up table which describes what to draw
     // READY FOR REVIEW
@@ -58,7 +58,7 @@ void SglRenderer::push_vertex(const Vec4 & vertex)
                 draw_line(vertices[0], vertices[1]);
             }
             else if(vertices.size() == 3) {
-                Vec4 first = vertices[0];
+                f32vec4 first = vertices[0];
                 draw_line(vertices[1], vertices[2]);
                 vertices.erase(vertices.begin()+1);
             }
@@ -86,7 +86,7 @@ void SglRenderer::push_vertex(const Vec4 & vertex)
                         draw_line(vertices[0], vertices[1]);
                     }
                     else if(vertices.size() == 3) {
-                        Vec4 first = vertices[0];
+                        f32vec4 first = vertices[0];
                         draw_line(vertices[1], vertices[2]);
                         vertices.erase(vertices.begin()+1);
                     }
@@ -107,7 +107,7 @@ void SglRenderer::push_vertex(const Vec4 & vertex)
     }
 }
 
-void SglRenderer::push_sphere(const Vec4 & center, float radius) {
+void SglRenderer::push_sphere(const f32vec4 & center, float radius) {
     if (state.defining_scene) {
         if (!materials.empty()) {
             Sphere sphere;
@@ -126,7 +126,7 @@ void SglRenderer::push_light(float x, float y, float z, float r, float g, float 
 }
 
 
-void SglRenderer::draw_point(const Vec4 & point) {
+void SglRenderer::draw_point(const f32vec4 & point) {
     int half_size = static_cast<int>(state.point_size / 2);
             
     // If the point size is 1 the half size will be 0 therefore both
@@ -134,8 +134,8 @@ void SglRenderer::draw_point(const Vec4 & point) {
     // otherwise it will create a square point around the vertex
     for(int i = -half_size; i <= half_size; ++i) {
         for(int j = -half_size; j <= half_size; ++j) {
-            int x = static_cast<int>(point.at(0) + i);
-            int y = static_cast<int>(point.at(1) + j);
+            int x = static_cast<int>(point.x + i);
+            int y = static_cast<int>(point.y + j);
             state.currentFramebuffer->set_pixel(x, y, state.draw_color);
         }
     }
@@ -199,11 +199,11 @@ void SglRenderer::draw_line_high(int x0, int y0, int x1, int y1) {
     }
 }
 
-void SglRenderer::draw_line(const Vec4 & start_v, const Vec4 & end_v) {
-    int x0 = static_cast<int>(start_v.at(0));
-    int y0 = static_cast<int>(start_v.at(1));
-    int x1 = static_cast<int>(end_v.at(0));
-    int y1 = static_cast<int>(end_v.at(1));
+void SglRenderer::draw_line(const f32vec4 & start_v, const f32vec4 & end_v) {
+    int x0 = static_cast<int>(start_v.x);
+    int y0 = static_cast<int>(start_v.y);
+    int x1 = static_cast<int>(end_v.x);
+    int y1 = static_cast<int>(end_v.y);
     int d_x = abs(x1 - x0);
     int d_y = abs(y1 - y0);
 
@@ -228,10 +228,10 @@ void SglRenderer::draw_sym_pixels(int x_c, int y_c, int z_c, int x, int y) {
     }
     
     else {
-        Vec4 start1 =  Vec4(x_c + x, y_c + y - 1, z_c, 1.0f);
-        Vec4 end1 =    Vec4(x_c + x, y_c - y + 1, z_c, 1.0f);
-        Vec4 start2 =  Vec4(x_c - x, y_c + y - 1, z_c, 1.0f);
-        Vec4 end2 =    Vec4(x_c - x, y_c - y + 1, z_c, 1.0f);
+        f32vec4 start1 =  f32vec4(x_c + x, y_c + y - 1, z_c, 1.0f);
+        f32vec4 end1 =    f32vec4(x_c + x, y_c - y + 1, z_c, 1.0f);
+        f32vec4 start2 =  f32vec4(x_c - x, y_c + y - 1, z_c, 1.0f);
+        f32vec4 end2 =    f32vec4(x_c - x, y_c - y + 1, z_c, 1.0f);
         draw_line(start1, end1);
         draw_line(start2, end2);
     }
@@ -241,25 +241,25 @@ void SglRenderer::draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int 
     int x1, y1;
     for(int i = 0; i < 2; ++i) {
         for(int j = 0; j < 2; ++j) {
-            Vec4 help = Vec4(pow(-1, i) * x, pow(-1, j) * y, z_c, 1.0f);
+            f32vec4 help = f32vec4(pow(-1, i) * x, pow(-1, j) * y, z_c, 1.0f);
             help = mat * help;
-            x1 = x_c + help.at(0);
-            y1 = y_c + help.at(1);
+            x1 = x_c + help.x;
+            y1 = y_c + help.y;
             state.currentFramebuffer->set_pixel(static_cast<int>(x1), static_cast<int>(y1), state.draw_color);
         }
     }
 }
 
-void SglRenderer::draw_circle(const Vec4 & center, float radius) {
+void SglRenderer::draw_circle(const f32vec4 & center, float radius) {
     if (state.area_mode == sglEAreaMode::SGL_POINT) {
         push_vertex(center);
         return;
     }
 
     int x, y, p, twoX, twoY;
-    int x_c = static_cast<int>(center.at(0));
-    int y_c = static_cast<int>(center.at(1));
-    int z_c = static_cast<int>(center.at(2));
+    int x_c = static_cast<int>(center.x);
+    int y_c = static_cast<int>(center.y);
+    int z_c = static_cast<int>(center.z);
 
     x = 0;
     y = radius;
@@ -285,7 +285,7 @@ void SglRenderer::draw_circle(const Vec4 & center, float radius) {
 
 }
 
-void SglRenderer::draw_ellipse(const Vec4 & center, float a, float b, SglMatrix mat) {
+void SglRenderer::draw_ellipse(const f32vec4 & center, float a, float b, SglMatrix mat) {
     if (state.area_mode == sglEAreaMode::SGL_POINT) {
         push_vertex(mat * center);
         return;
@@ -300,15 +300,15 @@ void SglRenderer::draw_ellipse(const Vec4 & center, float a, float b, SglMatrix 
 
     mat = mat * SglMatrix({
         .type = MatrixType::TRANSLATE,
-        .x = center.at(0), .y = center.at(1), .z = center.at(2)
+        .x = center.x, .y = center.y, .z = center.z
     });
 
     for (int i = 1; i <= N; ++i) {      
         x2 = a * cos(i * alpha);
         y2 = b * sin(i * alpha);
 
-        Vec4 start = Vec4(x1, y1, center.at(2), center.at(3));
-        Vec4 end = Vec4(x2, y2, center.at(2), center.at(3));
+        f32vec4 start = f32vec4(x1, y1, center.z, center.w);
+        f32vec4 end = f32vec4(x2, y2, center.z, center.w);
 
         draw_line(mat * start, mat * end);
         
@@ -322,7 +322,7 @@ void SglRenderer::draw_ellipse(const Vec4 & center, float a, float b, SglMatrix 
     if (state.area_mode == sglEAreaMode::SGL_FILL) draw_fill_object();
 }
 
-void SglRenderer::draw_arc(const Vec4 & center, float radius, float from, float to, SglMatrix mat) {
+void SglRenderer::draw_arc(const f32vec4 & center, float radius, float from, float to, SglMatrix mat) {
 
     if (state.area_mode == sglEAreaMode::SGL_POINT) {
         push_vertex(mat * center);
@@ -330,7 +330,7 @@ void SglRenderer::draw_arc(const Vec4 & center, float radius, float from, float 
     }
 
     float x1, y1;
-    int z_c = center.at(2);
+    int z_c = center.z;
 
     float angle = to - from;
     int N = int((40.0f * angle) / (2.0f * M_PI));
@@ -341,12 +341,12 @@ void SglRenderer::draw_arc(const Vec4 & center, float radius, float from, float 
 
     mat = mat * SglMatrix({
         .type = MatrixType::TRANSLATE,
-        .x = center.at(0), .y = center.at(1), .z = center.at(2)
+        .x = center.x, .y = center.y, .z = center.z
     }); 
     
     auto rot_mat = SglMatrix({ .type = MatrixType::ROTATE, .x = 0.0f, .y = 0.0f, .z = alpha });
 
-    Vec4 start = Vec4(x1, y1, z_c, center.at(3));
+    f32vec4 start = f32vec4(x1, y1, z_c, center.w);
 
     vertices.push_back(mat * start);
 
@@ -400,36 +400,36 @@ void SglRenderer::draw_fill_object()
     std::list<uint> inactive_edges;
 
     // NOTE(msakmary) framebuffer (0,0) is bottom left corner
-    auto insert_processed_edge = [&edges](const Vec4 & from, const Vec4 & to) -> bool
+    auto insert_processed_edge = [&edges](const f32vec4 & from, const f32vec4 & to) -> bool
     {
         // 2) remove horizontal edges
-        if(from.at(1) == to.at(1)) { return false; }
+        if(from.y == to.y) { return false; }
         // 1) orient edges top - bottom and shorten them by one pixel (this is in to.at(1) + 1.0f)
         // TODO(msakmary) CONTINUE HERE - store 1 - 1/z into the depth buffer
-        if(from.at(1) < to.at(1)) 
+        if(from.y < to.y) 
         { 
             edges.emplace_back(SglEdge{
-                .from_y  = static_cast<uint>(to.at(1)),
-                .to_y    = static_cast<uint>(from.at(1) + 1.0f),
-                .upper_x = to.at(0),
-                .upper_z = to.at(2),
+                .from_y  = static_cast<uint>(to.y),
+                .to_y    = static_cast<uint>(from.y + 1.0f),
+                .upper_x = to.x,
+                .upper_z = to.z,
                 // x_step = (x_from - x_to) / (y_from - y_to)
-                .step_x  = (from.at(0) - to.at(0)) / ((from.at(1)) - to.at(1)),
+                .step_x  = (from.x - to.x) / ((from.y) - to.y),
                 // x_step = (z_from - z_to) / (y_from - y_to)
-                .step_z  = (from.at(2) - to.at(2)) / ((from.at(1)) - to.at(1)),
+                .step_z  = (from.z - to.z) / ((from.y) - to.y),
             });
         }
         else
         {
             edges.emplace_back(SglEdge{
-                .from_y  = static_cast<uint>(from.at(1)),
-                .to_y    = static_cast<uint>(to.at(1) + 1.0f),
-                .upper_x = from.at(0),
-                .upper_z = from.at(2),
+                .from_y  = static_cast<uint>(from.y),
+                .to_y    = static_cast<uint>(to.y + 1.0f),
+                .upper_x = from.x,
+                .upper_z = from.z,
                 // x_step = (x_to - x_from) / (y_to - y_from)
-                .step_x  = (to.at(0) - from.at(0)) / ((to.at(1)) - from.at(1)),
+                .step_x  = (to.x - from.x) / ((to.y) - from.y),
                 // x_step = (z_to - z_from) / (y_to - y_from)
-                .step_z  = (to.at(2) - from.at(2)) / ((to.at(1)) - from.at(1)),
+                .step_z  = (to.z - from.z) / ((to.y) - from.y),
             });
         } 
         return true;
@@ -442,21 +442,19 @@ void SglRenderer::draw_fill_object()
     // add the first vertex again into vertices - this is because we need to add an edge connecting the
     // last vertex to the first vertex and this makes it a simple forloop later
     vertices.push_back(vertices.at(0));
-    if (vertices.at(0).at(0) > max_x) max_x = vertices.at(0).at(0);
-    if (vertices.at(0).at(1) > max_y) max_y = vertices.at(0).at(1);
-    if (vertices.at(0).at(0) < min_x) min_x = vertices.at(0).at(0);
-    if (vertices.at(0).at(1) < min_y) min_y = vertices.at(0).at(1);
+    if (vertices.at(0).x > max_x) max_x = vertices.at(0).x;
+    if (vertices.at(0).y > max_y) max_y = vertices.at(0).y;
+    if (vertices.at(0).x < min_x) min_x = vertices.at(0).x;
+    if (vertices.at(0).y < min_y) min_y = vertices.at(0).y;
     // each edge consists of two vertices so we start at one so we already have two vertices at the start of the loop
     for(size_t i = 1; i < vertices.size(); i++)
     {
-        SGL_DEBUG_OUT("1/z of current vertex is " + std::to_string(vertices.at(i-1).at(2)) + " giving depth of " + std::to_string(1.0f / vertices.at(i-1).at(2)));
         insert_processed_edge(vertices.at(i - 1), vertices.at(i));
 
-
-        if (vertices.at(i).at(0) > max_x) max_x = vertices.at(i).at(0);
-        if (vertices.at(i).at(1) > max_y) max_y = vertices.at(i).at(1);
-        if (vertices.at(i).at(0) < min_x) min_x = vertices.at(i).at(0);
-        if (vertices.at(i).at(1) < min_y) min_y = vertices.at(i).at(1);
+        if (vertices.at(i).x > max_x) max_x = vertices.at(i).x;
+        if (vertices.at(i).y > max_y) max_y = vertices.at(i).y;
+        if (vertices.at(i).x < min_x) min_x = vertices.at(i).x;
+        if (vertices.at(i).y < min_y) min_y = vertices.at(i).y;
     }
 
     AABB boundingBox = AABB(max_x, max_y, min_x, min_y);
@@ -675,29 +673,29 @@ void SglRenderer::rasterize_scene() {
     for (Polygon p: scene.polygons) draw_polygon(p);
 }
 
-Vec4 SglRenderer::phong_color() { //TODO add parameters depending on actual implementation (RAY, CAM, POINT, NORMAL, LIGHT, MATERIALID ...)
+f32vec3 SglRenderer::phong_color() { //TODO add parameters depending on actual implementation (RAY, CAM, POINT, NORMAL, LIGHT, MATERIALID ...)
     //TMP variables TODO REPLACE
-    Vec4 point, lightPos, normal, camPos;
+    f32vec3 point, lightPos, normal, camPos;
     unsigned materialId;
     PointLight pl(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-    Vec4 lightDir = (lightPos - point).normalize();
-    Vec4 viewDir = (camPos - point).normalize();
-    Vec4 reflectDir = reflect(lightDir * (-1.0f), normal).normalize();
+    f32vec3 lightDir = (lightPos - point).normalize();
+    f32vec3 viewDir = (camPos - point).normalize();
+    f32vec3 reflectDir = reflect(lightDir * (-1.0f), normal).normalize();
 
-    float cosAlpha = std::max(dot_product(lightDir, normal), 0.0f);
-    float cosBeta = std::max(dot_product(reflectDir, viewDir), 0.0f);
+    float cosAlpha = std::max(dot(lightDir, normal), 0.0f);
+    float cosBeta = std::max(dot(reflectDir, viewDir), 0.0f);
 
-    Vec4 result; //NOT PROUD OF THIS, WE BETTER SWITCH TO VEC3
+    f32vec3 result; //NOT PROUD OF THIS, WE BETTER SWITCH TO VEC3
     //DIFFUSE
-    result.at(0) = materials[materialId].kd * pl.color[0] * cosAlpha;
-    result.at(1) = materials[materialId].kd * pl.color[1] * cosAlpha;
-    result.at(2) = materials[materialId].kd * pl.color[2] * cosAlpha;
+    result.x = materials[materialId].kd * pl.color[0] * cosAlpha;
+    result.y = materials[materialId].kd * pl.color[1] * cosAlpha;
+    result.z = materials[materialId].kd * pl.color[2] * cosAlpha;
     //SPECULAR
     float cosBetaShine = std::pow(cosBeta, materials[materialId].shine);
-    result.at(0) += materials[materialId].ks * pl.color[0] * cosBetaShine;
-    result.at(1) += materials[materialId].ks * pl.color[1] * cosBetaShine;
-    result.at(2) += materials[materialId].ks * pl.color[2] * cosBetaShine;
+    result.x += materials[materialId].ks * pl.color[0] * cosBetaShine;
+    result.y += materials[materialId].ks * pl.color[1] * cosBetaShine;
+    result.z += materials[materialId].ks * pl.color[2] * cosBetaShine;
 
     return result;
 }

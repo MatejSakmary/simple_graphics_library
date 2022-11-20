@@ -39,9 +39,9 @@ struct vec<3, T>
     union { T y, g; };
     union { T z, b; };
 
-    vec<3, T>();
-    vec<3, T>(const T x, const T y, const T z);
-    vec<3, T>(const vec<3, T> & other);
+    vec();
+    vec(const T x, const T y, const T z);
+    vec(const vec<3, T> & other);
 
     auto to_string() const -> std::string;
     auto get_norm() const -> float;
@@ -54,6 +54,8 @@ struct vec<3, T>
 
     vec<3, T> operator * (float scalar) const;
     vec<3, T> operator / (float scalar) const;
+    T & operator [](int index);
+    T operator [](int index) const;
     private:
         friend SglMatrix;
 };
@@ -66,9 +68,9 @@ struct vec<4, T>
     union { T z, b; };
     union { T w, a; };
 
-    vec<4, T>();
-    vec<4, T>(const T x, const T y, const T z, const T w);
-    vec<4, T>(const vec<4, T> & other);
+    vec();
+    vec(const T x, const T y, const T z, const T w);
+    vec(const vec<4, T> & other);
 
     auto to_string() const -> std::string;
     auto get_norm() const -> float;
@@ -81,6 +83,8 @@ struct vec<4, T>
 
     vec<4, T> operator * (float scalar) const;
     vec<4, T> operator / (float scalar) const;
+    T & operator [](int index);
+    T operator [](int index) const;
     private:
         friend SglMatrix;
 };
@@ -103,6 +107,21 @@ auto cross(const vec<size, T> & first, const vec<size, T> & second) -> vec<size,
     throw std::runtime_error("[sgl_vec.hpp::cross] ERROR cross on types other than vec3 is not implemented");
 }
 
+/// @brief reflect *vector* along *normal*
+///              normal
+///  reflected      x       vector
+///                xxx
+///       xxxxxx  xxxxx  xxxxxx
+///       xxxx     xxx     xxxx
+///       x xxx    xxx    xxx x
+///       x  xxx   xxx   xxx  x
+///           xxx  xxx  xxx
+///            xxx xxx xxx
+///             xxxxxxxxx
+///              xxxxxxx
+/// @param vector - outgoing direction from the point of reflection
+/// @param normal - outgoing normal from the point of reflection
+/// @return reflected vector outgoing from the point of reflection
 template<int size, typename T>
 auto reflect(const vec<size, T> & first, const vec<size, T> &second) -> vec<size, T>
 {
@@ -116,32 +135,3 @@ auto dot(const vec<size, T> & vector, const vec<size, T> & normal) -> float
 };
 
 #include "sgl_vec.inl"
-
-struct Vec4
-{
-    Vec4();
-    Vec4(float x, float y, float z, float w);
-    ~Vec4();
-
-    auto to_string() -> std::string;
-    auto at(int idx) const -> float;
-    auto at(int idx) -> float &;
-    // Divide vertex by w
-    void persp_division();
-    
-    float get_norm();
-
-    Vec4 normalize();
-
-
-    Vec4 operator - (const Vec4 &rhs) const;
-    Vec4 operator * (float scalar) const;
-
-    private:
-        friend SglMatrix;
-        std::array<float, 4> vert;
-};
-
-Vec4 cross_product(const Vec4 &A, const Vec4 &B);
-float dot_product(const Vec4 &A, const Vec4 &B);
-Vec4 reflect(const Vec4 &A, const Vec4 &normal);

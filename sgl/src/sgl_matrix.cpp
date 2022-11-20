@@ -105,9 +105,10 @@ auto SglMatrix::at (int x, int y) -> float&
 };
 
 
-Vec4 SglMatrix::operator * (const Vec4 & other )
+template <typename T>
+vec<4, T> SglMatrix::operator * (const vec<4, T> & other )
 {
-    Vec4 res_vert = Vec4();
+    vec<4, T> res_vert = vec<4, T>();
     // RET = OTHER_MAT * THIS_VERT
     //                            
     // #      row > # # # #       # 
@@ -120,11 +121,16 @@ Vec4 SglMatrix::operator * (const Vec4 & other )
     {
         for(int idx = 0; idx < 4; idx++)
         {
-            res_vert.vert[row] += mat[row * 4 + idx] * other.vert[idx]; 
+            res_vert[row] += mat[row * 4 + idx] * other[idx]; 
         }
     }
     return res_vert;
 }
+
+template vec<4, float> SglMatrix::operator * (const vec<4, float> & other );
+template vec<4, int> SglMatrix::operator * (const vec<4, int> & other );
+template vec<4, uint> SglMatrix::operator * (const vec<4, uint> & other );
+template vec<4, double> SglMatrix::operator * (const vec<4, double> & other );
 
 SglMatrix SglMatrix::operator * (const SglMatrix & other )
 {

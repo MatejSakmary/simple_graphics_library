@@ -5,11 +5,10 @@
 #include "sgl_vec.hpp"
 #include "sgl_matrix.hpp"
 
-
-
-struct Ray {
-    Vec4 origin;
-    Vec4 direction;
+struct Ray 
+{
+    f32vec3 origin;
+    f32vec3 direction;
 };
 
 
@@ -43,27 +42,27 @@ struct Primitive
 {
     unsigned materialIndex;
     // Primitive(const Material & material);
-    virtual Vec4 compute_normal_vector(const Vec4 & vector);
+    virtual f32vec4 compute_normal_vector(const f32vec4 & vector);
     virtual bool intersection(const Ray &ray, float &t);
 };
 
 struct Sphere : Primitive 
 {
-    Vec4 center;
+    f32vec4 center;
     float radius;
     // Sphere(const Material & material, const Vec4 & center, float radius);
     // ~Sphere();
-    Vec4 compute_normal_vector(const Vec4 & vector) override;
+    f32vec4 compute_normal_vector(const f32vec4 & vector) override;
     bool intersection(const Ray &ray, float &t) override;
 };
 
 struct Polygon : Primitive 
 {
-    std::vector<Vec4> vertices;
+    std::vector<f32vec4> vertices;
     bool computed;
-    Vec4 norm;
+    f32vec4 norm;
 
-    Vec4 compute_normal_vector(const Vec4 & vector) override;
+    f32vec4 compute_normal_vector(const f32vec4 & vector) override;
     bool intersection(const Ray &ray, float &t) override;
     // Polygon(const Material & material, const Vec4 & v1, const Vec4 & v2, const Vec4 & v3);
     // ~Primitive();
@@ -71,7 +70,7 @@ struct Polygon : Primitive
 
 struct PointLight 
 {
-    Vec4 source;
+    f32vec4 source;
     float color[3] = {0.0f, 0.0f, 0.0f};
 
     PointLight(float x, float y, float z, float r, float g, float b);

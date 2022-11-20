@@ -32,11 +32,11 @@ struct SglRenderer
     SglRenderer();
     ~SglRenderer();
 
-    void push_vertex(const Vec4 & vertex);
-    void draw_circle(const Vec4 & center, float radius);
-    void draw_ellipse(const Vec4 & center, float a, float b, SglMatrix mat);
-    void draw_arc(const Vec4 & center, float radius, float from, float to, SglMatrix mat);
-    void push_sphere(const Vec4 & center, float radius);
+    void push_vertex(const f32vec4 & vertex);
+    void draw_circle(const f32vec4 & center, float radius);
+    void draw_ellipse(const f32vec4 & center, float a, float b, SglMatrix mat);
+    void draw_arc(const f32vec4 & center, float radius, float from, float to, SglMatrix mat);
+    void push_sphere(const f32vec4 & center, float radius);
     void push_light(float x, float y, float z, float r, float g, float b);
 
     void push_material(
@@ -52,12 +52,12 @@ struct SglRenderer
 
     private:
         friend struct SglCore;
-        std::vector<Vec4> vertices;
+        std::vector<f32vec4> vertices;
 
-        void draw_point(const Vec4 & point);
+        void draw_point(const f32vec4 & point);
         void draw_line_low(int x0, int y0, int x1, int y1);
         void draw_line_high(int x0, int y0, int x1, int y1);
-        void draw_line(const Vec4 & start_v, const Vec4 & end_v);
+        void draw_line(const f32vec4 & start_v, const f32vec4 & end_v);
         void draw_sym_pixels(int x_c, int y_c, int z_c, int x, int y);
         void draw_sym_pixels_rotated(int x_c, int y_c, int z_c, int x, int y, SglMatrix mat);
 
@@ -72,7 +72,7 @@ struct SglRenderer
         // vec4 trace_ray();
         void raytrace_sphere(const Sphere & sphere, SglMatrix mat);
         void raytrace_polygon(const Polygon & polygon, SglMatrix mat);
-        Vec4 phong_color(); //TODO
+        f32vec3 phong_color(); //TODO
 
 
         // Rasterizing primitives functions

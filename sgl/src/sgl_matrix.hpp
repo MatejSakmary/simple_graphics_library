@@ -42,15 +42,18 @@ struct SglMatrix
     SglMatrix(const MatrixCreateInfo & info);
     ~SglMatrix();
     SglMatrix operator * (const SglMatrix & other );
-    Vec4 operator * (const Vec4 & other );
     SglMatrix operator + (const SglMatrix & other );
+
+    template<typename T>
+    vec<4, T> operator * (const vec<4, T> & other );
 
     auto at(int x, int y) -> float&;
     auto to_string() const -> std::string;
     bool invert();
 
     private:
-        friend struct SglVertex;
+        template<int size,typename T>
+        friend struct vec;
         SglMatrix();
         std::array<float, 16> mat;
 };

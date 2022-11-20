@@ -65,6 +65,38 @@ vec<3, T> vec<3, T>::operator / (float scalar) const
 }
 
 template<typename T>
+T & vec<3, T>::operator [](int index)
+{
+    switch(index)
+    {
+        case 0:
+            return &x;
+        case 1:
+            return &y;
+        case 2:
+            return &z;
+        default:
+            throw std::runtime_error("[vec<3, T>::operator []] ERROR index out of bounds for vector with 3 elements");
+    }
+}
+
+template<typename T>
+T vec<3, T>::operator [](int index) const
+{
+    switch(index)
+    {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        default:
+            throw std::runtime_error("[vec<3, T>::operator []] ERROR index out of bounds for vector with 3 elements");
+    }
+}
+
+template<typename T>
 vec<4, T>::vec() : x{T(0.0)}, y{T(0.0)}, z{T(0.0)}, w{T(0.0)} {}
 
 template<typename T>
@@ -116,7 +148,7 @@ vec<4, T> vec<4, T>::operator * (const vec<4, T> & rhs) const
 template<typename T>
 vec<4, T> vec<4, T>::operator / (const vec<4, T> & rhs) const
 {
-    return { x / rhs.x, y / rhs.y, z / rhs.z, w * rhs.w };
+    return { x / rhs.x, y / rhs.y, z / rhs.z, w / rhs.w };
 }
 
 template<typename T>
@@ -128,7 +160,43 @@ vec<4, T> vec<4, T>::operator * (float scalar) const
 template<typename T>
 vec<4, T> vec<4, T>::operator / (float scalar) const
 {
-    return { x / scalar, y / scalar, z / scalar, w * scalar };
+    return { x / scalar, y / scalar, z / scalar, w / scalar };
+}
+
+template<typename T>
+T & vec<4,T>::operator [](int index)
+{
+    switch(index)
+    {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
+        default:
+            throw std::runtime_error("[vec<4, T>::operator []] ERROR index out of bounds for vector with 4 elements");
+    }
+}
+
+template<typename T>
+T vec<4,T>::operator [](int index) const
+{
+    switch(index)
+    {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
+        default:
+            throw std::runtime_error("[vec<4, T>::operator []] ERROR index out of bounds for vector with 4 elements");
+    }
 }
 
 template<typename T>

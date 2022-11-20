@@ -670,7 +670,8 @@ f32vec3 SglRenderer::trace_ray(const Ray & ray)
 
     if(best_dist < MAXFLOAT)
     {
-        return {1.0, 0.0, 0.0};
+        auto mat = materials[best_primitive->materialIndex];
+        return {mat.r, mat.g, mat.b};
     }
     return {0.0, 1.0, 0.0};
 }

@@ -83,6 +83,7 @@ struct vec<4, T>
 
     vec<4, T> operator * (float scalar) const;
     vec<4, T> operator / (float scalar) const;
+
     T & operator [](int index);
     T operator [](int index) const;
     private:

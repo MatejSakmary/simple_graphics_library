@@ -12,8 +12,8 @@
 
 // #define TEST0
 // #define TEST1
-#define TEST2
-// #define TEST3
+// #define TEST2
+#define TEST3
 //#define TEST4
 //#define TEST5
 
@@ -45,8 +45,8 @@
 #define WIDTH 512
 #define HEIGHT 512
 #define TEST_3A
-// #define TEST_3B
-// #define TEST_3C
+#define TEST_3B
+#define TEST_3C
 #endif
 
 #ifdef TEST4
@@ -1030,7 +1030,7 @@ float RayTraceScene(const char *scenename, unsigned int iter = 1)
         nffstore.up.z);
 
     // compute a ray traced image and store it in the color buffer
-    for (unsigned int i = 0; i < iter; i++)
+    for (unsigned int i = 0; i < 1; i++)
         sglRayTraceScene();
 
     return timer.RealTime();
@@ -1619,7 +1619,7 @@ int main(int argc, char **argv)
         cout << "test 3b..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "cornell.nff";
+        const char *sceneFile = "resources/cornell.nff";
         sglSetContext(_contexts[2]);
         double time = RayTraceScene(sceneFile, runMultiplier);
         totalTime += time;
@@ -1635,7 +1635,7 @@ int main(int argc, char **argv)
         cout << "test 3c..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "floor_sph.nff";
+        const char *sceneFile = "resources/floor_sph.nff";
         sglSetContext(_contexts[3]);
         double time = RayTraceScene(sceneFile, runMultiplier);
         totalTime += time;

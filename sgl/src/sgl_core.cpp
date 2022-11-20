@@ -179,5 +179,7 @@ void SglCore::raytrace_scene() {
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(); 
     mat = mat * contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top();
     
-    renderer.raytrace_scene(mat);
+    renderer.raytrace_scene(contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top(),
+                            contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top(),
+                            contexts.at(current_context).viewport_mat);
 }

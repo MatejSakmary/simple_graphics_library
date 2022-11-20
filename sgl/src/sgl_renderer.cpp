@@ -602,7 +602,10 @@ void SglRenderer::recording_end()
         if (state.element_type_mode == sglEElementType::SGL_TRIANGLES || 
             state.element_type_mode == sglEElementType::SGL_POLYGON) 
         {
-            draw_fill_object();
+            if(state.defining_scene == false)
+            {
+                draw_fill_object();
+            }
         }
     }
 
@@ -625,38 +628,72 @@ void SglRenderer::push_material(
     materials.push_back(Material(r, g, b, kd, ks, shine, T, ior));
 }
 
-void SglRenderer::raytrace_sphere(const Sphere & sphere, SglMatrix mat) {
-//    Sphere s = Sphere();
-//    s.center = mat * sphere.center;
-//    s.material = sphere.material;
-//    s.radius = sphere.radius;
-//
-//    Ray r;
-//    float t;
-//    bool intersected = s.intersection(r, t);
+Ray SglRenderer::gen_ray(const SglMatrix & inv_modelveiw,
+                         const SglMatrix & inv_viewport_projection,
+                         const float width, const float height)
+{
+    Ray ray;
+    auto origin_tmp = inv_modelveiw * f32vec4(0.0, 0.0, 0.0, 1.0);
+    auto direction_tmp = inv_viewport_projection * f32vec4(float(width) + 0.5f, float(height) + 0.5, 1.0f, 1.0f);
+    
+    if(direction_tmp.w != 0.0f) { direction_tmp = (1.0f / direction_tmp.w) * direction_tmp; }
+    auto dir_norm_tmp = (direction_tmp - origin_tmp).normalize();
+    ray.direction = f32vec3(dir_norm_tmp.x, dir_norm_tmp.y, dir_norm_tmp.z);
+
+    ray.origin = f32vec3(origin_tmp.x, origin_tmp.y, origin_tmp.z);
+
+    return ray;
 }
 
-
-void SglRenderer::raytrace_polygon(const Polygon & polygon, SglMatrix mat) {
-    //todo 
-}
-
-
-#include <iostream>
-void SglRenderer::raytrace_scene(const SglMatrix & mat) {
-
-    // rasterize_scene();
-    for (int x = 0; x < state.currentFramebuffer->get_width(); x++)
+f32vec3 SglRenderer::trace_ray(const Ray & ray)
+{
+    float best_dist = MAXFLOAT;
+    const Primitive * best_primitive = nullptr;
+    for( const auto & sphere : scene.spheres)
     {
-        for(int y = 0; y < state.currentFramebuffer->get_height(); y++)
+        float dist;
+        if(sphere.intersection(ray, dist) && dist < best_dist)
         {
-            // auto col = trace_ray(gen_ray());
+            best_dist = dist;
+            best_primitive = &sphere;
         }
     }
-    for (Sphere &s: scene.spheres) raytrace_sphere(s, mat);
-    for (Polygon &p: scene.polygons) raytrace_polygon(p, mat);
+    for( const auto & poly : scene.polygons)
+    {
+        float dist;
+        if(poly.intersection(ray, dist) && dist < best_dist)
+        {
+            best_dist = dist;
+            best_primitive = &poly;
+        }
+    }
+
+    if(best_dist < MAXFLOAT)
+    {
+        return {1.0, 0.0, 0.0};
+    }
+    return {0.0, 1.0, 0.0};
 }
 
+void SglRenderer::raytrace_scene(const SglMatrix & modelview,
+                                 const SglMatrix & projection,
+                                 const SglMatrix & viewport) {
+
+    auto modelview_inverse = modelview;
+    auto viewport_projection_inverse = viewport * projection;
+    modelview_inverse.invert();
+    viewport_projection_inverse.invert();
+    viewport_projection_inverse = modelview_inverse * viewport_projection_inverse;
+
+    for (uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
+    {
+        for(uint32_t y = 0; y < state.currentFramebuffer->get_height(); y++)
+        {
+            auto col = trace_ray(gen_ray(modelview_inverse, viewport_projection_inverse, x, y));
+            state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
+        }
+    }
+}
 
 void SglRenderer::draw_sphere(const Sphere & sphere) {
     draw_circle(sphere.center, sphere.radius);

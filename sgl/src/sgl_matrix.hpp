@@ -41,11 +41,11 @@ struct SglMatrix
     SglMatrix(const std::array<float, 16> & mat);
     SglMatrix(const MatrixCreateInfo & info);
     ~SglMatrix();
-    SglMatrix operator * (const SglMatrix & other );
-    SglMatrix operator + (const SglMatrix & other );
+    SglMatrix operator * (const SglMatrix & other ) const;
+    SglMatrix operator + (const SglMatrix & other ) const;
 
     template<typename T>
-    vec<4, T> operator * (const vec<4, T> & other );
+    vec<4, T> operator * (const vec<4, T> & other ) const;
 
     auto at(int x, int y) -> float&;
     auto to_string() const -> std::string;

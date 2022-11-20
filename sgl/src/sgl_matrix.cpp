@@ -106,7 +106,7 @@ auto SglMatrix::at (int x, int y) -> float&
 
 
 template <typename T>
-vec<4, T> SglMatrix::operator * (const vec<4, T> & other )
+vec<4, T> SglMatrix::operator * (const vec<4, T> & other ) const
 {
     vec<4, T> res_vert = vec<4, T>();
     // RET = OTHER_MAT * THIS_VERT
@@ -127,12 +127,12 @@ vec<4, T> SglMatrix::operator * (const vec<4, T> & other )
     return res_vert;
 }
 
-template vec<4, float> SglMatrix::operator * (const vec<4, float> & other );
-template vec<4, int> SglMatrix::operator * (const vec<4, int> & other );
-template vec<4, uint> SglMatrix::operator * (const vec<4, uint> & other );
-template vec<4, double> SglMatrix::operator * (const vec<4, double> & other );
+template vec<4, float> SglMatrix::operator * (const vec<4, float> & other ) const;
+template vec<4, int> SglMatrix::operator * (const vec<4, int> & other ) const;
+template vec<4, uint> SglMatrix::operator * (const vec<4, uint> & other ) const;
+template vec<4, double> SglMatrix::operator * (const vec<4, double> & other ) const;
 
-SglMatrix SglMatrix::operator * (const SglMatrix & other )
+SglMatrix SglMatrix::operator * (const SglMatrix & other ) const
 {
     SglMatrix ret_mat = SglMatrix();
     // RET = THIS * OTHER
@@ -159,7 +159,7 @@ SglMatrix SglMatrix::operator * (const SglMatrix & other )
     return ret_mat;
 }
 
-SglMatrix SglMatrix::operator + (const SglMatrix & other )
+SglMatrix SglMatrix::operator + (const SglMatrix & other ) const
 {
     SglMatrix ret_mat = SglMatrix(other);
     for(int i = 0; i < 16; i++)

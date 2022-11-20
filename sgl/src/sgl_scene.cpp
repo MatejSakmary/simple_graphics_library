@@ -34,16 +34,8 @@ Material::Material(
 
 Material::~Material() {}
 
-// These virtual functions will never be used.
-f32vec4 Primitive::compute_normal_vector(const f32vec4 & vector) { return f32vec4(0.0f, 0.0f, 0.0f, 1.0f); }
-
-bool Primitive::intersection(const Ray &ray, float &t) {
-    return false;
-}
-
-
 // Intersection and raytrace needed functions
-f32vec4 Polygon::compute_normal_vector(const f32vec4 & vector) {
+f32vec4 Polygon::compute_normal_vector(const f32vec4 & vector){
     if (computed) {
         return norm;
     }
@@ -69,7 +61,7 @@ PointLight::PointLight(float x, float y, float z, float r, float g, float b) {
 PointLight::~PointLight() {}
 
 // Find intersection point - from PBRT - www.pbrt.org
-bool Polygon::intersection(const Ray &ray, float &t) {
+bool Polygon::intersection(const Ray &ray, float &t) const {
     // TODO(msakmary) this is not very clean
     f32vec3 vert0 {this->vertices[0].x, this->vertices[0].y, this->vertices[0].z};
     f32vec3 vert1 {this->vertices[1].x, this->vertices[1].y, this->vertices[1].z};
@@ -77,22 +69,25 @@ bool Polygon::intersection(const Ray &ray, float &t) {
     const f32vec3 e1 = vert1 - vert0;
     const f32vec3 e2 = vert2 - vert0;
 
-    f32vec3 s1 = cross(e1, e2);
+    f32vec3 s1 = cross(ray.direction, e2);
     float divisor = dot(s1, e1);
+    if (divisor == 0.0)
+        return false;
+
     float invDivisor = 1.0f / divisor;
     // Compute first barycentric coordinate
     f32vec3 d = ray.origin - vert0;
     float b1 = dot(d, s1) * invDivisor;
-    if (b1 < 0. || b1 > 1.)
+    if (b1 < 0.0f || b1 > 1.0f)
         return false;
     // Compute second barycentric coordinate
     f32vec3 s2 = cross(d, e1);
     float b2 = dot(ray.direction, s2) * invDivisor;
-    if (b2 < 0. || b1 + b2 > 1.)
+    if (b2 < 0.0f || b1 + b2 > 1.0f)
         return false;
     // Compute _t_ to intersection point
     float tt = dot(e2, s2) * invDivisor;
-    if (tt < 0) // In original algo there is tt < 0 || tt > maxT
+    if (tt < 0.0f) // In original algo there is tt < 0 || tt > maxT
         return false;
     t = tt;
     return true;
@@ -110,7 +105,7 @@ f32vec4 Sphere::compute_normal_vector(const f32vec4 & vector) {
 }
 
 // source: http://www.devmaster.net/wiki/Ray-sphere_intersection
-bool Sphere::intersection(const Ray &ray, float &t) {
+bool Sphere::intersection(const Ray &ray, float &t) const {
     const f32vec3 dst = ray.origin - f32vec3(center.x, center.y, center.z);
     const float b = dot(dst, ray.direction);
     const float c = dot(dst, dst) - radius*radius;

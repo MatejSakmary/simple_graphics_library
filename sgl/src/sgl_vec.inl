@@ -18,7 +18,8 @@ auto vec<3, T>::to_string() const -> std::string
 template<typename T>
 auto vec<3, T>::get_norm() const -> float
 {
-    return sqrt(x * x + y * y + z * z);
+    float tmp = sqrt(x * x + y * y + z * z);
+    return tmp != 0 ? tmp : 1.0f;
 }
 
 template<typename T>
@@ -117,7 +118,8 @@ auto vec<4, T>::to_string() const -> std::string
 template<typename T>
 auto vec<4, T>::get_norm() const -> float
 {
-    return sqrt(x * x + y * y + z * z + w * w);
+    float tmp = sqrt(x * x + y * y + z * z + w * w);
+    return tmp != 0 ? tmp : 1.0f;
 }
 
 template<typename T>
@@ -226,7 +228,7 @@ template<typename T>
 auto reflect(const vec<3, T> & vector, const vec<3, T> &normal) -> vec<3, T>
 {
     auto normalized_normal = normal.normalize();
-    return 2.0f * dot(normalized_normal, vector) * normalized_normal - vector;
+    return vector - 2.0f * dot(normalized_normal, vector) * normalized_normal;
 }
 
 template<typename T>

@@ -40,9 +40,9 @@ struct Material
 
 struct Primitive 
 {
-    unsigned materialIndex;
+    unsigned material_index;
     // Primitive(const Material & material);
-    virtual f32vec4 compute_normal_vector(const f32vec4 & vector) = 0;
+    virtual f32vec3 compute_normal_vector(const f32vec3 & vector);
     virtual bool intersection(const Ray &ray, float &t) const = 0;
     virtual ~Primitive() = default;
 
@@ -56,7 +56,7 @@ struct Sphere : public Primitive
     float radius;
     Sphere() = default;
 
-    f32vec4 compute_normal_vector(const f32vec4 & vector) override;
+    f32vec3 compute_normal_vector(const f32vec3 & vector) override;
     bool intersection(const Ray &ray, float &t) const override;
 };
 
@@ -64,10 +64,10 @@ struct Polygon : public Primitive
 {
     std::vector<f32vec4> vertices;
     bool computed;
-    f32vec4 norm;
+    f32vec3 norm;
 
-    Polygon() = default;
-    f32vec4 compute_normal_vector(const f32vec4 & vector) override;
+    Polygon();
+    f32vec3 compute_normal_vector(const f32vec3 & vector) override;
     bool intersection(const Ray &ray, float &t) const override;
     // Polygon(const Material & material, const Vec4 & v1, const Vec4 & v2, const Vec4 & v3);
     // ~Primitive();

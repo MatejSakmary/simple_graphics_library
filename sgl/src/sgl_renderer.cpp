@@ -70,7 +70,7 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
             if (state.defining_scene && vertices.size() == 3) {
                 if (!materials.empty()) {
                     Polygon poly;
-                    poly.materialIndex = materials.size() - 1;
+                    poly.material_index = materials.size() - 1;
                     for (int i = 0; i < 3; ++i)
                         poly.vertices.push_back(vertices.at(i));
                     scene.polygons.push_back(poly);
@@ -111,7 +111,7 @@ void SglRenderer::push_sphere(const f32vec4 & center, float radius) {
     if (state.defining_scene) {
         if (!materials.empty()) {
             Sphere sphere;
-            sphere.materialIndex = materials.size() - 1;
+            sphere.material_index = materials.size() - 1;
             sphere.center = center;
             sphere.radius = radius;
             scene.spheres.push_back(sphere);
@@ -645,11 +645,12 @@ Ray SglRenderer::gen_ray(const SglMatrix & inv_modelveiw,
     return ray;
 }
 
+
 f32vec3 SglRenderer::trace_ray(const Ray & ray)
 {
     float best_dist = MAXFLOAT;
-    const Primitive * best_primitive = nullptr;
-    for( const auto & sphere : scene.spheres)
+    Primitive * best_primitive = nullptr;
+    for(auto & sphere : scene.spheres)
     {
         float dist;
         if(sphere.intersection(ray, dist) && dist < best_dist)
@@ -658,7 +659,7 @@ f32vec3 SglRenderer::trace_ray(const Ray & ray)
             best_primitive = &sphere;
         }
     }
-    for( const auto & poly : scene.polygons)
+    for(auto & poly : scene.polygons)
     {
         float dist;
         if(poly.intersection(ray, dist) && dist < best_dist)
@@ -670,10 +671,20 @@ f32vec3 SglRenderer::trace_ray(const Ray & ray)
 
     if(best_dist < MAXFLOAT)
     {
-        auto mat = materials[best_primitive->materialIndex];
-        return {mat.r, mat.g, mat.b};
+        f32vec3 color;
+        f32vec3 intersection_point = ray.origin + (ray.direction * best_dist);
+        f32vec3 intersection_normal = best_primitive->compute_normal_vector(intersection_point);
+
+        for(auto &l : scene.lights){
+            f32vec3 light_pos = {l.source.x,l.source.y,l.source.z};
+            f32vec3 light_col = {l.color[0], l.color[1], l.color[2]};
+            f32vec3 light_direction = (light_pos - intersection_point).normalize();
+            f32vec3 view_dir = ray.direction * (-1.0f);
+            color = color + phong_color(view_dir, light_direction, intersection_normal, best_primitive->material_index, light_col);
+        }
+        return color;
     }
-    return {0.0, 1.0, 0.0};
+    return {-420.0, 0.0, 0.0};
 }
 
 void SglRenderer::raytrace_scene(const SglMatrix & modelview,
@@ -691,7 +702,8 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
         for(uint32_t y = 0; y < state.currentFramebuffer->get_height(); y++)
         {
             auto col = trace_ray(gen_ray(modelview_inverse, viewport_projection_inverse, x, y));
-            state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
+            if(col.x != -420.0f)
+                state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
         }
     }
 }
@@ -711,29 +723,19 @@ void SglRenderer::rasterize_scene() {
     for (Polygon p: scene.polygons) draw_polygon(p);
 }
 
-f32vec3 SglRenderer::phong_color() { //TODO add parameters depending on actual implementation (RAY, CAM, POINT, NORMAL, LIGHT, MATERIALID ...)
-    //TMP variables TODO REPLACE
-    f32vec3 point, lightPos, normal, camPos;
-    unsigned materialId;
-    PointLight pl(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+f32vec3 SglRenderer::phong_color(f32vec3 &view_dir, f32vec3 &light_dir, f32vec3 &normal, unsigned int material_index, f32vec3 &light_color) {
+    f32vec3 reflected_dir = reflect(light_dir * (-1.0f), normal).normalize();
 
-    f32vec3 lightDir = (lightPos - point).normalize();
-    f32vec3 viewDir = (camPos - point).normalize();
-    f32vec3 reflectDir = reflect(lightDir * (-1.0f), normal).normalize();
+    float cosAlpha = std::max(dot(light_dir, normal), 0.0f);
+    float cosBeta = std::max(dot(reflected_dir, view_dir), 0.0f);
 
-    float cosAlpha = std::max(dot(lightDir, normal), 0.0f);
-    float cosBeta = std::max(dot(reflectDir, viewDir), 0.0f);
+    f32vec3 material_color = {materials[material_index].r, materials[material_index].g, materials[material_index].b}; //TODO REWRITE TO VEC3
+    f32vec3 material_Ks = {materials[material_index].ks,materials[material_index].ks,materials[material_index].ks};
 
-    f32vec3 result; //NOT PROUD OF THIS, WE BETTER SWITCH TO VEC3
-    //DIFFUSE
-    result.x = materials[materialId].kd * pl.color[0] * cosAlpha;
-    result.y = materials[materialId].kd * pl.color[1] * cosAlpha;
-    result.z = materials[materialId].kd * pl.color[2] * cosAlpha;
-    //SPECULAR
-    float cosBetaShine = std::pow(cosBeta, materials[materialId].shine);
-    result.x += materials[materialId].ks * pl.color[0] * cosBetaShine;
-    result.y += materials[materialId].ks * pl.color[1] * cosBetaShine;
-    result.z += materials[materialId].ks * pl.color[2] * cosBetaShine;
+    f32vec3 diffuse, specular;
+    diffuse = light_color * materials[material_index].kd * cosAlpha;
+    specular = material_Ks * std::pow(cosBeta, materials[material_index].shine);
 
-    return result;
+    return diffuse * material_color + specular;
 }
+

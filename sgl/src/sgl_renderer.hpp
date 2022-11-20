@@ -72,7 +72,8 @@ struct SglRenderer
                     const SglMatrix & inv_viewport_projection,
                     const float u, const float v);
         f32vec3 trace_ray(const Ray & ray);
-        f32vec3 phong_color(); //TODO
+        //f32vec3 phong_color(f32vec3 &point, unsigned materialId, f32vec3 &normal, PointLight &pl, Ray &r);
+        f32vec3 phong_color(f32vec3 &view_dir,f32vec3 &light_dir,f32vec3 &normal, unsigned material_index, f32vec3 &light_color);
 
         // Rasterizing primitives functions
         void draw_sphere(const Sphere & sphere);

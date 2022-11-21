@@ -32,6 +32,13 @@
             }
         },
         {
+            "name" : "defaults-release-debug-info",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
             "name" : "defaults-debug",
             "hidden": true,
             "cacheVariables": {
@@ -53,6 +60,14 @@
             "inherits" : [
                 "defaults-linux",
                 "defaults-release"
+            ]
+        },
+        {
+            "name" : "linux-release-with-debug-info",
+            "displayName": "release-with-debug-info",
+            "inherits" : [
+                "defaults-linux",
+                "defaults-release-debug-info"
             ]
         }
     ]

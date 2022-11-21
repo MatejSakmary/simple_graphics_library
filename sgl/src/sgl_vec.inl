@@ -204,9 +204,25 @@ T vec<4,T>::operator [](int index) const
 template<typename T>
 auto cross(const vec<3, T> & first, const vec<3, T> & second) -> vec<3, T>
 {
-    return { first.y * second.z - first.z * second.y,
-             first.z * second.x - first.x * second.z,
-             first.x * second.y - first.y * second.x };
+
+    // return { first.y * second.z - first.z * second.y,
+    //          first.z * second.x - first.x * second.z,
+    //          first.x * second.y - first.y * second.x };
+    vec<3, T> res_fin;
+    __m128 prod_f_1 = {first.y, first.z, first.x, 0.0};
+    __m128 prod_f_2 = {first.z, first.x, first.y, 0.0};
+    __m128 prod_s_1 = {second.z, second.x, second.y, 0.0};
+    __m128 prod_s_2 = {second.y, second.z, second.x, 0.0};
+
+    __m128 res_1 = _mm_mul_ps(prod_f_1, prod_s_1);
+    __m128 res_2 = _mm_mul_ps(prod_f_2, prod_s_2);
+    __m128 res = _mm_sub_ps(res_1, res_2);
+    std::array<float, 4> arr;
+    _mm_store_ps(arr.data(), res);
+    res_fin.x = arr[0];
+    res_fin.y = arr[1];
+    res_fin.z = arr[2];
+    return res_fin;
 }
 
 /// @brief reflect *vector* along *normal*

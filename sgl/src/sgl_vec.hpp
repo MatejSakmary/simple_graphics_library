@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <immintrin.h>
 
 #include "sgl.h"
 

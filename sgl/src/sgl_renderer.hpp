@@ -69,9 +69,8 @@ struct SglRenderer
         // void draw_fill_triangles();
 
         // RayTracing functions
-        Ray gen_ray(const SglMatrix & inv_modelveiw,
-                    const SglMatrix & inv_viewport_projection,
-                    const float u, const float v);
+        Ray gen_ray(const float width, const float height, const f32vec3 v00, 
+            const f32vec3 v10, const f32vec3 v01, const f32vec3 origin);
         f32vec3 trace_ray(const Ray & ray);
         //f32vec3 phong_color(f32vec3 &point, unsigned materialId, f32vec3 &normal, PointLight &pl, Ray &r);
         f32vec3 phong_color(f32vec3 &view_dir,f32vec3 &light_dir,f32vec3 &normal, unsigned material_index, f32vec3 &light_color);

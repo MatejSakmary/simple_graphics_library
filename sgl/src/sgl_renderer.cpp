@@ -58,7 +58,6 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
                 draw_line(vertices[0], vertices[1]);
             }
             else if(vertices.size() == 3) {
-                f32vec4 first = vertices[0];
                 draw_line(vertices[1], vertices[2]);
                 vertices.erase(vertices.begin()+1);
             }
@@ -86,7 +85,6 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
                         draw_line(vertices[0], vertices[1]);
                     }
                     else if(vertices.size() == 3) {
-                        f32vec4 first = vertices[0];
                         draw_line(vertices[1], vertices[2]);
                         vertices.erase(vertices.begin()+1);
                     }
@@ -628,19 +626,20 @@ void SglRenderer::push_material(
     materials.push_back(Material(r, g, b, kd, ks, shine, T, ior));
 }
 
-Ray SglRenderer::gen_ray(const SglMatrix & inv_modelveiw,
-                         const SglMatrix & inv_viewport_projection,
-                         const float width, const float height)
+Ray SglRenderer::gen_ray(const float width, const float height, const f32vec3 v00, 
+    const f32vec3 v10, const f32vec3 v01, const f32vec3 origin)
 {
     Ray ray;
-    auto origin_tmp = inv_modelveiw * f32vec4(0.0, 0.0, 0.0, 1.0);
-    auto direction_tmp = inv_viewport_projection * f32vec4(float(width) + 0.5f, float(height) + 0.5, 1.0f, 1.0f);
-    
-    if(direction_tmp.w != 0.0f) { direction_tmp = (1.0f / direction_tmp.w) * direction_tmp; }
-    auto dir_norm_tmp = (direction_tmp - origin_tmp).normalize();
-    ray.direction = f32vec3(dir_norm_tmp.x, dir_norm_tmp.y, dir_norm_tmp.z);
 
-    ray.origin = f32vec3(origin_tmp.x, origin_tmp.y, origin_tmp.z);
+    float t_x = float(width)/float(state.currentFramebuffer->get_width());
+    float t_y = float(height)/float(state.currentFramebuffer->get_height());
+    auto final_dir = v00 + t_x * (v10 - v00);
+    final_dir = final_dir + t_y * (v01 - v00);
+    final_dir = final_dir.normalize();
+
+
+    ray.direction = f32vec3(final_dir.x, final_dir.y, final_dir.z);
+    ray.origin = origin;
 
     return ray;
 }
@@ -687,16 +686,12 @@ f32vec3 SglRenderer::trace_ray(const Ray & ray)
     return {-420.0, 0.0, 0.0};
 }
 
-void do_stuff(int param)
-{
-    std::cout << "Thread with param " << param << std::endl;
-}
-
 void SglRenderer::raytrace_scene(const SglMatrix & modelview,
                                  const SglMatrix & projection,
                                  const SglMatrix & viewport) {
 
-    const int num_threads = 32;
+    const int num_threads = std::thread::hardware_concurrency() * 2;
+    // const int num_threads = 1;
     std::vector<std::thread> threads;
 
     auto modelview_inverse = modelview;
@@ -705,12 +700,30 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
     viewport_projection_inverse.invert();
     viewport_projection_inverse = modelview_inverse * viewport_projection_inverse;
 
+    auto origin_tmp = modelview_inverse * f32vec4(0.0, 0.0, 0.0, 1.0);
+    auto orig = f32vec3(origin_tmp.x, origin_tmp.y, origin_tmp.z);
+
+    auto horizontal_min = viewport_projection_inverse * f32vec4(0.5f, 0.5f, 1.0f, 1.0f);
+    horizontal_min = (1.0f / horizontal_min.w) * horizontal_min;
+    auto dir_00 = (horizontal_min - origin_tmp).normalize();
+    auto d00 = f32vec3(dir_00.x, dir_00.y, dir_00.z);
+
+    auto horizontal_max = viewport_projection_inverse * f32vec4(float(state.currentFramebuffer->get_width()) + 0.5f, 0.5f, 1.0f, 1.0f);
+    horizontal_max = (1.0f / horizontal_max.w) * horizontal_max;
+    auto dir_10 = (horizontal_max - origin_tmp).normalize();
+    auto d10 = f32vec3(dir_10.x, dir_10.y, dir_10.z);
+
+    auto vertical_max = viewport_projection_inverse * f32vec4(0.5f, float(state.currentFramebuffer->get_height()) + 0.5f, 1.0f, 1.0f);
+    vertical_max = (1.0f / vertical_max.w) * vertical_max;
+    auto dir_01 = (vertical_max - origin_tmp).normalize();
+    auto d01 = f32vec3(dir_01.x, dir_01.y, dir_01.z);
+
     auto task = [&](int start, int end){
-        for(uint32_t y = start; y < end; y++)
+        for(int y = start; y < end; y++)
         {
             for(uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
             {
-                auto col = trace_ray(gen_ray(modelview_inverse, viewport_projection_inverse, x, y));
+                auto col = trace_ray(gen_ray(x, y, d00, d10, d01, orig));
                 if(col.x != -420.0f)
                     state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
             }
@@ -733,17 +746,6 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
     {
         threads.at(i).join();
     }
-
-
-    // for (uint32_t y = 0; y < state.currentFramebuffer->get_height(); y++)
-    // {
-    //     for(uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
-    //     {
-    //         auto col = trace_ray(gen_ray(modelview_inverse, viewport_projection_inverse, x, y));
-    //         if(col.x != -420.0f)
-    //             state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
-    //     }
-    // }
 }
 
 void SglRenderer::draw_sphere(const Sphere & sphere) {
@@ -762,7 +764,7 @@ void SglRenderer::rasterize_scene() {
 }
 
 f32vec3 SglRenderer::phong_color(f32vec3 &view_dir, f32vec3 &light_dir, f32vec3 &normal, unsigned int material_index, f32vec3 &light_color) {
-    f32vec3 reflected_dir = reflect(light_dir * (-1.0f), normal).normalize();
+    f32vec3 reflected_dir = reflect(light_dir * (-1.0f), normal);
 
     float cosAlpha = std::max(dot(light_dir, normal), 0.0f);
     float cosBeta = std::max(dot(reflected_dir, view_dir), 0.0f);

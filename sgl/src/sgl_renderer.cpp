@@ -733,9 +733,9 @@ f32vec3 SglRenderer::phong_color(f32vec3 &view_dir, f32vec3 &light_dir, f32vec3 
     f32vec3 material_Ks = {materials[material_index].ks,materials[material_index].ks,materials[material_index].ks};
 
     f32vec3 diffuse, specular;
-    diffuse = light_color * materials[material_index].kd * cosAlpha;
-    specular = material_Ks * std::pow(cosBeta, materials[material_index].shine);
+    diffuse = material_color * light_color * materials[material_index].kd * cosAlpha;
+    specular = light_color * material_Ks * std::pow(cosBeta, materials[material_index].shine);
 
-    return diffuse * material_color + specular;
+    return diffuse + specular;
 }
 

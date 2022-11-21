@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <thread>
 
 #include "sgl.h"
 #include "sgl_vec.hpp"

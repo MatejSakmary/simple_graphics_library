@@ -687,9 +687,17 @@ f32vec3 SglRenderer::trace_ray(const Ray & ray)
     return {-420.0, 0.0, 0.0};
 }
 
+void do_stuff(int param)
+{
+    std::cout << "Thread with param " << param << std::endl;
+}
+
 void SglRenderer::raytrace_scene(const SglMatrix & modelview,
                                  const SglMatrix & projection,
                                  const SglMatrix & viewport) {
+
+    const int num_threads = 32;
+    std::vector<std::thread> threads;
 
     auto modelview_inverse = modelview;
     auto viewport_projection_inverse = viewport * projection;
@@ -697,15 +705,45 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
     viewport_projection_inverse.invert();
     viewport_projection_inverse = modelview_inverse * viewport_projection_inverse;
 
-    for (uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
-    {
-        for(uint32_t y = 0; y < state.currentFramebuffer->get_height(); y++)
+    auto task = [&](int start, int end){
+        for(uint32_t y = start; y < end; y++)
         {
-            auto col = trace_ray(gen_ray(modelview_inverse, viewport_projection_inverse, x, y));
-            if(col.x != -420.0f)
-                state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
+            for(uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
+            {
+                auto col = trace_ray(gen_ray(modelview_inverse, viewport_projection_inverse, x, y));
+                if(col.x != -420.0f)
+                    state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
+            }
+        }
+    };
+    threads.reserve(num_threads);
+    int chunk = state.currentFramebuffer->get_height() / num_threads;
+    int remainder = state.currentFramebuffer->get_height() % num_threads;
+    for(int i = 0; i < num_threads; i++)
+    {
+        if(i != num_threads - 1)
+        {
+            threads.push_back(std::thread(task, i * chunk, (i+1) * chunk));
+        } else 
+        {
+            threads.push_back(std::thread(task, i * chunk, ((i+1) * chunk) + remainder));
         }
     }
+    for(int i = 0; i < num_threads; i++)
+    {
+        threads.at(i).join();
+    }
+
+
+    // for (uint32_t y = 0; y < state.currentFramebuffer->get_height(); y++)
+    // {
+    //     for(uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
+    //     {
+    //         auto col = trace_ray(gen_ray(modelview_inverse, viewport_projection_inverse, x, y));
+    //         if(col.x != -420.0f)
+    //             state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
+    //     }
+    // }
 }
 
 void SglRenderer::draw_sphere(const Sphere & sphere) {

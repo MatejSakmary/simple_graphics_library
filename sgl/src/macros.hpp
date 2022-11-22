@@ -1,3 +1,5 @@
+#pragma once
+#pragma GCC optimize("O3,unroll-loops,fast-math")
 
 #ifdef SGL_LOG_OUTPUT
 #include <iostream>

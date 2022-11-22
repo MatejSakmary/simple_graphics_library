@@ -5,6 +5,7 @@
 
 #include "sgl.h"
 #include "macros.hpp"
+#pragma GCC optimize("O3,unroll-loops,fast-math")
 
 struct Pixel
 {

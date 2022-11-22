@@ -1,3 +1,4 @@
+#pragma GCC optimize("O3,unroll-loops,fast-math")
 template<typename T>
 vec<3, T>::vec() : x{T(0.0)}, y{T(0.0)}, z{T(0.0)} {}
 

@@ -1,4 +1,6 @@
 #include "sgl_matrix.hpp"
+#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 
 #include <cmath>
 #include <sstream>

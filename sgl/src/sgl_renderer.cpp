@@ -3,6 +3,8 @@
 #include <list>
 #include <numeric>
 
+#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 SglRenderer::SglRenderer() : 
     state{
        .draw_color = Pixel{.r = 0.0f, .g = 0.0f, .b = 0.0f} ,

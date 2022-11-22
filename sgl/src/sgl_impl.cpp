@@ -11,6 +11,8 @@
 #include "macros.hpp"
 #include "sgl_core.hpp"
 #include "sgl_vec.hpp"
+#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 
 // sglCore instance
 std::unique_ptr<SglCore> core = nullptr;

@@ -1,4 +1,7 @@
 #include "sgl_context.hpp"
+#pragma GCC optimize("O3,unroll-loops,fast-math")
+
+
 
 SglContext::SglContext(const SglContextInitInfo & info) :
     info{info},

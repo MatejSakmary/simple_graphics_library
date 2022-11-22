@@ -1,4 +1,6 @@
 #include "sgl_core.hpp"
+#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 
 SglCore::SglCore() : 
     recording{false},

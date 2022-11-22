@@ -1,4 +1,5 @@
 #include "sgl_framebuffer.hpp"
+#pragma GCC optimize("O3,unroll-loops,fast-math")
 
 #include <cstring>
 

@@ -690,7 +690,7 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
                                  const SglMatrix & projection,
                                  const SglMatrix & viewport) {
 
-    const int num_threads = std::thread::hardware_concurrency() * 2;
+    const int num_threads = std::thread::hardware_concurrency() * 3;
     // const int num_threads = 1;
     std::vector<std::thread> threads;
 

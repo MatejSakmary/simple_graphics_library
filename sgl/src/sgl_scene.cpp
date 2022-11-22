@@ -1,5 +1,6 @@
 #include "sgl_scene.hpp"
 #include <iostream>
+#include <immintrin.h>
 
 Material::Material() : 
     r{0.0f},
@@ -64,7 +65,46 @@ PointLight::~PointLight() {}
 
 // Find intersection point - from PBRT - www.pbrt.org
 bool Polygon::intersection(const Ray &ray, float &t) const {
-    // TODO(msakmary) this is not very clean
+    // NOTE(Very cool, but also slower than normal) :(
+    // f32vec3 vert0 {this->vertices[0].x, this->vertices[0].y, this->vertices[0].z};
+    // f32vec3 vert1 {this->vertices[1].x, this->vertices[1].y, this->vertices[1].z};
+    // f32vec3 vert2 {this->vertices[2].x, this->vertices[2].y, this->vertices[2].z};
+    // const f32vec3 e1 = vert1 - vert0;
+    // const f32vec3 e2 = vert2 - vert0;
+
+    // f32vec3 s1 = cross(ray.direction, e2);
+    // f32vec3 d = ray.origin - vert0;
+    // f32vec3 s2 = cross(d, e1);
+
+    // __m128 s1_s2_x = {s1.x, s1.x, s2.x, s2.x};
+    // __m128 s1_s2_y = {s1.y, s1.y, s2.y, s2.y};
+    // __m128 s1_s2_z = {s1.z, s1.z, s2.z, s2.z};
+    // __m128 e1_d_e2_rd_x = {e1.x, d.x, e2.x, ray.direction.x};
+    // __m128 e1_d_e2_rd_y = {e1.y, d.y, e2.y, ray.direction.y};
+    // __m128 e1_d_e2_rd_z = {e1.z, d.z, e2.z, ray.direction.z};
+    
+    // __m128 tmp_1 = _mm_mul_ps(s1_s2_x, e1_d_e2_rd_x);
+    // __m128 tmp_2 = _mm_mul_ps(s1_s2_y, e1_d_e2_rd_y);
+    // __m128 tmp_3 = _mm_mul_ps(s1_s2_z, e1_d_e2_rd_z);
+
+    // __m128 res = _mm_add_ps(tmp_1, tmp_2);
+    // res = _mm_add_ps(res, tmp_3);
+
+    // __m128 div = _mm_shuffle_ps(res, res, _MM_SHUFFLE(0,0,0,0));
+    // res = _mm_div_ps(res, div);
+
+    // std::array<float, 5> arr;
+    // _mm_store1_ps(arr.data(), div);
+    // _mm_store_ps(arr.data() + 1, res);
+    // float divisor = arr[0];
+    // auto b1 = arr[2];
+    // auto tt = arr[3];
+    // auto b2 = arr[4];
+
+    // if ((b1 < 0.0f) | (b1 > 1.0f) | (b2 < 0.0f) | (b1 + b2 > 1.0f) | (divisor == 0.0f) | (tt < 0.0f))
+    //     return false;
+    // t = tt;
+    // return true;
     f32vec3 vert0 {this->vertices[0].x, this->vertices[0].y, this->vertices[0].z};
     f32vec3 vert1 {this->vertices[1].x, this->vertices[1].y, this->vertices[1].z};
     f32vec3 vert2 {this->vertices[2].x, this->vertices[2].y, this->vertices[2].z};
@@ -92,7 +132,7 @@ bool Polygon::intersection(const Ray &ray, float &t) const {
     if (tt < 0.0f) // In original algo there is tt < 0 || tt > maxT
         return false;
     t = tt;
-    return true;
+    return true;   
 }
 
 Polygon::Polygon() :computed(false){};

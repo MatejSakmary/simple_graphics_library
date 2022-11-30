@@ -419,9 +419,7 @@ void sglDisable(sglEEnableFlags cap)
 void sglBeginScene() 
 {
 	if ((core->get_context() == -1) || core->get_recording()) core->set_error(sglEErrorCode::SGL_INVALID_OPERATION);
-	core->renderer.scene.lights.clear();
-	core->renderer.scene.polygons.clear();
-	core->renderer.scene.spheres.clear();
+	core->renderer.scene.clear();
 	core->renderer.state.defining_scene = true;
 }
 

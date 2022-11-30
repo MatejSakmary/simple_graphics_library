@@ -44,12 +44,14 @@ struct vec<3, T>
     vec();
     vec(const T x, const T y, const T z);
     vec(const vec<3, T> & other);
+    vec(const vec<4, T> & other); // DISCARDS W COORDINATE!
 
     auto to_string() const -> std::string;
     auto get_norm() const -> float;
     auto normalize() const -> vec<3, T>;
 
     vec<3, T> operator - (const vec<3, T> & rhs) const;
+    vec<3, T> operator - () const;
     vec<3, T> operator + (const vec<3, T> & rhs) const;
     vec<3, T> operator * (const vec<3, T> & rhs) const;
     vec<3, T> operator / (const vec<3, T> & rhs) const;

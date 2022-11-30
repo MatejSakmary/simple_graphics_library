@@ -1,9 +1,15 @@
 #pragma GCC optimize("O3,unroll-loops,fast-math")
+
+#include "sgl_vec.hpp"
+
 template<typename T>
 vec<3, T>::vec() : x{T(0.0)}, y{T(0.0)}, z{T(0.0)} {}
 
 template<typename T>
 vec<3, T>::vec(const vec<3, T> & other) : x{other.x}, y {other.y}, z{other.z} {}
+
+template<typename T>
+vec<3, T>::vec(const vec<4, T> & other) : x{other.x}, y {other.y}, z{other.z} {}
 
 template<typename T>
 vec<3, T>::vec(const T x, const T y, const T z) : x{x}, y{y}, z{z} {}
@@ -34,6 +40,11 @@ template<typename T>
 vec<3, T> vec<3, T>::operator - (const vec<3, T> & rhs) const
 {
     return { x - rhs.x, y - rhs.y, z - rhs.z };
+}
+
+template<typename T>
+vec<3, T> vec<3, T>::operator-() const {
+    return { -x, -y, -z };
 }
 
 template<typename T>
@@ -244,7 +255,15 @@ auto reflect(const vec<3, T> & vector, const vec<3, T> &normal) -> vec<3, T>
 }
 
 template<typename T>
+auto refract(const vec<3, T> & vector, const vec<3, T> &normal) -> vec<3, T>
+{
+    auto normalized_normal = normal.normalize();
+    return vector - 2.0f * dot(vector, normalized_normal) * normalized_normal;
+}
+
+template<typename T>
 auto dot(const vec<3, T> & first, const vec<3, T> & second) -> float
 {
     return {first.x * second.x + first.y * second.y + first.z * second.z};
 }
+

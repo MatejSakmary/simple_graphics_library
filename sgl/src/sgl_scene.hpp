@@ -15,9 +15,7 @@ struct Ray
 
 struct Material
 {
-    float r;
-    float g;
-    float b;
+    f32vec3 color;
     float kd;
     float ks;
     float shine;
@@ -43,35 +41,35 @@ struct Primitive
 {
     unsigned material_index;
     // Primitive(const Material & material);
-    virtual f32vec3 compute_normal_vector(const f32vec3 & vector);
+    virtual f32vec3 compute_normal_vector(const f32vec3 & vector) = 0;
     virtual bool intersection(const Ray &ray, float &t) const = 0;
     virtual ~Primitive() = default;
 
     protected:
-        Primitive(){}
+        Primitive(unsigned material_index);
 };
 
 struct Sphere : public Primitive 
 {
     f32vec4 center;
     float radius;
-    Sphere() = default;
+    Sphere(const f32vec4 &center, float radius, unsigned material_index);
 
     f32vec3 compute_normal_vector(const f32vec3 & vector) override;
     bool intersection(const Ray &ray, float &t) const override;
 };
 
+// Polygon is considered as triangle
 struct Polygon : public Primitive 
 {
     std::vector<f32vec4> vertices;
-    bool computed;
+    bool already_computed_normal;
     f32vec3 norm;
 
-    Polygon();
     f32vec3 compute_normal_vector(const f32vec3 & vector) override;
     bool intersection(const Ray &ray, float &t) const override;
-    // Polygon(const Material & material, const Vec4 & v1, const Vec4 & v2, const Vec4 & v3);
-    // ~Primitive();
+
+    Polygon(const f32vec4 &v1, const f32vec4 &v2, const f32vec4 &v3, unsigned material_index);
 };
 
 struct PointLight 
@@ -85,12 +83,11 @@ struct PointLight
 
 struct Scene
 {
-    std::vector<Sphere> spheres;
-    std::vector<Polygon> polygons;
+    std::vector<Primitive*> objects;
     std::vector<PointLight> lights;
+
+    void clear();
 
     Scene();
     ~Scene();
-    // void add_sphere(const Material & material, const Vec4 & center, float radius);
-    // void add_polygon(const Material & material, const Vec4 & v1, const Vec4 & v2, const Vec4 & v3);
 };

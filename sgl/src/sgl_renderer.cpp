@@ -70,11 +70,8 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
             // TODO sakacond add comment
             if (state.defining_scene && vertices.size() == 3) {
                 if (!materials.empty()) {
-                    Polygon poly;
-                    poly.material_index = materials.size() - 1;
-                    for (int i = 0; i < 3; ++i)
-                        poly.vertices.push_back(vertices.at(i));
-                    scene.polygons.push_back(poly);
+                    Polygon *poly = new Polygon(vertices.at(0), vertices.at(1), vertices.at(2), materials.size() - 1);
+                    scene.objects.push_back(poly);
                     vertices.clear();
                 }
                 else {
@@ -110,11 +107,8 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
 void SglRenderer::push_sphere(const f32vec4 & center, float radius) {
     if (state.defining_scene) {
         if (!materials.empty()) {
-            Sphere sphere;
-            sphere.material_index = materials.size() - 1;
-            sphere.center = center;
-            sphere.radius = radius;
-            scene.spheres.push_back(sphere);
+            Sphere* sphere = new Sphere(center, radius, materials.size() - 1);
+            scene.objects.emplace_back(sphere);
         }
     }
     // TODO ERRORS
@@ -602,7 +596,7 @@ void SglRenderer::recording_end()
         if (state.element_type_mode == sglEElementType::SGL_TRIANGLES || 
             state.element_type_mode == sglEElementType::SGL_POLYGON) 
         {
-            if(state.defining_scene == false)
+            if(!state.defining_scene)
             {
                 draw_fill_object();
             }
@@ -612,6 +606,27 @@ void SglRenderer::recording_end()
     vertices.clear();
 }
 
+void SglRenderer::draw_sphere(const Sphere & sphere) {
+    draw_circle(sphere.center, sphere.radius);
+}
+
+void SglRenderer::draw_polygon(const Polygon & polygon) {
+    for (int i = 0; i < 3; ++i) vertices.push_back(polygon.vertices.at(i));
+    draw_fill_object();
+}
+
+void SglRenderer::rasterize_scene() {
+    for(auto & object : scene.objects){
+        Polygon * polygon = dynamic_cast<Polygon*>(object);
+        if(polygon!= nullptr){
+            draw_polygon(*polygon);
+        }
+        else{
+            Sphere * sphere = dynamic_cast<Sphere*>(object);
+            draw_sphere(*sphere);
+        }
+    }
+}
 
 // Raytrace functions
 
@@ -626,6 +641,32 @@ void SglRenderer::push_material(
         float ior) 
 {
     materials.push_back(Material(r, g, b, kd, ks, shine, T, ior));
+}
+
+f32vec3 SglRenderer::phong_color(const PointLight &light,const Ray &ray, f32vec3 &normal,const f32vec3 &intersection, unsigned material_index){
+    f32vec3 to_light = (f32vec3(light.source) - intersection).normalize();
+    f32vec3 reflected_light = reflect(-to_light, normal); // -to_light = from_light
+
+    float cos_beta = std::max(dot(reflected_light, -ray.direction), 0.0f); // -ray.direction = to_view
+    float cos_alpha = std::max(dot(normal, to_light), 0.0f);
+
+    f32vec3 diffuse = materials[material_index].color * light.color * materials[material_index].kd * cos_alpha;
+    f32vec3 specular = light.color * materials[material_index].ks * std::pow(cos_beta, materials[material_index].shine);
+
+    return diffuse + specular;
+}
+
+bool SglRenderer::is_visible_from_light(const f32vec3 &light_position, const f32vec3 &intersection){
+    const Ray shadow_ray = {intersection, (light_position - intersection).normalize()};
+    float dist;
+    for(auto &object : scene.objects)
+    {
+        if(object->intersection(shadow_ray, dist) && dist > 0.01f && dist < MAXFLOAT)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 Ray SglRenderer::gen_ray(const float width, const float height, const f32vec3 v00, 
@@ -646,33 +687,22 @@ Ray SglRenderer::gen_ray(const float width, const float height, const f32vec3 v0
     return ray;
 }
 
-
 f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth)
 {
     float best_dist = MAXFLOAT;
     Primitive * best_primitive = nullptr;
-    for(auto & sphere : scene.spheres)
-    {
+
+    for(auto & object : scene.objects){
         float dist;
-        if(sphere.intersection(ray, dist) && dist < best_dist && dist > 0.01f)
-        {
+        if(object->intersection(ray, dist) && dist > 0.0f && dist < best_dist){
             best_dist = dist;
-            best_primitive = &sphere;
-        }
-    }
-    for(auto & poly : scene.polygons)
-    {
-        float dist;
-        if(poly.intersection(ray, dist) && dist < best_dist && dist > 0.01f)
-        {
-            best_dist = dist;
-            best_primitive = &poly;
+            best_primitive = object;
         }
     }
 
     if(best_dist < MAXFLOAT)
     {
-        f32vec3 color = {0.0f, 0.0f, 0.0f};
+        f32vec3 color; //  0.0f , 0.0f, 0.0f by default
         f32vec3 intersection_point = ray.origin + (ray.direction * best_dist);
         f32vec3 intersection_normal = best_primitive->compute_normal_vector(intersection_point); // IS NORMALIZED
 
@@ -685,14 +715,16 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth)
         // TRACE RAY
         int nextDepth = depth + 1;
         if(nextDepth < 8){ // by default 8
-            if(materials[best_primitive->material_index].ks > 0.01f){
+            if(materials[best_primitive->material_index].ks > 0.01f){// Can .ks be negative? If yes change to != 0.0f.
                 // shift origin, se we dont accidentally intersect with self
-                auto reflected_dir = reflect(ray.direction, intersection_normal).normalize();
-                //return {reflected_dir.x, reflected_dir.y, -reflected_dir.z};
-                Ray reflectedRay = {intersection_point + (intersection_normal * 0.01f), reflected_dir};
-                f32vec3 traced_color = trace_ray(reflectedRay, nextDepth);
-                color = color + traced_color * materials[best_primitive->material_index].ks;
+                Ray reflected_ray = {intersection_point + (intersection_normal * 0.01f), reflect(ray.direction, intersection_normal).normalize()};
+                color = color + trace_ray(reflected_ray, nextDepth) * materials[best_primitive->material_index].ks;
             }
+            if(materials[best_primitive->material_index].T > 0.01f){
+                auto refracted_dir = refract();
+                Ray refracted_ray = {intersection_point + (intersection_normal * 0.01f), }
+            }
+
         }
         return color;
 
@@ -761,61 +793,3 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
         threads.at(i).join();
     }
 }
-
-void SglRenderer::draw_sphere(const Sphere & sphere) {
-    draw_circle(sphere.center, sphere.radius);
-}
-
-void SglRenderer::draw_polygon(const Polygon & polygon) {
-    for (int i = 0; i < 3; ++i) vertices.push_back(polygon.vertices.at(i));
-    draw_fill_object();
-}
-
-
-void SglRenderer::rasterize_scene() {
-    for (Sphere s: scene.spheres) draw_sphere(s);
-    for (Polygon p: scene.polygons) draw_polygon(p);
-}
-
-
-
-//
-f32vec3 SglRenderer::phong_color(const PointLight &light,const Ray &ray, f32vec3 &normal,const f32vec3 &intersection, unsigned material_index){
-    f32vec3 light_position = {light.source.x, light.source.y, light.source.z};
-    f32vec3 toLight = (light_position - intersection).normalize();
-    f32vec3 from_light = toLight * (-1.0f);
-    f32vec3 reflected_light = reflect(from_light, normal);
-    f32vec3 toView = ray.direction * (-1.0f);
-
-    float cos_beta = std::max(dot(reflected_light, toView), 0.0f);
-    float cos_alpha = std::max(dot(normal, toLight), 0.0f);
-
-    f32vec3 material_col = {materials[material_index].r, materials[material_index].g,materials[material_index].b};
-
-    f32vec3 diffuse = material_col * light.color * materials[material_index].kd * cos_alpha;
-    f32vec3 specular = light.color * materials[material_index].ks * std::pow(cos_beta, materials[material_index].shine);
-
-    return diffuse + specular;
-}
-
-bool SglRenderer::is_visible_from_light(const f32vec3 &light_position, const f32vec3 &intersection){
-    const Ray shadow_ray = {intersection, (light_position - intersection).normalize()};
-    float dist;
-    const float error = 0.01f;
-    for(auto & sphere : scene.spheres)
-    {
-        if(sphere.intersection(shadow_ray, dist) && dist > error && dist < MAXFLOAT)
-        {
-            return false;
-        }
-    }
-    for(auto & poly : scene.polygons)
-    {
-        if(poly.intersection(shadow_ray, dist) && dist > error && dist < MAXFLOAT)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-

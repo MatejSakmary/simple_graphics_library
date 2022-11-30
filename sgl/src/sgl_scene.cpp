@@ -4,10 +4,8 @@
 #include <iostream>
 #include <immintrin.h>
 
-Material::Material() : 
-    r{0.0f},
-    g{0.0f},
-    b{0.0f},
+Material::Material() :
+    color{0.0f, 0.0f, 0.0f},
     kd{0.0f},
     ks{0.0f},
     shine{0.0f},
@@ -24,10 +22,8 @@ Material::Material(
     float ks,
     float shine,
     float T,
-    float ior) : 
-    r{r},
-    g{g},
-    b{b},
+    float ior) :
+    color{r,g,b},
     kd{kd},
     ks{ks},
     shine{shine},
@@ -40,7 +36,7 @@ Material::~Material() {}
 
 // Intersection and raytrace needed functions
 f32vec3 Polygon::compute_normal_vector(const f32vec3 & vector){
-    if (computed) {
+    if (already_computed_normal) {
         return norm;
     }
 
@@ -51,7 +47,7 @@ f32vec3 Polygon::compute_normal_vector(const f32vec3 & vector){
     tmp_norm = tmp_norm.normalize();
     norm = tmp_norm;
 
-    computed = true;
+    already_computed_normal = true;
 
     return norm;
 }
@@ -135,8 +131,6 @@ bool Polygon::intersection(const Ray &ray, float &t) const {
     return true;   
 }
 
-Polygon::Polygon() :computed(false){};
-
 f32vec3 Sphere::compute_normal_vector(const f32vec3 & vector){
     f32vec3 normal = {vector.x - this->center.x,
                       vector.y - this->center.y,
@@ -161,14 +155,21 @@ bool Sphere::intersection(const Ray &ray, float &t) const {
     return false;
 
 }
+Primitive::Primitive(unsigned material_index) : material_index(material_index) {};
+Sphere::Sphere(const f32vec4 &center, const float radius, const unsigned material_index) : Primitive(material_index), center(center), radius(radius) {};
+Polygon::Polygon(const f32vec4 &v1, const f32vec4 &v2, const f32vec4 &v3, unsigned material_index) : Primitive(material_index), already_computed_normal(false), vertices{v1,v2,v3} {};
 
-Scene::Scene() :
-    spheres{},
-    polygons{} {}
+Scene::Scene() : objects{} {};
 
-Scene::~Scene() {}
-
-f32vec3 Primitive::compute_normal_vector(const f32vec3 &vector) {
-    std::cout<<"OH GOD NO" << std::endl;
-    return f32vec3{};
+Scene::~Scene() {
+    clear();
 }
+
+void Scene::clear() {
+    for(auto &o : objects){
+        delete o;
+    }
+    objects.clear();
+    lights.clear();
+}
+

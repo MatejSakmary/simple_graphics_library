@@ -255,10 +255,24 @@ auto reflect(const vec<3, T> & vector, const vec<3, T> &normal) -> vec<3, T>
 }
 
 template<typename T>
-auto refract(const vec<3, T> & vector, const vec<3, T> &normal) -> vec<3, T>
+auto refract(const vec<3, T> & vector, const vec<3, T> &normal, float ior) -> vec<3, T>
 {
-    auto normalized_normal = normal.normalize();
-    return vector - 2.0f * dot(vector, normalized_normal) * normalized_normal;
+    auto normal_ = normal; // hotfix :D couldnt do -normal..
+    float gamma, sqrterm;
+    float dot_value = dot(vector, normal_);
+    if(dot_value < 0.0f)
+    {
+        gamma = 1.0f / ior;
+    }
+    else
+    {
+        gamma = ior;
+        dot_value = -dot_value;
+        normal_ = -normal_;
+    }
+    sqrterm = 1.0f - gamma * gamma * (1.0f - dot_value * dot_value);
+    sqrterm = dot_value * gamma + std::sqrt(sqrterm);
+    return -sqrterm * normal_ + vector * gamma;
 }
 
 template<typename T>
@@ -266,4 +280,3 @@ auto dot(const vec<3, T> & first, const vec<3, T> & second) -> float
 {
     return {first.x * second.x + first.y * second.y + first.z * second.z};
 }
-

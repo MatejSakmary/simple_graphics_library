@@ -134,6 +134,12 @@ auto reflect(const vec<size, T> & vector, const vec<size, T> &normal) -> vec<siz
 }
 
 template<int size, typename T>
+auto refract(const vec<size, T> & vector, const vec<size, T> &normal, float ior) -> vec<size, T>
+{
+    throw std::runtime_error("[sgl_vec.hpp::refract] ERROR refract on types other than vec3 is not implemented");
+}
+
+template<int size, typename T>
 auto dot(const vec<size, T> & first, const vec<size, T> & second) -> float
 {
     throw std::runtime_error("[sgl_vec.hpp::dot] ERROR dot product on types other than vec3 is not implemented");

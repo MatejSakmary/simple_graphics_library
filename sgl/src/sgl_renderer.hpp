@@ -72,7 +72,7 @@ struct SglRenderer
         // RayTracing functions
         Ray gen_ray(const float width, const float height, const f32vec3 v00, 
             const f32vec3 v10, const f32vec3 v01, const f32vec3 origin);
-        f32vec3 trace_ray(const Ray &ray, const int depth);
+        f32vec3 trace_ray(const Ray &ray, const int depth, bool refracted);
         //f32vec3 phong_color(f32vec3 &point, unsigned materialId, f32vec3 &normal, PointLight &pl, Ray &r);
         f32vec3 phong_color(const PointLight &light,const Ray &ray, f32vec3 &normal,const f32vec3 &intersection, unsigned material_index);
         bool is_visible_from_light(const f32vec3 &light_position, const f32vec3 &intersection);

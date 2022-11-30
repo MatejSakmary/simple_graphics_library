@@ -687,14 +687,25 @@ Ray SglRenderer::gen_ray(const float width, const float height, const f32vec3 v0
     return ray;
 }
 
-f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth)
+f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth, bool refracted)
 {
     float best_dist = MAXFLOAT;
     Primitive * best_primitive = nullptr;
+    f32vec3 intersection_point, intersection_normal;
 
     for(auto & object : scene.objects){
         float dist;
         if(object->intersection(ray, dist) && dist > 0.0f && dist < best_dist){
+            auto tmp_point = ray.origin + (ray.direction * dist);
+            auto tmp_normal = object->compute_normal_vector(tmp_point);// IS NORMALIZED
+
+            //BACKFACE CULLING
+            if(!refracted && dot(tmp_normal, ray.direction) > 0.0f)
+            {
+                continue;
+            }
+            intersection_point = tmp_point;
+            intersection_normal = tmp_normal;
             best_dist = dist;
             best_primitive = object;
         }
@@ -703,9 +714,6 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth)
     if(best_dist < MAXFLOAT)
     {
         f32vec3 color; //  0.0f , 0.0f, 0.0f by default
-        f32vec3 intersection_point = ray.origin + (ray.direction * best_dist);
-        f32vec3 intersection_normal = best_primitive->compute_normal_vector(intersection_point); // IS NORMALIZED
-
         for(auto &l : scene.lights){
             f32vec3 light_position = {l.source.x, l.source.y, l.source.z};
             if(is_visible_from_light(light_position, intersection_point)){
@@ -713,16 +721,20 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth)
             }
         }
         // TRACE RAY
-        int nextDepth = depth + 1;
-        if(nextDepth < 8){ // by default 8
+        int next_depth = depth + 1;
+        if(next_depth < 8){ // DEFAULT 8
             if(materials[best_primitive->material_index].ks > 0.01f){// Can .ks be negative? If yes change to != 0.0f.
                 // shift origin, se we dont accidentally intersect with self
-                Ray reflected_ray = {intersection_point + (intersection_normal * 0.01f), reflect(ray.direction, intersection_normal).normalize()};
-                color = color + trace_ray(reflected_ray, nextDepth) * materials[best_primitive->material_index].ks;
+                auto reflected_dir = reflect(ray.direction, intersection_normal);
+                Ray reflected_ray = {intersection_point + (reflected_dir * 0.01f), reflected_dir};
+                color = color +
+                        trace_ray(reflected_ray, next_depth, false) * materials[best_primitive->material_index].ks;
             }
             if(materials[best_primitive->material_index].T > 0.01f){
-                auto refracted_dir = refract();
-                Ray refracted_ray = {intersection_point + (intersection_normal * 0.01f), }
+                f32vec3 refracted_dir = refract(ray.direction, intersection_normal, materials[best_primitive->material_index].ior);
+                Ray refracted_ray = {intersection_point + (refracted_dir * 0.01f), refracted_dir};
+                color = color +
+                        trace_ray(refracted_ray, next_depth, true) * materials[best_primitive->material_index].T;
             }
 
         }
@@ -769,7 +781,7 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
         {
             for(uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
             {
-                auto col = trace_ray(gen_ray(x, y, d00, d10, d01, orig), 0);
+                auto col = trace_ray(gen_ray(x, y, d00, d10, d01, orig), 0, false);
                 //if(col.x != -420.0f)
                 state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
             }

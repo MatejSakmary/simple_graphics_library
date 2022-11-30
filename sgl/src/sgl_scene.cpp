@@ -39,10 +39,9 @@ f32vec3 Polygon::compute_normal_vector(const f32vec3 & vector){
     if (already_computed_normal) {
         return norm;
     }
-
-    f32vec3 vert0{vertices.at(0).x, vertices.at(0).y, vertices.at(0).z};
-    f32vec3 vert1{vertices.at(1).x, vertices.at(1).y, vertices.at(1).z};
-    f32vec3 vert2{vertices.at(2).x, vertices.at(2).y, vertices.at(2).z};
+    f32vec3 vert0 = f32vec3(vertices.at(0));
+    f32vec3 vert1 = f32vec3(vertices.at(1));
+    f32vec3 vert2 = f32vec3(vertices.at(2));
     auto tmp_norm = cross(vert1 - vert0, vert2 - vert0);
     tmp_norm = tmp_norm.normalize();
     norm = tmp_norm;

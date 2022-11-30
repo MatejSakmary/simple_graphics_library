@@ -17,7 +17,7 @@
 //
 // - Points are column vectors and transformation matrices are 4x4 matrices
 //   stored as in OpenGL, that is [column-by-column]. Transformed vector is
-//   already_computed_normal as v_t = M*v.
+//   computed as v_t = M*v.
 //
 // - The color buffer is a contiguous block of memory which holds scanlines
 //   of individual pixels one after another. The pixels themselves are R-G-B
@@ -333,7 +333,7 @@ extern "C"
 	  Current transformation is applied _only_ to the coordinates of the center.
 
 	  Radius is scaled by the overall scale [x,y] of the concatenated (modelview o
-	  projection o viewport) transformation. This scaling factor is already_computed_normal as the
+	  projection o viewport) transformation. This scaling factor is computed as the
 	  square root of the determinant of the 2x2 upper left block of the concatenated
 	  transformation matrix.
 
@@ -616,9 +616,9 @@ extern "C"
 	  Specifies the affine transformation from normalized device coordinates to
 	  window (canvas) coordinates.
 
-	  Let (x_nd, y_nd) be normalized device coordinates (already_computed_normal by transforming
+	  Let (x_nd, y_nd) be normalized device coordinates (computed by transforming
 	  the vertices by [modelview o projection] matrix). Then the window coordinates
-	  (x_w, y_w) are already_computed_normal as follows:
+	  (x_w, y_w) are computed as follows:
 
 	  x_w = (x_nd + 1) * width/2  + x
 	  y_w = (y_nd + 1) * height/2 + y

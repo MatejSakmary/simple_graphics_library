@@ -13,8 +13,8 @@
 // #define TEST0
 // #define TEST1
 // #define TEST2
-#define TEST3
-//#define TEST4
+//#define TEST3
+#define TEST4
 //#define TEST5
 
 #ifdef TEST0
@@ -52,9 +52,9 @@
 #ifdef TEST4
 #define WIDTH 512
 #define HEIGHT 512
-#define TEST_4A
+//#define TEST_4A
 #define TEST_4B
-#define TEST_4C
+//#define TEST_4C
 #endif
 
 #ifdef TEST5
@@ -1651,7 +1651,7 @@ int main(int argc, char **argv)
         cout << "test 4a..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "cornell-blocks.nff";
+        const char *sceneFile = "resources/cornell-blocks.nff";
         sglSetContext(_contexts[3]);
         double time = RayTraceScene(sceneFile);
         totalTime += time;
@@ -1667,7 +1667,7 @@ int main(int argc, char **argv)
         cout << "test 4b..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "cornell-spheres-raytrace.nff";
+        const char *sceneFile = "resources/cornell-spheres-raytrace.nff";
         sglSetContext(_contexts[4]);
         double time = RayTraceScene(sceneFile);
         totalTime += time;
@@ -1683,7 +1683,7 @@ int main(int argc, char **argv)
         cout << "test 4c..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "cornell-spheres-crazy.nff";
+        const char *sceneFile = "resources/cornell-spheres-crazy.nff";
         sglSetContext(_contexts[5]);
         double time = RayTraceScene(sceneFile);
         totalTime += time;

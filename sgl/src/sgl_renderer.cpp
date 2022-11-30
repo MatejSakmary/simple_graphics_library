@@ -647,7 +647,7 @@ Ray SglRenderer::gen_ray(const float width, const float height, const f32vec3 v0
 }
 
 
-f32vec3 SglRenderer::trace_ray(const Ray & ray)
+f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth)
 {
     float best_dist = MAXFLOAT;
     Primitive * best_primitive = nullptr;
@@ -674,7 +674,7 @@ f32vec3 SglRenderer::trace_ray(const Ray & ray)
     {
         f32vec3 color;
         f32vec3 intersection_point = ray.origin + (ray.direction * best_dist);
-        f32vec3 intersection_normal = best_primitive->compute_normal_vector(intersection_point);
+        f32vec3 intersection_normal = best_primitive->compute_normal_vector(intersection_point); // IS NORMALIZED
 
         for(auto &l : scene.lights){
             f32vec3 light_pos = {l.source.x,l.source.y,l.source.z};
@@ -683,9 +683,19 @@ f32vec3 SglRenderer::trace_ray(const Ray & ray)
             f32vec3 view_dir = ray.direction * (-1.0f);
             color = color + phong_color(view_dir, light_direction, intersection_normal, best_primitive->material_index, light_col);
         }
+        // TRACE RAY
+        int nextDepth = depth + 1;
+        if(nextDepth < 8){
+            if(materials[best_primitive->material_index].ks > 0.01f){
+                // shift origin, se we dont accidentally intersect with self
+                Ray reflectedRay = {intersection_point + (intersection_normal * 0.01), reflect(ray.direction, intersection_normal)};
+                color = color + trace_ray(reflectedRay, nextDepth)*materials[best_primitive->material_index].ks;
+            }
+        }
         return color;
+
     }
-    return {-420.0, 0.0, 0.0};
+    return {0.0, 0.0, 0.0};
 }
 
 void SglRenderer::raytrace_scene(const SglMatrix & modelview,
@@ -693,7 +703,7 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
                                  const SglMatrix & viewport) {
 
     const int num_threads = std::thread::hardware_concurrency() * 3;
-    // const int num_threads = 1;
+    //const int num_threads = 1;
     std::vector<std::thread> threads;
 
     auto modelview_inverse = modelview;
@@ -725,7 +735,7 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
         {
             for(uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
             {
-                auto col = trace_ray(gen_ray(x, y, d00, d10, d01, orig));
+                auto col = trace_ray(gen_ray(x, y, d00, d10, d01, orig), 0);
                 if(col.x != -420.0f)
                     state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
             }

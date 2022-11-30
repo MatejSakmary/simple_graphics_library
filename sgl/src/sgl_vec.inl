@@ -240,7 +240,7 @@ template<typename T>
 auto reflect(const vec<3, T> & vector, const vec<3, T> &normal) -> vec<3, T>
 {
     auto normalized_normal = normal.normalize();
-    return vector - 2.0f * dot(normalized_normal, vector) * normalized_normal;
+    return vector - 2.0f * dot(vector, normalized_normal) * normalized_normal;
 }
 
 template<typename T>

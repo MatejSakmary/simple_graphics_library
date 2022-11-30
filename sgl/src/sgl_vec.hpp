@@ -126,13 +126,13 @@ auto cross(const vec<size, T> & first, const vec<size, T> & second) -> vec<size,
 /// @param normal - outgoing normal from the point of reflection
 /// @return reflected vector outgoing from the point of reflection
 template<int size, typename T>
-auto reflect(const vec<size, T> & first, const vec<size, T> &second) -> vec<size, T>
+auto reflect(const vec<size, T> & vector, const vec<size, T> &normal) -> vec<size, T>
 {
     throw std::runtime_error("[sgl_vec.hpp::reflect] ERROR reflect on types other than vec3 is not implemented");
 }
 
 template<int size, typename T>
-auto dot(const vec<size, T> & vector, const vec<size, T> & normal) -> float
+auto dot(const vec<size, T> & first, const vec<size, T> & second) -> float
 {
     throw std::runtime_error("[sgl_vec.hpp::dot] ERROR dot product on types other than vec3 is not implemented");
 };

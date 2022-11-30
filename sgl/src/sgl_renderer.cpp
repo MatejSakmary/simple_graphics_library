@@ -654,7 +654,7 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth)
     for(auto & sphere : scene.spheres)
     {
         float dist;
-        if(sphere.intersection(ray, dist) && dist < best_dist)
+        if(sphere.intersection(ray, dist) && dist < best_dist && dist > 0.01f)
         {
             best_dist = dist;
             best_primitive = &sphere;
@@ -663,7 +663,7 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth)
     for(auto & poly : scene.polygons)
     {
         float dist;
-        if(poly.intersection(ray, dist) && dist < best_dist)
+        if(poly.intersection(ray, dist) && dist < best_dist && dist > 0.01f)
         {
             best_dist = dist;
             best_primitive = &poly;
@@ -672,30 +672,32 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth)
 
     if(best_dist < MAXFLOAT)
     {
-        f32vec3 color;
+        f32vec3 color = {0.0f, 0.0f, 0.0f};
         f32vec3 intersection_point = ray.origin + (ray.direction * best_dist);
         f32vec3 intersection_normal = best_primitive->compute_normal_vector(intersection_point); // IS NORMALIZED
 
         for(auto &l : scene.lights){
-            f32vec3 light_pos = {l.source.x,l.source.y,l.source.z};
-            f32vec3 light_col = {l.color[0], l.color[1], l.color[2]};
-            f32vec3 light_direction = (light_pos - intersection_point).normalize();
-            f32vec3 view_dir = ray.direction * (-1.0f);
-            color = color + phong_color(view_dir, light_direction, intersection_normal, best_primitive->material_index, light_col);
+            f32vec3 light_position = {l.source.x, l.source.y, l.source.z};
+            if(is_visible_from_light(light_position, intersection_point)){
+                color = color + phong_color(l, ray, intersection_normal, intersection_point, best_primitive->material_index);
+            }
         }
         // TRACE RAY
         int nextDepth = depth + 1;
-        if(nextDepth < 8){
+        if(nextDepth < 8){ // by default 8
             if(materials[best_primitive->material_index].ks > 0.01f){
                 // shift origin, se we dont accidentally intersect with self
-                Ray reflectedRay = {intersection_point + (intersection_normal * 0.01), reflect(ray.direction, intersection_normal)};
-                color = color + trace_ray(reflectedRay, nextDepth)*materials[best_primitive->material_index].ks;
+                auto reflected_dir = reflect(ray.direction, intersection_normal).normalize();
+                //return {reflected_dir.x, reflected_dir.y, -reflected_dir.z};
+                Ray reflectedRay = {intersection_point + (intersection_normal * 0.01f), reflected_dir};
+                f32vec3 traced_color = trace_ray(reflectedRay, nextDepth);
+                color = color + traced_color * materials[best_primitive->material_index].ks;
             }
         }
         return color;
 
     }
-    return {0.0, 0.0, 0.0};
+    return {0.0, 0.0, 0.0}; // TODO We have to get clear color here!
 }
 
 void SglRenderer::raytrace_scene(const SglMatrix & modelview,
@@ -736,8 +738,8 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
             for(uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
             {
                 auto col = trace_ray(gen_ray(x, y, d00, d10, d01, orig), 0);
-                if(col.x != -420.0f)
-                    state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
+                //if(col.x != -420.0f)
+                state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
             }
         }
     };
@@ -775,19 +777,45 @@ void SglRenderer::rasterize_scene() {
     for (Polygon p: scene.polygons) draw_polygon(p);
 }
 
-f32vec3 SglRenderer::phong_color(f32vec3 &view_dir, f32vec3 &light_dir, f32vec3 &normal, unsigned int material_index, f32vec3 &light_color) {
-    f32vec3 reflected_dir = reflect(light_dir * (-1.0f), normal);
 
-    float cosAlpha = std::max(dot(light_dir, normal), 0.0f);
-    float cosBeta = std::max(dot(reflected_dir, view_dir), 0.0f);
 
-    f32vec3 material_color = {materials[material_index].r, materials[material_index].g, materials[material_index].b}; //TODO REWRITE TO VEC3
-    f32vec3 material_Ks = {materials[material_index].ks,materials[material_index].ks,materials[material_index].ks};
+//
+f32vec3 SglRenderer::phong_color(const PointLight &light,const Ray &ray, f32vec3 &normal,const f32vec3 &intersection, unsigned material_index){
+    f32vec3 light_position = {light.source.x, light.source.y, light.source.z};
+    f32vec3 toLight = (light_position - intersection).normalize();
+    f32vec3 from_light = toLight * (-1.0f);
+    f32vec3 reflected_light = reflect(from_light, normal);
+    f32vec3 toView = ray.direction * (-1.0f);
 
-    f32vec3 diffuse, specular;
-    diffuse = material_color * light_color * materials[material_index].kd * cosAlpha;
-    specular = light_color * material_Ks * std::pow(cosBeta, materials[material_index].shine);
+    float cos_beta = std::max(dot(reflected_light, toView), 0.0f);
+    float cos_alpha = std::max(dot(normal, toLight), 0.0f);
+
+    f32vec3 material_col = {materials[material_index].r, materials[material_index].g,materials[material_index].b};
+
+    f32vec3 diffuse = material_col * light.color * materials[material_index].kd * cos_alpha;
+    f32vec3 specular = light.color * materials[material_index].ks * std::pow(cos_beta, materials[material_index].shine);
 
     return diffuse + specular;
+}
+
+bool SglRenderer::is_visible_from_light(const f32vec3 &light_position, const f32vec3 &intersection){
+    const Ray shadow_ray = {intersection, (light_position - intersection).normalize()};
+    float dist;
+    const float error = 0.01f;
+    for(auto & sphere : scene.spheres)
+    {
+        if(sphere.intersection(shadow_ray, dist) && dist > error && dist < MAXFLOAT)
+        {
+            return false;
+        }
+    }
+    for(auto & poly : scene.polygons)
+    {
+        if(poly.intersection(shadow_ray, dist) && dist > error && dist < MAXFLOAT)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 

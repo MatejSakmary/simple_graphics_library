@@ -58,9 +58,7 @@ f32vec3 Polygon::compute_normal_vector(const f32vec3 & vector){
 
 PointLight::PointLight(float x, float y, float z, float r, float g, float b) {
     this->source = f32vec4(x, y, z, 1.0f);
-    this->color[0] = r;
-    this->color[1] = g;
-    this->color[2] = b;
+    this->color = {r,g,b};
 }
 
 PointLight::~PointLight() {}

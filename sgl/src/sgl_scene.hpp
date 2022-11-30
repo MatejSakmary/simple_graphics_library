@@ -77,7 +77,7 @@ struct Polygon : public Primitive
 struct PointLight 
 {
     f32vec4 source;
-    float color[3] = {0.0f, 0.0f, 0.0f};
+    f32vec3 color;
 
     PointLight(float x, float y, float z, float r, float g, float b);
     ~PointLight();

@@ -1030,7 +1030,7 @@ float RayTraceScene(const char *scenename, unsigned int iter = 1)
         nffstore.up.z);
 
     // compute a ray traced image and store it in the color buffer
-    for (unsigned int i = 0; i < 500; i++)
+    for (unsigned int i = 0; i < 1; i++)
         sglRayTraceScene();
 
     return timer.RealTime();

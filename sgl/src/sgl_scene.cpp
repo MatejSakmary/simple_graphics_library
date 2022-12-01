@@ -156,7 +156,7 @@ bool Sphere::intersection(const Ray &ray, float &t) const {
 }
 Primitive::Primitive(unsigned material_index) : material_index(material_index) {};
 Sphere::Sphere(const f32vec4 &center, const float radius, const unsigned material_index) : Primitive(material_index), center(center), radius(radius) {};
-Polygon::Polygon(const f32vec4 &v1, const f32vec4 &v2, const f32vec4 &v3, unsigned material_index) : Primitive(material_index), already_computed_normal(false), vertices{v1,v2,v3} {};
+Polygon::Polygon(const f32vec4 &v1, const f32vec4 &v2, const f32vec4 &v3, unsigned material_index) : Primitive(material_index), vertices{v1,v2,v3}, already_computed_normal(false) {};
 
 Scene::Scene() : objects{} {};
 

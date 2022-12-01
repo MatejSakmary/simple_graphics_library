@@ -1,5 +1,5 @@
 #pragma once
-#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 #include <cstdint>
 #include <stack>
 #include <functional>

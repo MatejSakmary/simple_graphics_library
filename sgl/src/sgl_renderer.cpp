@@ -3,8 +3,6 @@
 #include <list>
 #include <numeric>
 
-#pragma GCC optimize("O3,unroll-loops,fast-math")
-
 SglRenderer::SglRenderer() : 
     state{
        .draw_color = Pixel{.r = 0.0f, .g = 0.0f, .b = 0.0f} ,
@@ -659,9 +657,11 @@ f32vec3 SglRenderer::phong_color(const PointLight &light,const Ray &ray, f32vec3
 bool SglRenderer::is_visible_from_light(const f32vec3 &light_position, const f32vec3 &intersection){
     const Ray shadow_ray = {intersection, (light_position - intersection).normalize()};
     float dist;
+    f32vec3 to_light = light_position - intersection;
+    float light_dist = sqrt(to_light.x * to_light.x + to_light.y * to_light.y + to_light.z * to_light.z);
     for(auto &object : scene.objects)
     {
-        if(object->intersection(shadow_ray, dist) && dist > 0.01f && dist < MAXFLOAT)
+        if(object->intersection(shadow_ray, dist) && dist > 0.01f && dist < light_dist * 0.99f)
         {
             return false;
         }
@@ -693,14 +693,14 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth, bool refracted)
     Primitive * best_primitive = nullptr;
     f32vec3 intersection_point, intersection_normal;
 
-    for(auto & object : scene.objects){
+    for(const auto object : scene.objects){
         float dist;
         if(object->intersection(ray, dist) && dist > 0.0f && dist < best_dist){
             auto tmp_point = ray.origin + (ray.direction * dist);
             auto tmp_normal = object->compute_normal_vector(tmp_point);// IS NORMALIZED
 
-            //BACKFACE CULLING
-            if(!refracted && dot(tmp_normal, ray.direction) > 0.0f)
+            // BACKFACE CULLING
+            if((!refracted) && (dot(tmp_normal, ray.direction) > 0.0f))
             {
                 continue;
             }
@@ -716,7 +716,7 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth, bool refracted)
         f32vec3 color; //  0.0f , 0.0f, 0.0f by default
         for(auto &l : scene.lights){
             f32vec3 light_position = {l.source.x, l.source.y, l.source.z};
-            if(is_visible_from_light(light_position, intersection_point)){
+            if(is_visible_from_light(light_position, intersection_point + (intersection_normal * 0.01f))){
                 color = color + phong_color(l, ray, intersection_normal, intersection_point, best_primitive->material_index);
             }
         }
@@ -741,15 +741,15 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth, bool refracted)
         return color;
 
     }
-    return {0.0, 0.0, 0.0}; // TODO We have to get clear color here!
+    return {state.clear_color->r, state.clear_color->g, state.clear_color->b};
 }
 
 void SglRenderer::raytrace_scene(const SglMatrix & modelview,
                                  const SglMatrix & projection,
                                  const SglMatrix & viewport) {
 
-    const int num_threads = std::thread::hardware_concurrency() * 3;
-    //const int num_threads = 1;
+    const int num_threads = std::thread::hardware_concurrency() * 2;
+    // const int num_threads = 1;
     std::vector<std::thread> threads;
 
     auto modelview_inverse = modelview;
@@ -782,7 +782,6 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
             for(uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
             {
                 auto col = trace_ray(gen_ray(x, y, d00, d10, d01, orig), 0, false);
-                //if(col.x != -420.0f)
                 state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
             }
         }

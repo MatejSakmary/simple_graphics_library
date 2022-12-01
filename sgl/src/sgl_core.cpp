@@ -1,5 +1,5 @@
 #include "sgl_core.hpp"
-#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 
 
 SglCore::SglCore() : 
@@ -54,6 +54,7 @@ void SglCore::set_context(int32_t context_idx)
     current_context = context_idx;
     // TODO(msakmary) very error prone code -> think about better way of doing this
     renderer.state.currentFramebuffer = &contexts.at(current_context).framebuffer;
+    renderer.state.clear_color = &contexts.at(current_context).clear_color;
     renderer.state.depth_test = contexts.at(current_context).capabilites;
 }
 

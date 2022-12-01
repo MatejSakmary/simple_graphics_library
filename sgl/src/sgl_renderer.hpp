@@ -1,6 +1,6 @@
 #pragma once
 
-#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 #include <vector>
 #include <thread>
 
@@ -22,6 +22,7 @@ struct DrawState
     sglEElementType element_type_mode;
     bool depth_test;
     SglFramebuffer* currentFramebuffer;
+    Pixel * clear_color;
     bool defining_scene;
 };
 

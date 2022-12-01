@@ -15,7 +15,7 @@
             "environment": [],
             "externalConsole": false,
             "linux": {
-                "type": "lldb"
+                "type": "cppdbg"
             },
         }
     ]

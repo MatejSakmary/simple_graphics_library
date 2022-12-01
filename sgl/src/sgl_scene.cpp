@@ -1,5 +1,5 @@
 #include "sgl_scene.hpp"
-#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 
 #include <iostream>
 #include <immintrin.h>

@@ -1,4 +1,4 @@
-#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 
 #include "sgl_vec.hpp"
 

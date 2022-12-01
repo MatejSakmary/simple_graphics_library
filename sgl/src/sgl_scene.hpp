@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#pragma GCC optimize("O3,unroll-loops,fast-math")
+
 
 #include "sgl_vec.hpp"
 #include "sgl_matrix.hpp"

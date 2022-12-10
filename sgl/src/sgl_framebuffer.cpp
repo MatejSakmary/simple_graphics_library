@@ -1,8 +1,5 @@
 #include "sgl_framebuffer.hpp"
 
-
-#include <cstring>
-
 SglFramebuffer::SglFramebuffer(uint32_t width, uint32_t height) :
     pixels(width * height, {0,0,0}), depth(width * height, 1.0f),  width{width}, height{height}
 {}
@@ -10,7 +7,7 @@ SglFramebuffer::SglFramebuffer(uint32_t width, uint32_t height) :
 SglFramebuffer::~SglFramebuffer()
 {}
 
-void SglFramebuffer::clear_framebuffer(const Pixel & clear_color, uint32_t mask)
+void SglFramebuffer::clear_framebuffer(const f32vec3 & clear_color, uint32_t mask)
 {
     if(mask & sglEClearBit::SGL_COLOR_BUFFER_BIT)
     {

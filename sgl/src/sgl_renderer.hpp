@@ -10,19 +10,21 @@
 #include "sgl_framebuffer.hpp"
 #include "sgl_scene.hpp"
 #include "macros.hpp"
+#include "sgl_context.hpp"
 
 // Forward decl vertex so we can friend it 
 struct SglCore;
 
 struct DrawState
 {
-    Pixel draw_color;
+    f32vec3 draw_color;
     float point_size;
     sglEAreaMode area_mode;
     sglEElementType element_type_mode;
     bool depth_test;
     SglFramebuffer* currentFramebuffer;
-    Pixel * clear_color;
+    f32vec3 * clear_color;
+    SglEnvMap * environment_map;
     bool defining_scene;
 };
 

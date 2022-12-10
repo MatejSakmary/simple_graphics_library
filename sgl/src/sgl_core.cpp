@@ -55,6 +55,7 @@ void SglCore::set_context(int32_t context_idx)
     // TODO(msakmary) very error prone code -> think about better way of doing this
     renderer.state.currentFramebuffer = &contexts.at(current_context).framebuffer;
     renderer.state.clear_color = &contexts.at(current_context).clear_color;
+    renderer.state.environment_map = &contexts.at(current_context).environment_map;
     renderer.state.depth_test = contexts.at(current_context).capabilites;
 }
 

@@ -3,9 +3,9 @@
 #include <list>
 #include <numeric>
 
-SglRenderer::SglRenderer() : 
+SglRenderer::SglRenderer() :
     state{
-       .draw_color = Pixel{.r = 0.0f, .g = 0.0f, .b = 0.0f} ,
+       .draw_color = {0.0f, 0.0f, 0.0f} ,
        .point_size = 1.0f,
        .area_mode = sglEAreaMode::SGL_FILL,
        .element_type_mode = sglEElementType::SGL_POINTS,
@@ -30,7 +30,7 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
         case sglEElementType::SGL_POINTS:
             draw_point(vertex);
             break;
-        
+
         case sglEElementType::SGL_LINES:
             vertices.push_back(vertex);
             // If there are 2 vertices already in vertex vector we will draw them
@@ -40,7 +40,7 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
                 vertices.clear();
             }
             break;
-        
+
         case sglEElementType::SGL_LINE_STRIP:
             vertices.push_back(vertex);
             // If there are 2 vertices in the vertex vector we will draw them
@@ -50,7 +50,7 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
                 vertices.erase(vertices.begin());
             }
             break;
-        
+
         case sglEElementType::SGL_LINE_LOOP:
             vertices.push_back(vertex);
             // TODO sakacond add comment
@@ -88,7 +88,7 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
                 }
             }
             break;
-        
+
         case sglEElementType::SGL_TRIANGLES:
             vertices.push_back(vertex);
             if (vertices.size() % 3 == 0) {
@@ -120,7 +120,7 @@ void SglRenderer::push_light(float x, float y, float z, float r, float g, float 
 
 void SglRenderer::draw_point(const f32vec4 & point) {
     int half_size = static_cast<int>(state.point_size / 2);
-            
+
     // If the point size is 1 the half size will be 0 therefore both
     // for loops will happen only once and draw the point itself
     // otherwise it will create a square point around the vertex
@@ -138,18 +138,18 @@ void SglRenderer::draw_line_low(int x0, int y0, int x1, int y1) {
     int d_x = x1 - x0;
     int d_y = y1 - y0;
     int y_step = 1;
-    
+
     if(d_y < 0) {
         y_step = -1;
         d_y = -d_y;
     }
-    
+
     c0 = 2 * d_y;
     c1 = c0 - 2 * d_x;
     p = c0 - d_x;
 
     state.currentFramebuffer->set_pixel(x0, y0, state.draw_color);
-    
+
     for(int i=x0+1; i <= x1; ++i) {
         if(p<0) {
             p += c0;
@@ -157,7 +157,7 @@ void SglRenderer::draw_line_low(int x0, int y0, int x1, int y1) {
             p += c1;
             y0 += y_step;
         }
-    
+
         state.currentFramebuffer->set_pixel(i, y0, state.draw_color);
     }
 }
@@ -167,7 +167,7 @@ void SglRenderer::draw_line_high(int x0, int y0, int x1, int y1) {
     int d_x = x1 - x0;
     int d_y = y1 - y0;
     int x_step = 1;
-    
+
     if(d_x < 0) {
         x_step = -1;
         d_x = -d_x;
@@ -178,7 +178,7 @@ void SglRenderer::draw_line_high(int x0, int y0, int x1, int y1) {
     p = c0 - d_y;
 
     state.currentFramebuffer->set_pixel(x0, y0, state.draw_color);
-    
+
     for(int i=y0+1; i <= y1; ++i) {
         if(p<0) {
             p += c0;
@@ -186,7 +186,7 @@ void SglRenderer::draw_line_high(int x0, int y0, int x1, int y1) {
             p += c1;
             x0 += x_step;
         }
-    
+
         state.currentFramebuffer->set_pixel(x0, i, state.draw_color);
     }
 }
@@ -218,7 +218,7 @@ void SglRenderer::draw_sym_pixels(int x_c, int y_c, int z_c, int x, int y) {
         state.currentFramebuffer->set_pixel(x_c - x, y_c + y, state.draw_color);
         state.currentFramebuffer->set_pixel(x_c - x, y_c - y, state.draw_color);
     }
-    
+
     else {
         f32vec4 start1 =  f32vec4(x_c + x, y_c + y - 1, z_c, 1.0f);
         f32vec4 end1 =    f32vec4(x_c + x, y_c - y + 1, z_c, 1.0f);
@@ -268,7 +268,7 @@ void SglRenderer::draw_circle(const f32vec4 & center, float radius) {
         if (p > 0) {
             p = p - twoY + 2;
             twoY -= 2;
-            y -= 1; 
+            y -= 1;
         }
         p = p + twoX + 3;
         twoX += 2;
@@ -295,7 +295,7 @@ void SglRenderer::draw_ellipse(const f32vec4 & center, float a, float b, SglMatr
         .x = center.x, .y = center.y, .z = center.z
     });
 
-    for (int i = 1; i <= N; ++i) {      
+    for (int i = 1; i <= N; ++i) {
         x2 = a * cos(i * alpha);
         y2 = b * sin(i * alpha);
 
@@ -303,7 +303,7 @@ void SglRenderer::draw_ellipse(const f32vec4 & center, float a, float b, SglMatr
         f32vec4 end = f32vec4(x2, y2, center.z, center.w);
 
         draw_line(mat * start, mat * end);
-        
+
         if(i == 1) vertices.push_back(mat * start);
         vertices.push_back(mat * end);
 
@@ -327,15 +327,15 @@ void SglRenderer::draw_arc(const f32vec4 & center, float radius, float from, flo
     float angle = to - from;
     int N = int((40.0f * angle) / (2.0f * M_PI));
     float alpha = angle / N;
-    
+
     x1 = radius * cos(from);
     y1 = radius * sin(from);
 
     mat = mat * SglMatrix({
         .type = MatrixType::TRANSLATE,
         .x = center.x, .y = center.y, .z = center.z
-    }); 
-    
+    });
+
     auto rot_mat = SglMatrix({ .type = MatrixType::ROTATE, .x = 0.0f, .y = 0.0f, .z = alpha });
 
     f32vec4 start = f32vec4(x1, y1, z_c, center.w);
@@ -344,11 +344,11 @@ void SglRenderer::draw_arc(const f32vec4 & center, float radius, float from, flo
 
     for (int i = 0; i < N; ++i) {
         auto end = rot_mat * start;
-        
+
         draw_line(mat * start, mat * end);
-        
+
         vertices.push_back(mat * end);
-        
+
         start = end;
     }
 
@@ -398,8 +398,8 @@ void SglRenderer::draw_fill_object()
         if(from.y == to.y) { return false; }
         // 1) orient edges top - bottom and shorten them by one pixel (this is in to.at(1) + 1.0f)
         // TODO(msakmary) CONTINUE HERE - store 1 - 1/z into the depth buffer
-        if(from.y < to.y) 
-        { 
+        if(from.y < to.y)
+        {
             edges.emplace_back(SglEdge{
                 .from_y  = static_cast<uint>(to.y),
                 .to_y    = static_cast<uint>(from.y + 1.0f),
@@ -423,7 +423,7 @@ void SglRenderer::draw_fill_object()
                 // x_step = (z_to - z_from) / (y_to - y_from)
                 .step_z  = (to.z - from.z) / ((to.y) - from.y),
             });
-        } 
+        }
         return true;
     };
 
@@ -466,8 +466,8 @@ void SglRenderer::draw_fill_object()
         {
             // if the edge start is equal to y we hit it and we should 
             // move it to the active lists 
-            if(edges.at(edge).from_y == y) 
-            { 
+            if(edges.at(edge).from_y == y)
+            {
                 // SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is hit at y: " + std::to_string(y) + " adding to active");
                 active_edges.push_back(edge);
                 to_remove_edges.push_back(edge);
@@ -483,8 +483,8 @@ void SglRenderer::draw_fill_object()
         {
             // if the edge start is equal to y we hit it and we should 
             // move it to the active lists 
-            if(y < edges.at(edge).to_y) 
-            { 
+            if(y < edges.at(edge).to_y)
+            {
                 // SGL_DEBUG_OUT("edge at idx: " + std::to_string(edge) + " is finished at y: " + std::to_string(y) + " deleting from active");
                 to_remove_edges.push_back(edge);
             }
@@ -496,12 +496,12 @@ void SglRenderer::draw_fill_object()
     auto shake_sort_active_edges = [&edges, &active_edges](){
         // cocktail sort copied from https://www.geeksforgeeks.org/cocktail-sort/ and modified for lists using iterators
         bool swapped = true;
- 
+
         while (swapped) {
             swapped = false;
- 
+
             auto one_before_end_it = --active_edges.end();
-            for (auto it = active_edges.begin(); it != one_before_end_it; ++it) 
+            for (auto it = active_edges.begin(); it != one_before_end_it; ++it)
             {
                 // list iterators don't have + operator defined thus we must only use ++ or -- operations
                 // which would modify the current iterator and the forloop condition would then cause it to
@@ -510,17 +510,17 @@ void SglRenderer::draw_fill_object()
 
                 // TODO(msakmary) This is very cursed, improve if there is time
                 auto it_ = it;
-                if (edges.at(*it).upper_x > edges.at(*(++it_)).upper_x) 
+                if (edges.at(*it).upper_x > edges.at(*(++it_)).upper_x)
                 {
                     std::swap(*it, *it_);
                     swapped = true;
                 }
             }
- 
+
             if (!swapped){ break; }
             swapped = false;
- 
-            for (auto it = --active_edges.end(); it != active_edges.begin(); --it) 
+
+            for (auto it = --active_edges.end(); it != active_edges.begin(); --it)
             {
                 auto it_ = it;
                 // TODO(msakmary) This is very cursed, improve if there is time
@@ -538,7 +538,7 @@ void SglRenderer::draw_fill_object()
             auto & start = edges.at(*(it++));
             auto & end = edges.at(*(it++));
             // SGL_DEBUG_OUT("Filling row of pixels at " + std::to_string(y) + " bounded (" + std::to_string(start.upper_x) + "," + std::to_string(end.upper_x) + ")"); 
-            for(uint x = static_cast<uint>(start.upper_x); x <= static_cast<uint>(end.upper_x); x++) 
+            for(uint x = static_cast<uint>(start.upper_x); x <= static_cast<uint>(end.upper_x); x++)
             {
                 if(this->state.depth_test)
                 {
@@ -546,7 +546,7 @@ void SglRenderer::draw_fill_object()
                     float t = (static_cast<float>(x) - start.upper_x) / (end.upper_x - start.upper_x);
                     if(x == static_cast<uint>(start.upper_x)) { t = 0.0f; }
 
-                    float depth = ((1.0f - t) * start.upper_z) + (t * end.upper_z); 
+                    float depth = ((1.0f - t) * start.upper_z) + (t * end.upper_z);
                     // there is something closer in the depth buffer -> ignore this write
                     if(depth > this->state.currentFramebuffer->get_depth(x, y)) { continue; }
                     this->state.currentFramebuffer->set_pixel(x, y, this->state.draw_color);
@@ -591,8 +591,8 @@ void SglRenderer::recording_end()
     SGL_DEBUG_OUT("Number of vertices: " + std::to_string(vertices.size()));
     // TODO(msakmary) Add other objects which are allowed with SGL_FILL - triangle, arc etc...
     if (state.area_mode == sglEAreaMode::SGL_FILL) {
-        if (state.element_type_mode == sglEElementType::SGL_TRIANGLES || 
-            state.element_type_mode == sglEElementType::SGL_POLYGON) 
+        if (state.element_type_mode == sglEElementType::SGL_TRIANGLES ||
+            state.element_type_mode == sglEElementType::SGL_POLYGON)
         {
             if(!state.defining_scene)
             {
@@ -636,7 +636,7 @@ void SglRenderer::push_material(
         float ks,
         float shine,
         float T,
-        float ior) 
+        float ior)
 {
     materials.push_back(Material(r, g, b, kd, ks, shine, T, ior));
 }
@@ -669,7 +669,7 @@ bool SglRenderer::is_visible_from_light(const f32vec3 &light_position, const f32
     return true;
 }
 
-Ray SglRenderer::gen_ray(const float width, const float height, const f32vec3 v00, 
+Ray SglRenderer::gen_ray(const float width, const float height, const f32vec3 v00,
     const f32vec3 v10, const f32vec3 v01, const f32vec3 origin)
 {
     Ray ray;
@@ -741,14 +741,19 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth, bool refracted)
         return color;
 
     }
-    return {state.clear_color->r, state.clear_color->g, state.clear_color->b};
+    if(state.environment_map->set){
+        return state.environment_map->at(ray.direction);
+    }
+    else{
+        return *state.clear_color;
+    }
 }
 
 void SglRenderer::raytrace_scene(const SglMatrix & modelview,
                                  const SglMatrix & projection,
                                  const SglMatrix & viewport) {
 
-    const int num_threads = std::thread::hardware_concurrency() * 2;
+    const int num_threads = std::thread::hardware_concurrency() * 3;
     // const int num_threads = 1;
     std::vector<std::thread> threads;
 
@@ -782,7 +787,7 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
             for(uint32_t x = 0; x < state.currentFramebuffer->get_width(); x++)
             {
                 auto col = trace_ray(gen_ray(x, y, d00, d10, d01, orig), 0, false);
-                state.currentFramebuffer->set_pixel(x, y, Pixel{col.r, col.g, col.b});
+                state.currentFramebuffer->set_pixel(x, y, {col.r, col.g, col.b});
             }
         }
     };
@@ -794,7 +799,7 @@ void SglRenderer::raytrace_scene(const SglMatrix & modelview,
         if(i != num_threads - 1)
         {
             threads.push_back(std::thread(task, i * chunk, (i+1) * chunk));
-        } else 
+        } else
         {
             threads.push_back(std::thread(task, i * chunk, ((i+1) * chunk) + remainder));
         }

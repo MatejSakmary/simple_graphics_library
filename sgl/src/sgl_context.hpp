@@ -15,12 +15,23 @@ struct SglContextInitInfo
     std::function<void(sglEErrorCode)> error_cbf;
 };
 
+struct SglEnvMap
+{
+    bool set;
+    uint32_t width;
+    uint32_t height;
+    std::vector<f32vec3> env_map;
+
+    f32vec3 at(const f32vec3 &dir) const;
+};
+
 struct SglContext
 {
     SglContextInitInfo info;
     SglFramebuffer framebuffer;
-    Pixel clear_color;
+    f32vec3 clear_color;
     sglEEnableFlags capabilites;
+    SglEnvMap environment_map;
 
     SglContext(const SglContextInitInfo & info);
     ~SglContext();

@@ -15,7 +15,7 @@ hither 0.1
 resolution 512 512
 
 #B stpeters_probe.hdr
-B uffizi_probe.hdr
+B resources/uffizi_probe.hdr
 
 #light source
 l 275 549 0  1 0.95 0.9

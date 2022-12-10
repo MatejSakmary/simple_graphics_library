@@ -14,7 +14,7 @@ angle 40
 hither 0.1
 resolution 512 512
 
-B stpeters_probe.hdr
+B resources/stpeters_probe.hdr
 #B uffizi_probe.hdr
 
 #light source

@@ -5,25 +5,18 @@
 
 #include "sgl.h"
 #include "macros.hpp"
-
-
-struct Pixel
-{
-    float r;
-    float g;
-    float b;
-};
+#include "sgl_vec.hpp"
 
 struct SglFramebuffer
 {
     SglFramebuffer(uint32_t width, uint32_t height);
     ~SglFramebuffer();
 
-    inline Pixel get_pixel(uint32_t x, uint32_t y) const               { return pixels.at(y * width + x);    }
+    inline f32vec3 get_pixel(uint32_t x, uint32_t y) const               { return pixels.at(y * width + x);    }
     inline float get_depth(uint32_t x, uint32_t y) const               { return depth.at(y * width + x);     }
-    inline void set_pixel(uint32_t x, uint32_t y, const Pixel & pixel) { pixels.at(y * width + x) = pixel;   }
+    inline void set_pixel(uint32_t x, uint32_t y, const f32vec3 & pixel) { pixels.at(y * width + x) = pixel;   }
     inline void set_depth(uint32_t x, uint32_t y, float new_depth)     { depth.at(y * width + x) = new_depth;} 
-    void clear_framebuffer(const Pixel & clear_color, uint32_t clear_depth);
+    void clear_framebuffer(const f32vec3 & clear_color, uint32_t clear_depth);
     uint32_t get_height() const;
     uint32_t get_width() const;
     float* get_framebuffer_pointer();
@@ -32,7 +25,7 @@ struct SglFramebuffer
 
     private:
         friend struct Context;
-        std::vector<Pixel> pixels; 
+        std::vector<f32vec3> pixels;
         std::vector<float> depth;
         uint32_t width;
         uint32_t height;

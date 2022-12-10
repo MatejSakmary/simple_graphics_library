@@ -6,14 +6,15 @@
 SglContext::SglContext(const SglContextInitInfo & info) :
     info{info},
     framebuffer(info.width, info.height),
-    clear_color{Pixel{.r = 0.0f, .g = 0.0f, .b = 0.0f}},
+    clear_color{0.0f,0.0f,0.0f},
     released{false},
     mode{sglEMatrixMode::SGL_MODELVIEW},
     error_cbf{info.error_cbf},
     matrix_stacks{
         std::stack<SglMatrix>({SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})}),
         std::stack<SglMatrix>({SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})})},
-    viewport_mat{SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})}
+    viewport_mat{SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})},
+    environment_map{false, 0,0,{}}
     {}
 
 SglContext::~SglContext() {}
@@ -126,4 +127,18 @@ void SglContext::viewport(int x, int y, int width, int height)
 void SglContext::clear(unsigned mask)
 {
     framebuffer.clear_framebuffer(clear_color, mask);
+}
+
+f32vec3 SglEnvMap::at(const f32vec3 &dir) const {
+    if(!this->set){
+        return {0.0f, 0.0f, 0.0f};
+    }
+    float d = std::sqrt(dir.x*dir.x + dir.y*dir.y);
+    float r = d>0 ? acos(dir.z)/(2*M_PI*d) : 0.0f;
+    float u = 0.5f + dir.x * r;
+    float v = 0.5f + dir.y * r;
+    uint32_t x = (uint32_t) (u * width);
+    uint32_t y = (uint32_t) (v * height);
+    unsigned flipY_index = (y * width + x);
+    return env_map[flipY_index];
 }

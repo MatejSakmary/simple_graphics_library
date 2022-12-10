@@ -118,7 +118,7 @@ bool check_recording_status(std::string prefix)
 void sglClearColor(float r, float g, float b, float alpha) 
 {
 	if(!check_recording_status("[sglClearColor()]")) { return; }
-	core->contexts.at(core->get_context()).clear_color = Pixel{.r = r, .g = g, .b = b};
+	core->contexts.at(core->get_context()).clear_color = {r,g,b};
 }
 
 void sglClear(unsigned what)
@@ -356,7 +356,7 @@ void sglViewport(int x, int y, int width, int height)
 void sglColor3f(float r, float g, float b) 
 {
 	if(!check_recording_status("[sglColor3f()]")) { return; }
-	core->renderer.state.draw_color = Pixel{.r = r, .g = g, .b = b};
+	core->renderer.state.draw_color = {r, g, b};
 }
 
 void sglAreaMode(sglEAreaMode mode) 
@@ -482,7 +482,20 @@ void sglEnvironmentMap(const int width,
 					   const int height,
 					   float *texels)
 {
-
+    if(!check_recording_status("[sglClearColor()]")) { return; }
+    SglEnvMap * currentEnv = &(core->contexts.at(core->get_context()).environment_map);
+    currentEnv->set = true;
+    currentEnv->width = width;
+    currentEnv->height = height;
+    currentEnv->env_map.reserve(width*height);
+    // Different origins, flip horizontally
+    for(unsigned i = 0 ; i < width; ++i){
+        for(unsigned j = 0; j < height; ++j){
+            unsigned index_texels = 3*(i + j * width);
+            unsigned index_vector = i + (height - 1 - j)*width; // horizontal flip
+            currentEnv->env_map[index_vector] = {texels[index_texels], texels[index_texels + 1], texels[index_texels + 2]};
+        }
+    }
 }
 
 void sglEmissiveMaterial(const float r,

@@ -14,8 +14,8 @@
 // #define TEST1
 // #define TEST2
 //#define TEST3
-#define TEST4
-//#define TEST5
+//#define TEST4
+#define TEST5
 
 #ifdef TEST0
 #define WIDTH 800
@@ -60,8 +60,8 @@
 #ifdef TEST5
 #define WIDTH 512
 #define HEIGHT 512
-#define TEST_5A
-#define TEST_5B
+//#define TEST_5A
+//#define TEST_5B
 #define TEST_5C
 #define TEST_5D
 #endif
@@ -1731,7 +1731,7 @@ int main(int argc, char **argv)
         cout << "test 5c..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "basilica.nff";
+        const char *sceneFile = "resources/basilica.nff";
         sglSetContext(_contexts[2]);
         double time = RayTraceScene(sceneFile);
         totalTime += time;
@@ -1747,7 +1747,7 @@ int main(int argc, char **argv)
         cout << "test 5d..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "uffizi.nff";
+        const char *sceneFile = "resources/uffizi.nff";
         sglSetContext(_contexts[3]);
         double time = RayTraceScene(sceneFile);
         totalTime += time;

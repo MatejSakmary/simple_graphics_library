@@ -722,7 +722,7 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth, bool refracted)
         }
         // TRACE RAY
         int next_depth = depth + 1;
-        if(next_depth < 9){ // DEFAULT 9, DEPTH 0 for primary rays and 1..9 for secondary 1+8=9 in total
+        if(next_depth < 9){ // DEFAULT 9, DEPTH 0 for primary rays and 1..8 for secondary 1+8=9 in total
             if(std::abs(materials[best_primitive->material_index].ks - 0.0f) > std::numeric_limits<float>::epsilon()){// Can .ks be negative? If yes change to != 0.0f.
                 // shift origin, se we dont accidentally intersect with self
                 auto reflected_dir = reflect(ray.direction, intersection_normal);

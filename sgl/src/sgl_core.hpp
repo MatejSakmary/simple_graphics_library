@@ -5,7 +5,7 @@
 #include <memory>
 #include <cstdint>
 
-#include "sgl.h"
+#include "../include/sgl.h"
 #include "sgl_context.hpp"
 #include "sgl_framebuffer.hpp"
 #include "sgl_vec.hpp"

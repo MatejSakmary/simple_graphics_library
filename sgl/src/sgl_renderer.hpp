@@ -4,7 +4,7 @@
 #include <vector>
 #include <thread>
 
-#include "sgl.h"
+#include "../include/sgl.h"
 #include "sgl_vec.hpp"
 #include "sgl_matrix.hpp"
 #include "sgl_framebuffer.hpp"
@@ -26,6 +26,7 @@ struct DrawState
     f32vec3 * clear_color;
     SglEnvMap * environment_map;
     bool defining_scene;
+    bool emissive_material;
 };
 
 struct SglRenderer
@@ -33,6 +34,7 @@ struct SglRenderer
     DrawState state;
     Scene scene;
     std::vector<Material> materials;
+    std::vector<EmissiveMaterial> emissive_materials;
 
     SglRenderer();
     ~SglRenderer();
@@ -44,16 +46,8 @@ struct SglRenderer
     void push_sphere(const f32vec4 & center, float radius);
     void push_light(float x, float y, float z, float r, float g, float b);
 
-    void push_material(
-        float r,
-        float g,
-        float b,
-        float kd,
-        float ks,
-        float shine,
-        float T,
-        float ior
-    );
+    void push_material( float r, float g, float b, float kd, float ks, float shine, float T, float ior);
+    void push_emissive_material( float r, float g, float b, float c0, float c1, float c2 );
 
     private:
         friend struct SglCore;
@@ -69,9 +63,6 @@ struct SglRenderer
         // Reads *vertices* and draws fill of the polygon specified by vertices
         void draw_fill_object();
         
-        // TODO sakacond (was not enough time before deadline, will finish later)
-        // void draw_fill_triangles();
-
         // RayTracing functions
         Ray gen_ray(const float width, const float height, const f32vec3 v00, 
             const f32vec3 v10, const f32vec3 v01, const f32vec3 origin);

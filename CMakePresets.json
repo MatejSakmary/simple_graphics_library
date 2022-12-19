@@ -10,7 +10,10 @@
             "name": "defaults",
             "hidden": true,
             "binaryDir": "${sourceDir}/build/${presetName}",
-            "generator": "Ninja"
+            "generator": "Ninja", 
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS" : true
+            }
         },
         {
             "name" : "defaults-linux",

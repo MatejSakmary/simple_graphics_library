@@ -1,7 +1,10 @@
 #include "sgl_renderer.hpp"
+#include "sgl_scene.hpp"
 #include <algorithm>
+#include <cstdlib>
 #include <list>
 #include <numeric>
+#include <random>
 
 SglRenderer::SglRenderer() :
     state{
@@ -11,7 +14,8 @@ SglRenderer::SglRenderer() :
        .element_type_mode = sglEElementType::SGL_POINTS,
        .depth_test = false,
        .currentFramebuffer = nullptr,
-       .defining_scene = false
+       .defining_scene = false,
+       .emissive_material = false,
     },
     scene{ Scene() },
     materials{},
@@ -65,16 +69,17 @@ void SglRenderer::push_vertex(const f32vec4 & vertex)
 
         case sglEElementType::SGL_POLYGON:
             vertices.push_back(vertex);
-            // TODO sakacond add comment
             if (state.defining_scene && vertices.size() == 3) {
-                if (!materials.empty()) {
-                    Polygon *poly = new Polygon(vertices.at(0), vertices.at(1), vertices.at(2), materials.size() - 1);
-                    scene.objects.push_back(poly);
-                    vertices.clear();
-                }
-                else {
-                    //TODO sakacond ERROR material not defined
-                }
+                Polygon *poly = new Polygon(
+                    // vertices
+                    vertices.at(0), vertices.at(1), vertices.at(2),
+                    // material index
+                    state.emissive_material ? emissive_materials.size() - 1 : materials.size() - 1,
+                    // emissive material flag
+                    state.emissive_material ? true : false
+                );
+                scene.objects.push_back(poly);
+                vertices.clear();
             }
             else {
                 if ((state.area_mode == sglEAreaMode::SGL_LINE) && (vertices.size() >= 2)) {
@@ -588,7 +593,6 @@ void SglRenderer::recording_end()
         draw_line(vertices[0], vertices[1]);
     }
 
-    SGL_DEBUG_OUT("Number of vertices: " + std::to_string(vertices.size()));
     // TODO(msakmary) Add other objects which are allowed with SGL_FILL - triangle, arc etc...
     if (state.area_mode == sglEAreaMode::SGL_FILL) {
         if (state.element_type_mode == sglEElementType::SGL_TRIANGLES ||
@@ -628,20 +632,19 @@ void SglRenderer::rasterize_scene() {
 
 // Raytrace functions
 
-void SglRenderer::push_material(
-        float r,
-        float g,
-        float b,
-        float kd,
-        float ks,
-        float shine,
-        float T,
-        float ior)
+void SglRenderer::push_material( float r, float g, float b, float kd, float ks, float shine, float T, float ior)
 {
     materials.push_back(Material(r, g, b, kd, ks, shine, T, ior));
+    state.emissive_material = false;
 }
 
-f32vec3 SglRenderer::phong_color(const PointLight &light,const Ray &ray, f32vec3 &normal,const f32vec3 &intersection, unsigned material_index){
+void SglRenderer::push_emissive_material( float r, float g, float b, float c0, float c1, float c2 )
+{
+    emissive_materials.push_back(EmissiveMaterial(r, g, b, c0, c1, c2));
+    state.emissive_material = true;
+}
+
+f32vec3 SglRenderer::phong_color(const PointLight &light, const Ray &ray, f32vec3 &normal,const f32vec3 &intersection, unsigned material_index){
     f32vec3 to_light = (f32vec3(light.source) - intersection).normalize();
     f32vec3 reflected_light = reflect(-to_light, normal); // -to_light = from_light
 
@@ -714,16 +717,49 @@ f32vec3 SglRenderer::trace_ray(const Ray &ray, const int depth, bool refracted)
     if(best_dist < MAXFLOAT)
     {
         f32vec3 color; //  0.0f , 0.0f, 0.0f by default
+        if(best_primitive->is_emissive)
+        {
+            const auto & material = emissive_materials.at(best_primitive->material_index);
+            color = {material.r, material.g, material.b};
+            return color;
+        }
         for(auto &l : scene.lights){
             f32vec3 light_position = {l.source.x, l.source.y, l.source.z};
             if(is_visible_from_light(light_position, intersection_point + (intersection_normal * 0.01f))){
                 color = color + phong_color(l, ray, intersection_normal, intersection_point, best_primitive->material_index);
             }
         }
+        for(auto *area_light : scene.objects)
+        {
+            // if the object is not emissive skip it
+            if(!area_light->is_emissive) continue;
+            Polygon *polygon = dynamic_cast<Polygon*>(area_light);
+
+            const auto n = 16;
+            const auto normal = polygon->compute_normal_vector({0.0f, 0.0f, 0.0f});
+            const auto material = emissive_materials.at(polygon->material_index);
+
+            for(int i = 0; i < n; i++)
+            {
+                float rand_1 = float(rand()) / float(RAND_MAX);
+                float rand_2 = float(rand()) / float(RAND_MAX);
+                const auto sampled_point = polygon->get_sampled_point(rand_1, rand_2);
+                if(is_visible_from_light(sampled_point, intersection_point + (intersection_normal * 0.01f)))
+                {
+                    const auto dir = (sampled_point - intersection_point).normalize();
+                    const auto d = (sampled_point - intersection_point).get_norm();
+                    const auto area = polygon->get_area();
+                    const auto weight = (area * dot(normal, -dir)) / (n * (material.c0 + d * material.c1 + d * d * material.c2));
+                    const auto light = PointLight(sampled_point.x, sampled_point.y, sampled_point.z, material.r, material.g, material.b);
+                    color = color + weight * phong_color(light, ray, intersection_normal, intersection_point, best_primitive->material_index);
+                }
+            }
+        }
         // TRACE RAY
         int next_depth = depth + 1;
-        if(next_depth < 9){ // DEFAULT 9, DEPTH 0 for primary rays and 1..8 for secondary 1+8=9 in total
-            if(materials[best_primitive->material_index].ks != 0.0f){// Can .ks be negative? If yes change to != 0.0f.
+        // DEFAULT 9, DEPTH 0 for primary rays and 1..8 for secondary 1+8=9 in total
+        if(next_depth < 9){ 
+            if(materials[best_primitive->material_index].ks != 0.0f){
                 // shift origin, se we dont accidentally intersect with self
                 auto reflected_dir = reflect(ray.direction, intersection_normal);
                 Ray reflected_ray = {intersection_point + (reflected_dir * 0.01f), reflected_dir};

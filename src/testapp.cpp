@@ -60,8 +60,8 @@
 #ifdef TEST5
 #define WIDTH 512
 #define HEIGHT 512
-//#define TEST_5A
-//#define TEST_5B
+#define TEST_5A
+#define TEST_5B
 #define TEST_5C
 #define TEST_5D
 #endif
@@ -1699,7 +1699,7 @@ int main(int argc, char **argv)
         cout << "test 5a..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "cornell-blocks-arealight.nff";
+        const char *sceneFile = "resources/cornell-blocks-arealight.nff";
         sglSetContext(_contexts[0]);
         double time = RayTraceScene(sceneFile);
         totalTime += time;
@@ -1715,7 +1715,7 @@ int main(int argc, char **argv)
         cout << "test 5b..." << flush;
 
         /// read in the NFF file
-        const char *sceneFile = "cornell-blocks-arealight-color.nff";
+        const char *sceneFile = "resources/cornell-blocks-arealight-color.nff";
         sglSetContext(_contexts[1]);
         double time = RayTraceScene(sceneFile);
         totalTime += time;

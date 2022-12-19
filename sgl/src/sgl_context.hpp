@@ -6,7 +6,7 @@
 
 #include "sgl_framebuffer.hpp"
 #include "sgl_matrix.hpp"
-#include "sgl.h"
+#include "../include/sgl.h"
 
 struct SglContextInitInfo
 {

@@ -7,14 +7,14 @@ SglContext::SglContext(const SglContextInitInfo & info) :
     info{info},
     framebuffer(info.width, info.height),
     clear_color{0.0f,0.0f,0.0f},
+    environment_map{false, 0,0,{}},
     released{false},
     mode{sglEMatrixMode::SGL_MODELVIEW},
     error_cbf{info.error_cbf},
     matrix_stacks{
         std::stack<SglMatrix>({SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})}),
         std::stack<SglMatrix>({SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})})},
-    viewport_mat{SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})},
-    environment_map{false, 0,0,{}}
+    viewport_mat{SglMatrix({.type = MatrixType::IDENTITY, .x = 0.0f, .y = 0.0f, .z = 0.0f})}
     {}
 
 SglContext::~SglContext() {}

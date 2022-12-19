@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <limits>
 
-#include "sgl.h"
+#include "../include/sgl.h"
 #include "macros.hpp"
 #include "sgl_vec.hpp"
 

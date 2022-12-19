@@ -1,5 +1,3 @@
-
-
 #include "sgl_vec.hpp"
 
 template<typename T>

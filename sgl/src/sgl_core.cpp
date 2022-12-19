@@ -133,16 +133,10 @@ auto SglCore::get_recording() -> bool
 
 void SglCore::push_vertex(f32vec4 vertex)
 {
-    // SGL_DEBUG_OUT("Got vertex " + vertex.to_string());
     vertex = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top() * vertex;
-    // SGL_DEBUG_OUT("MODELVIEW MATRIX IS\n" + contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_MODELVIEW].top().to_string());
-    // SGL_DEBUG_OUT("After MODELVIEW TRANSFORM " + vertex.to_string());
     vertex = contexts.at(current_context).matrix_stacks[sglEMatrixMode::SGL_PROJECTION].top() * vertex;
-    // SGL_DEBUG_OUT("After PROJECTION TRANSFORM " + vertex.to_string());
     vertex = vertex / vertex.w;
-    // SGL_DEBUG_OUT("After perspective division " + vertex.to_string());
     vertex = contexts.at(current_context).viewport_mat * vertex;
-    // SGL_DEBUG_OUT("After viewport transform " + vertex.to_string());
 
     renderer.push_vertex(vertex);
 }

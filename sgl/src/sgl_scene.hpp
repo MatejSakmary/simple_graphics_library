@@ -12,6 +12,18 @@ struct Ray
     f32vec3 direction;
 };
 
+struct EmissiveMaterial{
+    float r;
+    float g;
+    float b;
+    float c0;
+    float c1;
+    float c2;
+
+    EmissiveMaterial();
+    EmissiveMaterial( float r, float g, float b, float c0, float c1, float c2 ) :
+        r{r}, g{g}, b{b}, c0{c0}, c1{c1}, c2{c2} {}
+};
 
 struct Material
 {
@@ -40,13 +52,14 @@ struct Material
 struct Primitive 
 {
     unsigned material_index;
+    bool is_emissive;
     // Primitive(const Material & material);
     virtual f32vec3 compute_normal_vector(const f32vec3 & vector) = 0;
     virtual bool intersection(const Ray &ray, float &t) const = 0;
     virtual ~Primitive() = default;
 
     protected:
-        Primitive(unsigned material_index);
+        Primitive(unsigned material_index, bool is_emmisive = false);
 };
 
 struct Sphere : public Primitive 
@@ -67,9 +80,11 @@ struct Polygon : public Primitive
     f32vec3 norm;
 
     f32vec3 compute_normal_vector(const f32vec3 & vector) override;
+    f32vec3 get_sampled_point( const float r1, const float r2) const;
+    float get_area() const;
     bool intersection(const Ray &ray, float &t) const override;
 
-    Polygon(const f32vec4 &v1, const f32vec4 &v2, const f32vec4 &v3, unsigned material_index);
+    Polygon(const f32vec4 &v1, const f32vec4 &v2, const f32vec4 &v3, unsigned material_index, bool is_emissive = false);
 };
 
 struct PointLight 

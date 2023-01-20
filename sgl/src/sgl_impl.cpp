@@ -482,7 +482,7 @@ void sglEnvironmentMap(const int width,
     currentEnv->set = true;
     currentEnv->width = width;
     currentEnv->height = height;
-    currentEnv->env_map.reserve(width*height);
+    currentEnv->env_map.resize(width*height);
     // Different origins, flip horizontally
     for(unsigned i = 0 ; i < unsigned(width); ++i){
         for(unsigned j = 0; j < unsigned(height); ++j){
